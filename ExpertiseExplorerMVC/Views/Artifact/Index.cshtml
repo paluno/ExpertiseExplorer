@@ -1,0 +1,14 @@
+﻿@model ExpertiseExplorerMVC.Models.ArtifactViewModel
+
+@{
+    ViewBag.Title = string.Format("Developer Expertise for {0} ", Model.Name);
+}
+
+<h2>@string.Format("Developer Expertise for {0} ", Model.Name)</h2>
+<ol>
+    @foreach (var artifact in Model.Developers.OrderByDescending(t => t.Item3))
+    {
+        <li>@Html.ActionLink(string.Format("{0} - {1}", artifact.Item1, artifact.Item3), "Index", "Developer", new { id = artifact.Item2 }, null)</li>
+    }
+</ol>
+

@@ -1,0 +1,11 @@
+﻿@model ExpertiseExplorerMVC.Models.ListArtifactsViewModel
+
+@{
+    ViewBag.Title = string.Format("{0} by artifact", Model.Name);
+}
+
+@Html.ActionLink("Back", "Index", "Repository", new { id = Model.RepositoryId }, null)
+
+<h2>@string.Format("{0} by artifact ({1})", Model.Name, Model.Artifacts.Count)</h2>
+
+@Html.Partial("p_ArtifactsTable", Model)

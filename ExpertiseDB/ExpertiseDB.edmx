@@ -1,0 +1,1053 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="ExpertiseDB.Store" Alias="Self" Provider="MySql.Data.MySqlClient" ProviderManifestToken="5.5" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+  <EntityContainer Name="ExpertiseDBStoreContainer">
+    <EntitySet Name="SourceRepositorys" EntityType="ExpertiseDB.Store.SourceRepositorys" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Revisions" EntityType="ExpertiseDB.Store.Revisions" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="FileRevisions" EntityType="ExpertiseDB.Store.FileRevisions" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Repositorys" EntityType="ExpertiseDB.Store.Repositorys" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Developers" EntityType="ExpertiseDB.Store.Developers" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Algorithms" EntityType="ExpertiseDB.Store.Algorithms" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Artifacts" EntityType="ExpertiseDB.Store.Artifacts" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="ArtifactTypes" EntityType="ExpertiseDB.Store.ArtifactTypes" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="DeveloperExpertises" EntityType="ExpertiseDB.Store.DeveloperExpertises" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="DeveloperExpertiseValues" EntityType="ExpertiseDB.Store.DeveloperExpertiseValues" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="ActualReviewers" EntityType="ExpertiseDB.Store.ActualReviewers" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="ComputedReviewers" EntityType="ExpertiseDB.Store.ComputedReviewers" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="Filenames" EntityType="ExpertiseDB.Store.Filenames" store:Type="Tables" Schema="dbo" />
+    <AssociationSet Name="SourceRepositoryRevision" Association="ExpertiseDB.Store.SourceRepositoryRevision">
+      <End Role="SourceRepository" EntitySet="SourceRepositorys" />
+      <End Role="Revision" EntitySet="Revisions" />
+    </AssociationSet>
+    <AssociationSet Name="RevisionFile" Association="ExpertiseDB.Store.RevisionFile">
+      <End Role="Revision" EntitySet="Revisions" />
+      <End Role="File" EntitySet="FileRevisions" />
+    </AssociationSet>
+    <AssociationSet Name="RepositoryDeveloper" Association="ExpertiseDB.Store.RepositoryDeveloper">
+      <End Role="Repository" EntitySet="Repositorys" />
+      <End Role="Developer" EntitySet="Developers" />
+    </AssociationSet>
+    <AssociationSet Name="ArtifactTypeArtifact" Association="ExpertiseDB.Store.ArtifactTypeArtifact">
+      <End Role="ArtifactType" EntitySet="ArtifactTypes" />
+      <End Role="Artifact" EntitySet="Artifacts" />
+    </AssociationSet>
+    <AssociationSet Name="RepositoryArtifact" Association="ExpertiseDB.Store.RepositoryArtifact">
+      <End Role="Repository" EntitySet="Repositorys" />
+      <End Role="Artifact" EntitySet="Artifacts" />
+    </AssociationSet>
+    <AssociationSet Name="DeveloperDeveloperExpertise" Association="ExpertiseDB.Store.DeveloperDeveloperExpertise">
+      <End Role="Developer" EntitySet="Developers" />
+      <End Role="DeveloperExpertise" EntitySet="DeveloperExpertises" />
+    </AssociationSet>
+    <AssociationSet Name="DeveloperExpertiseArtifact" Association="ExpertiseDB.Store.DeveloperExpertiseArtifact">
+      <End Role="DeveloperExpertise" EntitySet="DeveloperExpertises" />
+      <End Role="Artifact" EntitySet="Artifacts" />
+    </AssociationSet>
+    <AssociationSet Name="ArtifactArtifact" Association="ExpertiseDB.Store.ArtifactArtifact">
+      <End Role="Artifact" EntitySet="Artifacts" />
+      <End Role="Artifact1" EntitySet="Artifacts" />
+    </AssociationSet>
+    <AssociationSet Name="DeveloperExpertiseDeveloperExpertiseValue" Association="ExpertiseDB.Store.DeveloperExpertiseDeveloperExpertiseValue">
+      <End Role="DeveloperExpertise" EntitySet="DeveloperExpertises" />
+      <End Role="DeveloperExpertiseValue" EntitySet="DeveloperExpertiseValues" />
+    </AssociationSet>
+    <AssociationSet Name="DeveloperExpertiseValueAlgorithm" Association="ExpertiseDB.Store.DeveloperExpertiseValueAlgorithm">
+      <End Role="DeveloperExpertiseValue" EntitySet="DeveloperExpertiseValues" />
+      <End Role="Algorithm" EntitySet="Algorithms" />
+    </AssociationSet>
+    <AssociationSet Name="ArtifactActualReviewer" Association="ExpertiseDB.Store.ArtifactActualReviewer">
+      <End Role="Artifact" EntitySet="Artifacts" />
+      <End Role="ActualReviewer" EntitySet="ActualReviewers" />
+    </AssociationSet>
+    <AssociationSet Name="ActualReviewerComputedReviewer" Association="ExpertiseDB.Store.ActualReviewerComputedReviewer">
+      <End Role="ActualReviewer" EntitySet="ActualReviewers" />
+      <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+    </AssociationSet>
+    <AssociationSet Name="FilenameFileRevision" Association="ExpertiseDB.Store.FilenameFileRevision">
+      <End Role="Filename" EntitySet="Filenames" />
+      <End Role="FileRevision" EntitySet="FileRevisions" />
+    </AssociationSet>
+    <AssociationSet Name="SourceRepositoryFileRevision" Association="ExpertiseDB.Store.SourceRepositoryFileRevision">
+      <End Role="SourceRepository" EntitySet="SourceRepositorys" />
+      <End Role="FileRevision" EntitySet="FileRevisions" />
+    </AssociationSet>
+    <AssociationSet Name="SourceRepositoryFilename" Association="ExpertiseDB.Store.SourceRepositoryFilename">
+      <End Role="SourceRepository" EntitySet="SourceRepositorys" />
+      <End Role="Filename" EntitySet="Filenames" />
+    </AssociationSet>
+  </EntityContainer>
+  <EntityType Name="SourceRepositorys">
+    <Key>
+      <PropertyRef Name="SourceRepositoryId" />
+    </Key>
+    <Property Name="SourceRepositoryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="varchar" Nullable="false" />
+    <Property Name="URL" Type="varchar" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Revisions">
+    <Key>
+      <PropertyRef Name="RevisionId" />
+    </Key>
+    <Property Name="RevisionId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="User" Type="varchar" Nullable="false" />
+    <Property Name="Tag" Type="varchar" Nullable="true" />
+    <Property Name="Parent" Type="varchar" Nullable="true" />
+    <Property Name="ID" Type="varchar" Nullable="false" />
+    <Property Name="Description" Type="varchar" Nullable="true" />
+    <Property Name="Time" Type="datetime" Nullable="false" />
+    <Property Name="SourceRepositoryId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="FileRevisions">
+    <Key>
+      <PropertyRef Name="FileRevisionId" />
+    </Key>
+    <Property Name="FileRevisionId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="IsNew" Type="bool" Nullable="false" DefaultValue="false" />
+    <Property Name="LinesAdded" Type="int" Nullable="false" DefaultValue="0" />
+    <Property Name="LinesDeleted" Type="int" Nullable="false" DefaultValue="0" />
+    <Property Name="Diff" Type="varchar" Nullable="true" />
+    <Property Name="RevisionId" Type="int" Nullable="false" />
+    <Property Name="FilenameId" Type="int" Nullable="false" />
+    <Property Name="SourceRepositoryId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Repositorys">
+    <Key>
+      <PropertyRef Name="RepositoryId" />
+    </Key>
+    <Property Name="RepositoryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="varchar" Nullable="false" />
+    <Property Name="SourceURL" Type="varchar" Nullable="false" />
+    <Property Name="LastUpdate" Type="datetime" Nullable="true" />
+  </EntityType>
+  <EntityType Name="Developers">
+    <Key>
+      <PropertyRef Name="DeveloperId" />
+    </Key>
+    <Property Name="DeveloperId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="varchar" Nullable="false" />
+    <Property Name="RepositoryId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Algorithms">
+    <Key>
+      <PropertyRef Name="AlgorithmId" />
+    </Key>
+    <Property Name="AlgorithmId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="varchar" Nullable="false" />
+    <Property Name="GUID" Type="guid" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Artifacts">
+    <Key>
+      <PropertyRef Name="ArtifactId" />
+    </Key>
+    <Property Name="ArtifactId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="ArtifactTypeId" Type="int" Nullable="false" />
+    <Property Name="Name" Type="varchar" Nullable="false" />
+    <Property Name="RepositoryId" Type="int" Nullable="false" />
+    <Property Name="ParentArtifactId" Type="int" Nullable="true" />
+    <Property Name="ModificationCount" Type="int" Nullable="false" DefaultValue="0" />
+  </EntityType>
+  <EntityType Name="ArtifactTypes">
+    <Key>
+      <PropertyRef Name="ArtifactTypeId" />
+    </Key>
+    <Property Name="ArtifactTypeId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="varchar" Nullable="false" />
+  </EntityType>
+  <EntityType Name="DeveloperExpertises">
+    <Key>
+      <PropertyRef Name="DeveloperExpertiseId" />
+    </Key>
+    <Property Name="DeveloperExpertiseId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="DeveloperId" Type="int" Nullable="false" />
+    <Property Name="ArtifactId" Type="int" Nullable="false" />
+    <Property Name="DeliveriesCount" Type="int" Nullable="false" DefaultValue="0" />
+    <Property Name="IsFirstAuthor" Type="bool" Nullable="false" DefaultValue="false" />
+    <Property Name="Inferred" Type="bool" Nullable="false" DefaultValue="false" />
+  </EntityType>
+  <EntityType Name="DeveloperExpertiseValues">
+    <Key>
+      <PropertyRef Name="DeveloperExpertiseValueId" />
+    </Key>
+    <Property Name="DeveloperExpertiseValueId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Value" Type="double" Nullable="false" />
+    <Property Name="DeveloperExpertiseId" Type="int" Nullable="false" />
+    <Property Name="AlgorithmId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ActualReviewers">
+    <Key>
+      <PropertyRef Name="ActualReviewerId" />
+    </Key>
+    <Property Name="ActualReviewerId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Time" Type="datetime" Nullable="false" />
+    <Property Name="BugId" Type="int" Nullable="false" />
+    <Property Name="ActivityId" Type="int" Nullable="false" />
+    <Property Name="Reviewer" Type="varchar" Nullable="false" />
+    <Property Name="ArtifactId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="ComputedReviewers">
+    <Key>
+      <PropertyRef Name="ComputedReviewerId" />
+    </Key>
+    <Property Name="ComputedReviewerId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Expert1" Type="varchar" Nullable="false" />
+    <Property Name="Expert1Value" Type="double" Nullable="false" />
+    <Property Name="Expert2" Type="varchar" Nullable="false" />
+    <Property Name="Expert2Value" Type="double" Nullable="false" />
+    <Property Name="Expert3" Type="varchar" Nullable="false" />
+    <Property Name="Expert3Value" Type="double" Nullable="false" />
+    <Property Name="Expert4" Type="varchar" Nullable="false" />
+    <Property Name="Expert4Value" Type="double" Nullable="false" />
+    <Property Name="Expert5" Type="varchar" Nullable="false" />
+    <Property Name="Expert5Value" Type="double" Nullable="false" />
+    <Property Name="ActualReviewerId" Type="int" Nullable="false" />
+    <Property Name="AlgorithmId" Type="int" Nullable="false" />
+  </EntityType>
+  <EntityType Name="Filenames">
+    <Key>
+      <PropertyRef Name="FilenameId" />
+    </Key>
+    <Property Name="FilenameId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+    <Property Name="Name" Type="varchar" Nullable="false" />
+    <Property Name="SourceRepositoryId" Type="int" Nullable="false" />
+  </EntityType>
+  <Association Name="SourceRepositoryRevision">
+    <End Role="SourceRepository" Type="ExpertiseDB.Store.SourceRepositorys" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="Revision" Type="ExpertiseDB.Store.Revisions" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="SourceRepository">
+        <PropertyRef Name="SourceRepositoryId" />
+      </Principal>
+      <Dependent Role="Revision">
+        <PropertyRef Name="SourceRepositoryId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="RevisionFile">
+    <End Role="Revision" Type="ExpertiseDB.Store.Revisions" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="File" Type="ExpertiseDB.Store.FileRevisions" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Revision">
+        <PropertyRef Name="RevisionId" />
+      </Principal>
+      <Dependent Role="File">
+        <PropertyRef Name="RevisionId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="RepositoryDeveloper">
+    <End Role="Repository" Type="ExpertiseDB.Store.Repositorys" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="Developer" Type="ExpertiseDB.Store.Developers" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Repository">
+        <PropertyRef Name="RepositoryId" />
+      </Principal>
+      <Dependent Role="Developer">
+        <PropertyRef Name="RepositoryId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="ArtifactTypeArtifact">
+    <End Role="ArtifactType" Type="ExpertiseDB.Store.ArtifactTypes" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="Artifact" Type="ExpertiseDB.Store.Artifacts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="ArtifactType">
+        <PropertyRef Name="ArtifactTypeId" />
+      </Principal>
+      <Dependent Role="Artifact">
+        <PropertyRef Name="ArtifactTypeId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="RepositoryArtifact">
+    <End Role="Repository" Type="ExpertiseDB.Store.Repositorys" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="Artifact" Type="ExpertiseDB.Store.Artifacts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Repository">
+        <PropertyRef Name="RepositoryId" />
+      </Principal>
+      <Dependent Role="Artifact">
+        <PropertyRef Name="RepositoryId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="DeveloperDeveloperExpertise">
+    <End Role="Developer" Type="ExpertiseDB.Store.Developers" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="DeveloperExpertise" Type="ExpertiseDB.Store.DeveloperExpertises" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Developer">
+        <PropertyRef Name="DeveloperId" />
+      </Principal>
+      <Dependent Role="DeveloperExpertise">
+        <PropertyRef Name="DeveloperId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="DeveloperExpertiseArtifact">
+    <End Role="DeveloperExpertise" Type="ExpertiseDB.Store.DeveloperExpertises" Multiplicity="*" />
+    <End Role="Artifact" Type="ExpertiseDB.Store.Artifacts" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <ReferentialConstraint>
+      <Principal Role="Artifact">
+        <PropertyRef Name="ArtifactId" />
+      </Principal>
+      <Dependent Role="DeveloperExpertise">
+        <PropertyRef Name="ArtifactId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="ArtifactArtifact">
+    <End Role="Artifact" Type="ExpertiseDB.Store.Artifacts" Multiplicity="0..1" />
+    <End Role="Artifact1" Type="ExpertiseDB.Store.Artifacts" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Artifact">
+        <PropertyRef Name="ArtifactId" />
+      </Principal>
+      <Dependent Role="Artifact1">
+        <PropertyRef Name="ParentArtifactId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="DeveloperExpertiseDeveloperExpertiseValue">
+    <End Role="DeveloperExpertise" Type="ExpertiseDB.Store.DeveloperExpertises" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="DeveloperExpertiseValue" Type="ExpertiseDB.Store.DeveloperExpertiseValues" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="DeveloperExpertise">
+        <PropertyRef Name="DeveloperExpertiseId" />
+      </Principal>
+      <Dependent Role="DeveloperExpertiseValue">
+        <PropertyRef Name="DeveloperExpertiseId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="DeveloperExpertiseValueAlgorithm">
+    <End Role="DeveloperExpertiseValue" Type="ExpertiseDB.Store.DeveloperExpertiseValues" Multiplicity="*" />
+    <End Role="Algorithm" Type="ExpertiseDB.Store.Algorithms" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <ReferentialConstraint>
+      <Principal Role="Algorithm">
+        <PropertyRef Name="AlgorithmId" />
+      </Principal>
+      <Dependent Role="DeveloperExpertiseValue">
+        <PropertyRef Name="AlgorithmId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="ArtifactActualReviewer">
+    <End Role="Artifact" Type="ExpertiseDB.Store.Artifacts" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="ActualReviewer" Type="ExpertiseDB.Store.ActualReviewers" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Artifact">
+        <PropertyRef Name="ArtifactId" />
+      </Principal>
+      <Dependent Role="ActualReviewer">
+        <PropertyRef Name="ArtifactId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="ActualReviewerComputedReviewer">
+    <End Role="ActualReviewer" Type="ExpertiseDB.Store.ActualReviewers" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="ComputedReviewer" Type="ExpertiseDB.Store.ComputedReviewers" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="ActualReviewer">
+        <PropertyRef Name="ActualReviewerId" />
+      </Principal>
+      <Dependent Role="ComputedReviewer">
+        <PropertyRef Name="ActualReviewerId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="FilenameFileRevision">
+    <End Role="Filename" Type="ExpertiseDB.Store.Filenames" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="FileRevision" Type="ExpertiseDB.Store.FileRevisions" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Filename">
+        <PropertyRef Name="FilenameId" />
+      </Principal>
+      <Dependent Role="FileRevision">
+        <PropertyRef Name="FilenameId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="SourceRepositoryFileRevision">
+    <End Role="SourceRepository" Type="ExpertiseDB.Store.SourceRepositorys" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="FileRevision" Type="ExpertiseDB.Store.FileRevisions" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="SourceRepository">
+        <PropertyRef Name="SourceRepositoryId" />
+      </Principal>
+      <Dependent Role="FileRevision">
+        <PropertyRef Name="SourceRepositoryId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+  <Association Name="SourceRepositoryFilename">
+    <End Role="SourceRepository" Type="ExpertiseDB.Store.SourceRepositorys" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="Filename" Type="ExpertiseDB.Store.Filenames" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="SourceRepository">
+        <PropertyRef Name="SourceRepositoryId" />
+      </Principal>
+      <Dependent Role="Filename">
+        <PropertyRef Name="SourceRepositoryId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
+</Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema xmlns="http://schemas.microsoft.com/ado/2009/11/edm" xmlns:cg="http://schemas.microsoft.com/ado/2006/04/codegeneration" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" Namespace="ExpertiseDB" Alias="Self" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" annotation:UseStrongSpatialTypes="false">
+        <EntityContainer Name="ExpertiseDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="SourceRepositorys" EntityType="ExpertiseDB.SourceRepository" />
+          <EntitySet Name="Revisions" EntityType="ExpertiseDB.Revision" />
+          <AssociationSet Name="SourceRepositoryRevision" Association="ExpertiseDB.SourceRepositoryRevision">
+            <End Role="SourceRepository" EntitySet="SourceRepositorys" />
+            <End Role="Revision" EntitySet="Revisions" />
+          </AssociationSet>
+          <EntitySet Name="FileRevisions" EntityType="ExpertiseDB.FileRevision" />
+          <AssociationSet Name="RevisionFile" Association="ExpertiseDB.RevisionFile">
+            <End Role="Revision" EntitySet="Revisions" />
+            <End Role="File" EntitySet="FileRevisions" />
+          </AssociationSet>
+          <EntitySet Name="Repositorys" EntityType="ExpertiseDB.Repository" />
+          <EntitySet Name="Developers" EntityType="ExpertiseDB.Developer" />
+          <AssociationSet Name="RepositoryDeveloper" Association="ExpertiseDB.RepositoryDeveloper">
+            <End Role="Repository" EntitySet="Repositorys" />
+            <End Role="Developer" EntitySet="Developers" />
+          </AssociationSet>
+          <EntitySet Name="Algorithms" EntityType="ExpertiseDB.Algorithm" />
+          <EntitySet Name="Artifacts" EntityType="ExpertiseDB.Artifact" />
+          <EntitySet Name="ArtifactTypes" EntityType="ExpertiseDB.ArtifactType" />
+          <AssociationSet Name="ArtifactTypeArtifact" Association="ExpertiseDB.ArtifactTypeArtifact">
+            <End Role="ArtifactType" EntitySet="ArtifactTypes" />
+            <End Role="Artifact" EntitySet="Artifacts" />
+          </AssociationSet>
+          <AssociationSet Name="RepositoryArtifact" Association="ExpertiseDB.RepositoryArtifact">
+            <End Role="Repository" EntitySet="Repositorys" />
+            <End Role="Artifact" EntitySet="Artifacts" />
+          </AssociationSet>
+          <EntitySet Name="DeveloperExpertises" EntityType="ExpertiseDB.DeveloperExpertise" />
+          <AssociationSet Name="DeveloperDeveloperExpertise" Association="ExpertiseDB.DeveloperDeveloperExpertise">
+            <End Role="Developer" EntitySet="Developers" />
+            <End Role="DeveloperExpertise" EntitySet="DeveloperExpertises" />
+          </AssociationSet>
+          <AssociationSet Name="DeveloperExpertiseArtifact" Association="ExpertiseDB.DeveloperExpertiseArtifact">
+            <End Role="DeveloperExpertise" EntitySet="DeveloperExpertises" />
+            <End Role="Artifact" EntitySet="Artifacts" />
+          </AssociationSet>
+          <AssociationSet Name="ArtifactArtifact" Association="ExpertiseDB.ArtifactArtifact">
+            <End Role="Artifact" EntitySet="Artifacts" />
+            <End Role="Artifact1" EntitySet="Artifacts" />
+          </AssociationSet>
+          <EntitySet Name="DeveloperExpertiseValues" EntityType="ExpertiseDB.DeveloperExpertiseValue" />
+          <AssociationSet Name="DeveloperExpertiseDeveloperExpertiseValue" Association="ExpertiseDB.DeveloperExpertiseDeveloperExpertiseValue">
+            <End Role="DeveloperExpertise" EntitySet="DeveloperExpertises" />
+            <End Role="DeveloperExpertiseValue" EntitySet="DeveloperExpertiseValues" />
+          </AssociationSet>
+          <AssociationSet Name="DeveloperExpertiseValueAlgorithm" Association="ExpertiseDB.DeveloperExpertiseValueAlgorithm">
+            <End Role="DeveloperExpertiseValue" EntitySet="DeveloperExpertiseValues" />
+            <End Role="Algorithm" EntitySet="Algorithms" />
+          </AssociationSet>
+          <EntitySet Name="ActualReviewers" EntityType="ExpertiseDB.ActualReviewer" />
+          <AssociationSet Name="ArtifactActualReviewer" Association="ExpertiseDB.ArtifactActualReviewer">
+            <End Role="Artifact" EntitySet="Artifacts" />
+            <End Role="ActualReviewer" EntitySet="ActualReviewers" />
+          </AssociationSet>
+          <EntitySet Name="ComputedReviewers" EntityType="ExpertiseDB.ComputedReviewer" />
+          <AssociationSet Name="ActualReviewerComputedReviewer" Association="ExpertiseDB.ActualReviewerComputedReviewer">
+            <End Role="ActualReviewer" EntitySet="ActualReviewers" />
+            <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+          </AssociationSet>
+          <EntitySet Name="Filenames" EntityType="ExpertiseDB.Filename" />
+          <AssociationSet Name="FilenameFileRevision" Association="ExpertiseDB.FilenameFileRevision">
+            <End Role="Filename" EntitySet="Filenames" />
+            <End Role="FileRevision" EntitySet="FileRevisions" />
+          </AssociationSet>
+          <AssociationSet Name="SourceRepositoryFileRevision" Association="ExpertiseDB.SourceRepositoryFileRevision">
+            <End Role="SourceRepository" EntitySet="SourceRepositorys" />
+            <End Role="FileRevision" EntitySet="FileRevisions" />
+          </AssociationSet>
+          <AssociationSet Name="SourceRepositoryFilename" Association="ExpertiseDB.SourceRepositoryFilename">
+            <End Role="SourceRepository" EntitySet="SourceRepositorys" />
+            <End Role="Filename" EntitySet="Filenames" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="SourceRepository">
+          <Key>
+            <PropertyRef Name="SourceRepositoryId" />
+          </Key>
+          <Property Type="Int32" Name="SourceRepositoryId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <Property Type="String" Name="URL" Nullable="false" />
+          <NavigationProperty Name="Revisions" Relationship="ExpertiseDB.SourceRepositoryRevision" FromRole="SourceRepository" ToRole="Revision" />
+          <NavigationProperty Name="FileRevisions" Relationship="ExpertiseDB.SourceRepositoryFileRevision" FromRole="SourceRepository" ToRole="FileRevision" />
+          <NavigationProperty Name="Filenames" Relationship="ExpertiseDB.SourceRepositoryFilename" FromRole="SourceRepository" ToRole="Filename" />
+        </EntityType>
+        <EntityType Name="Revision">
+          <Key>
+            <PropertyRef Name="RevisionId" />
+          </Key>
+          <Property Type="Int32" Name="RevisionId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="User" Nullable="false" />
+          <Property Type="String" Name="Tag" Nullable="true" />
+          <Property Type="String" Name="Parent" Nullable="true" />
+          <Property Type="String" Name="ID" Nullable="false" />
+          <Property Type="String" Name="Description" Nullable="true" />
+          <Property Type="DateTime" Name="Time" Nullable="false" />
+          <NavigationProperty Name="SourceRepository" Relationship="ExpertiseDB.SourceRepositoryRevision" FromRole="Revision" ToRole="SourceRepository" />
+          <Property Type="Int32" Name="SourceRepositoryId" Nullable="false" />
+          <NavigationProperty Name="Files" Relationship="ExpertiseDB.RevisionFile" FromRole="Revision" ToRole="File" />
+        </EntityType>
+        <Association Name="SourceRepositoryRevision">
+          <End Type="ExpertiseDB.SourceRepository" Role="SourceRepository" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.Revision" Role="Revision" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="SourceRepository">
+              <PropertyRef Name="SourceRepositoryId" />
+            </Principal>
+            <Dependent Role="Revision">
+              <PropertyRef Name="SourceRepositoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="FileRevision">
+          <Key>
+            <PropertyRef Name="FileRevisionId" />
+          </Key>
+          <Property Type="Int32" Name="FileRevisionId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Boolean" Name="IsNew" Nullable="false" DefaultValue="False" />
+          <Property Type="Int32" Name="LinesAdded" Nullable="false" DefaultValue="0" />
+          <Property Type="Int32" Name="LinesDeleted" Nullable="false" DefaultValue="0" />
+          <Property Type="String" Name="Diff" Nullable="true" />
+          <NavigationProperty Name="Revision" Relationship="ExpertiseDB.RevisionFile" FromRole="File" ToRole="Revision" />
+          <Property Type="Int32" Name="RevisionId" Nullable="false" />
+          <NavigationProperty Name="Filename" Relationship="ExpertiseDB.FilenameFileRevision" FromRole="FileRevision" ToRole="Filename" />
+          <Property Type="Int32" Name="FilenameId" Nullable="false" />
+          <NavigationProperty Name="SourceRepository" Relationship="ExpertiseDB.SourceRepositoryFileRevision" FromRole="FileRevision" ToRole="SourceRepository" />
+          <Property Type="Int32" Name="SourceRepositoryId" Nullable="false" />
+        </EntityType>
+        <Association Name="RevisionFile">
+          <End Type="ExpertiseDB.Revision" Role="Revision" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.FileRevision" Role="File" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Revision">
+              <PropertyRef Name="RevisionId" />
+            </Principal>
+            <Dependent Role="File">
+              <PropertyRef Name="RevisionId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Repository">
+          <Key>
+            <PropertyRef Name="RepositoryId" />
+          </Key>
+          <Property Type="Int32" Name="RepositoryId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <Property Type="String" Name="SourceURL" Nullable="false" />
+          <NavigationProperty Name="Developers" Relationship="ExpertiseDB.RepositoryDeveloper" FromRole="Repository" ToRole="Developer" />
+          <NavigationProperty Name="Artifacts" Relationship="ExpertiseDB.RepositoryArtifact" FromRole="Repository" ToRole="Artifact" />
+          <Property Type="DateTime" Name="LastUpdate" Nullable="true" />
+        </EntityType>
+        <EntityType Name="Developer">
+          <Key>
+            <PropertyRef Name="DeveloperId" />
+          </Key>
+          <Property Type="Int32" Name="DeveloperId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <NavigationProperty Name="Repository" Relationship="ExpertiseDB.RepositoryDeveloper" FromRole="Developer" ToRole="Repository" />
+          <Property Type="Int32" Name="RepositoryId" Nullable="false" />
+          <NavigationProperty Name="DeveloperExpertises" Relationship="ExpertiseDB.DeveloperDeveloperExpertise" FromRole="Developer" ToRole="DeveloperExpertise" />
+        </EntityType>
+        <Association Name="RepositoryDeveloper">
+          <End Type="ExpertiseDB.Repository" Role="Repository" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.Developer" Role="Developer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Repository">
+              <PropertyRef Name="RepositoryId" />
+            </Principal>
+            <Dependent Role="Developer">
+              <PropertyRef Name="RepositoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Algorithm">
+          <Key>
+            <PropertyRef Name="AlgorithmId" />
+          </Key>
+          <Property Type="Int32" Name="AlgorithmId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <Property Type="Guid" Name="GUID" Nullable="false" />
+          <NavigationProperty Name="DeveloperExpertiseValues" Relationship="ExpertiseDB.DeveloperExpertiseValueAlgorithm" FromRole="Algorithm" ToRole="DeveloperExpertiseValue" />
+        </EntityType>
+        <EntityType Name="Artifact">
+          <Key>
+            <PropertyRef Name="ArtifactId" />
+          </Key>
+          <Property Type="Int32" Name="ArtifactId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="ArtifactType" Relationship="ExpertiseDB.ArtifactTypeArtifact" FromRole="Artifact" ToRole="ArtifactType" />
+          <Property Type="Int32" Name="ArtifactTypeId" Nullable="false" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <NavigationProperty Name="Repository" Relationship="ExpertiseDB.RepositoryArtifact" FromRole="Artifact" ToRole="Repository" />
+          <Property Type="Int32" Name="RepositoryId" Nullable="false" />
+          <NavigationProperty Name="DeveloperExpertises" Relationship="ExpertiseDB.DeveloperExpertiseArtifact" FromRole="Artifact" ToRole="DeveloperExpertise" />
+          <NavigationProperty Name="ChildArtifacts" Relationship="ExpertiseDB.ArtifactArtifact" FromRole="Artifact" ToRole="Artifact1" />
+          <NavigationProperty Name="ParentArtifact" Relationship="ExpertiseDB.ArtifactArtifact" FromRole="Artifact1" ToRole="Artifact" />
+          <Property Type="Int32" Name="ParentArtifactId" Nullable="true" />
+          <Property Type="Int32" Name="ModificationCount" Nullable="false" DefaultValue="0" />
+          <NavigationProperty Name="ActualReviewers" Relationship="ExpertiseDB.ArtifactActualReviewer" FromRole="Artifact" ToRole="ActualReviewer" />
+        </EntityType>
+        <EntityType Name="ArtifactType">
+          <Key>
+            <PropertyRef Name="ArtifactTypeId" />
+          </Key>
+          <Property Type="Int32" Name="ArtifactTypeId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <NavigationProperty Name="Artifact" Relationship="ExpertiseDB.ArtifactTypeArtifact" FromRole="ArtifactType" ToRole="Artifact" />
+        </EntityType>
+        <Association Name="ArtifactTypeArtifact">
+          <End Type="ExpertiseDB.ArtifactType" Role="ArtifactType" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.Artifact" Role="Artifact" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ArtifactType">
+              <PropertyRef Name="ArtifactTypeId" />
+            </Principal>
+            <Dependent Role="Artifact">
+              <PropertyRef Name="ArtifactTypeId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="RepositoryArtifact">
+          <End Type="ExpertiseDB.Repository" Role="Repository" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.Artifact" Role="Artifact" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Repository">
+              <PropertyRef Name="RepositoryId" />
+            </Principal>
+            <Dependent Role="Artifact">
+              <PropertyRef Name="RepositoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="DeveloperExpertise">
+          <Key>
+            <PropertyRef Name="DeveloperExpertiseId" />
+          </Key>
+          <Property Type="Int32" Name="DeveloperExpertiseId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="Developer" Relationship="ExpertiseDB.DeveloperDeveloperExpertise" FromRole="DeveloperExpertise" ToRole="Developer" />
+          <Property Type="Int32" Name="DeveloperId" Nullable="false" />
+          <NavigationProperty Name="Artifact" Relationship="ExpertiseDB.DeveloperExpertiseArtifact" FromRole="DeveloperExpertise" ToRole="Artifact" />
+          <Property Type="Int32" Name="ArtifactId" Nullable="false" />
+          <Property Type="Int32" Name="DeliveriesCount" Nullable="false" DefaultValue="0" />
+          <Property Type="Boolean" Name="IsFirstAuthor" Nullable="false" DefaultValue="false" />
+          <NavigationProperty Name="DeveloperExpertiseValues" Relationship="ExpertiseDB.DeveloperExpertiseDeveloperExpertiseValue" FromRole="DeveloperExpertise" ToRole="DeveloperExpertiseValue" />
+          <Property Type="Boolean" Name="Inferred" Nullable="false" DefaultValue="False" />
+        </EntityType>
+        <Association Name="DeveloperDeveloperExpertise">
+          <End Type="ExpertiseDB.Developer" Role="Developer" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.DeveloperExpertise" Role="DeveloperExpertise" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Developer">
+              <PropertyRef Name="DeveloperId" />
+            </Principal>
+            <Dependent Role="DeveloperExpertise">
+              <PropertyRef Name="DeveloperId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="DeveloperExpertiseArtifact">
+          <End Type="ExpertiseDB.DeveloperExpertise" Role="DeveloperExpertise" Multiplicity="*" ></End>
+          <End Type="ExpertiseDB.Artifact" Role="Artifact" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <ReferentialConstraint>
+            <Principal Role="Artifact">
+              <PropertyRef Name="ArtifactId" />
+            </Principal>
+            <Dependent Role="DeveloperExpertise">
+              <PropertyRef Name="ArtifactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="ArtifactArtifact">
+          <End Type="ExpertiseDB.Artifact" Role="Artifact" Multiplicity="0..1" />
+          <End Type="ExpertiseDB.Artifact" Role="Artifact1" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Artifact">
+              <PropertyRef Name="ArtifactId" />
+            </Principal>
+            <Dependent Role="Artifact1">
+              <PropertyRef Name="ParentArtifactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="DeveloperExpertiseValue">
+          <Key>
+            <PropertyRef Name="DeveloperExpertiseValueId" />
+          </Key>
+          <Property Type="Int32" Name="DeveloperExpertiseValueId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="Double" Name="Value" Nullable="false" />
+          <NavigationProperty Name="DeveloperExpertise" Relationship="ExpertiseDB.DeveloperExpertiseDeveloperExpertiseValue" FromRole="DeveloperExpertiseValue" ToRole="DeveloperExpertise" />
+          <Property Type="Int32" Name="DeveloperExpertiseId" Nullable="false" />
+          <NavigationProperty Name="Algorithm" Relationship="ExpertiseDB.DeveloperExpertiseValueAlgorithm" FromRole="DeveloperExpertiseValue" ToRole="Algorithm" />
+          <Property Type="Int32" Name="AlgorithmId" Nullable="false" />
+        </EntityType>
+        <Association Name="DeveloperExpertiseDeveloperExpertiseValue">
+          <End Type="ExpertiseDB.DeveloperExpertise" Role="DeveloperExpertise" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.DeveloperExpertiseValue" Role="DeveloperExpertiseValue" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DeveloperExpertise">
+              <PropertyRef Name="DeveloperExpertiseId" />
+            </Principal>
+            <Dependent Role="DeveloperExpertiseValue">
+              <PropertyRef Name="DeveloperExpertiseId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="DeveloperExpertiseValueAlgorithm">
+          <End Type="ExpertiseDB.DeveloperExpertiseValue" Role="DeveloperExpertiseValue" Multiplicity="*" ></End>
+          <End Type="ExpertiseDB.Algorithm" Role="Algorithm" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <ReferentialConstraint>
+            <Principal Role="Algorithm">
+              <PropertyRef Name="AlgorithmId" />
+            </Principal>
+            <Dependent Role="DeveloperExpertiseValue">
+              <PropertyRef Name="AlgorithmId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="ActualReviewer">
+          <Key>
+            <PropertyRef Name="ActualReviewerId" />
+          </Key>
+          <Property Type="Int32" Name="ActualReviewerId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="DateTime" Name="Time" Nullable="false" />
+          <Property Type="Int32" Name="BugId" Nullable="false" />
+          <Property Type="Int32" Name="ActivityId" Nullable="false" />
+          <Property Type="String" Name="Reviewer" Nullable="false" />
+          <NavigationProperty Name="Artifact" Relationship="ExpertiseDB.ArtifactActualReviewer" FromRole="ActualReviewer" ToRole="Artifact" />
+          <Property Type="Int32" Name="ArtifactId" Nullable="false" />
+          <NavigationProperty Name="ComputedReviewers" Relationship="ExpertiseDB.ActualReviewerComputedReviewer" FromRole="ActualReviewer" ToRole="ComputedReviewer" />
+        </EntityType>
+        <Association Name="ArtifactActualReviewer">
+          <End Type="ExpertiseDB.Artifact" Role="Artifact" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.ActualReviewer" Role="ActualReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Artifact">
+              <PropertyRef Name="ArtifactId" />
+            </Principal>
+            <Dependent Role="ActualReviewer">
+              <PropertyRef Name="ArtifactId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="ComputedReviewer">
+          <Key>
+            <PropertyRef Name="ComputedReviewerId" />
+          </Key>
+          <Property Type="Int32" Name="ComputedReviewerId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Expert1" Nullable="false" />
+          <Property Type="Double" Name="Expert1Value" Nullable="false" />
+          <Property Type="String" Name="Expert2" Nullable="false" />
+          <Property Type="Double" Name="Expert2Value" Nullable="false" />
+          <Property Type="String" Name="Expert3" Nullable="false" />
+          <Property Type="Double" Name="Expert3Value" Nullable="false" />
+          <Property Type="String" Name="Expert4" Nullable="false" />
+          <Property Type="Double" Name="Expert4Value" Nullable="false" />
+          <Property Type="String" Name="Expert5" Nullable="false" />
+          <Property Type="Double" Name="Expert5Value" Nullable="false" />
+          <NavigationProperty Name="ActualReviewer" Relationship="ExpertiseDB.ActualReviewerComputedReviewer" FromRole="ComputedReviewer" ToRole="ActualReviewer" />
+          <Property Type="Int32" Name="ActualReviewerId" Nullable="false" />
+          <Property Type="Int32" Name="AlgorithmId" Nullable="false" />
+        </EntityType>
+        <Association Name="ActualReviewerComputedReviewer">
+          <End Type="ExpertiseDB.ActualReviewer" Role="ActualReviewer" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.ComputedReviewer" Role="ComputedReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ActualReviewer">
+              <PropertyRef Name="ActualReviewerId" />
+            </Principal>
+            <Dependent Role="ComputedReviewer">
+              <PropertyRef Name="ActualReviewerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Filename">
+          <Key>
+            <PropertyRef Name="FilenameId" />
+          </Key>
+          <Property Type="Int32" Name="FilenameId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Type="String" Name="Name" Nullable="false" />
+          <NavigationProperty Name="FileRevisions" Relationship="ExpertiseDB.FilenameFileRevision" FromRole="Filename" ToRole="FileRevision" />
+          <NavigationProperty Name="SourceRepository" Relationship="ExpertiseDB.SourceRepositoryFilename" FromRole="Filename" ToRole="SourceRepository" />
+          <Property Type="Int32" Name="SourceRepositoryId" Nullable="false" />
+        </EntityType>
+        <Association Name="FilenameFileRevision">
+          <End Type="ExpertiseDB.Filename" Role="Filename" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.FileRevision" Role="FileRevision" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Filename">
+              <PropertyRef Name="FilenameId" />
+            </Principal>
+            <Dependent Role="FileRevision">
+              <PropertyRef Name="FilenameId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="SourceRepositoryFileRevision">
+          <End Type="ExpertiseDB.SourceRepository" Role="SourceRepository" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.FileRevision" Role="FileRevision" Multiplicity="*" >
+          </End>
+          <ReferentialConstraint>
+            <Principal Role="SourceRepository">
+              <PropertyRef Name="SourceRepositoryId" />
+            </Principal>
+            <Dependent Role="FileRevision">
+              <PropertyRef Name="SourceRepositoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="SourceRepositoryFilename">
+          <End Type="ExpertiseDB.SourceRepository" Role="SourceRepository" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.Filename" Role="Filename" Multiplicity="*" >
+          </End>
+          <ReferentialConstraint>
+            <Principal Role="SourceRepository">
+              <PropertyRef Name="SourceRepositoryId" />
+            </Principal>
+            <Dependent Role="Filename">
+              <PropertyRef Name="SourceRepositoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+    <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="ExpertiseDBStoreContainer" CdmEntityContainer="ExpertiseDBEntities">
+    <EntitySetMapping Name="SourceRepositorys">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.SourceRepository)">
+        <MappingFragment StoreEntitySet="SourceRepositorys">
+          <ScalarProperty Name="SourceRepositoryId" ColumnName="SourceRepositoryId" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="URL" ColumnName="URL" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Revisions">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.Revision)">
+        <MappingFragment StoreEntitySet="Revisions">
+          <ScalarProperty Name="RevisionId" ColumnName="RevisionId" />
+          <ScalarProperty Name="User" ColumnName="User" />
+          <ScalarProperty Name="Tag" ColumnName="Tag" />
+          <ScalarProperty Name="Parent" ColumnName="Parent" />
+          <ScalarProperty Name="ID" ColumnName="ID" />
+          <ScalarProperty Name="Description" ColumnName="Description" />
+          <ScalarProperty Name="Time" ColumnName="Time" />
+          <ScalarProperty Name="SourceRepositoryId" ColumnName="SourceRepositoryId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="FileRevisions">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.FileRevision)">
+        <MappingFragment StoreEntitySet="FileRevisions">
+          <ScalarProperty Name="FileRevisionId" ColumnName="FileRevisionId" />
+          <ScalarProperty Name="IsNew" ColumnName="IsNew" />
+          <ScalarProperty Name="LinesAdded" ColumnName="LinesAdded" />
+          <ScalarProperty Name="LinesDeleted" ColumnName="LinesDeleted" />
+          <ScalarProperty Name="Diff" ColumnName="Diff" />
+          <ScalarProperty Name="RevisionId" ColumnName="RevisionId" />
+          <ScalarProperty Name="FilenameId" ColumnName="FilenameId" />
+          <ScalarProperty Name="SourceRepositoryId" ColumnName="SourceRepositoryId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Repositorys">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.Repository)">
+        <MappingFragment StoreEntitySet="Repositorys">
+          <ScalarProperty Name="RepositoryId" ColumnName="RepositoryId" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="SourceURL" ColumnName="SourceURL" />
+          <ScalarProperty Name="LastUpdate" ColumnName="LastUpdate" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Developers">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.Developer)">
+        <MappingFragment StoreEntitySet="Developers">
+          <ScalarProperty Name="DeveloperId" ColumnName="DeveloperId" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="RepositoryId" ColumnName="RepositoryId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Algorithms">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.Algorithm)">
+        <MappingFragment StoreEntitySet="Algorithms">
+          <ScalarProperty Name="AlgorithmId" ColumnName="AlgorithmId" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="GUID" ColumnName="GUID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Artifacts">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.Artifact)">
+        <MappingFragment StoreEntitySet="Artifacts">
+          <ScalarProperty Name="ArtifactId" ColumnName="ArtifactId" />
+          <ScalarProperty Name="ArtifactTypeId" ColumnName="ArtifactTypeId" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="RepositoryId" ColumnName="RepositoryId" />
+          <ScalarProperty Name="ParentArtifactId" ColumnName="ParentArtifactId" />
+          <ScalarProperty Name="ModificationCount" ColumnName="ModificationCount" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="ArtifactTypes">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.ArtifactType)">
+        <MappingFragment StoreEntitySet="ArtifactTypes">
+          <ScalarProperty Name="ArtifactTypeId" ColumnName="ArtifactTypeId" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="DeveloperExpertises">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.DeveloperExpertise)">
+        <MappingFragment StoreEntitySet="DeveloperExpertises">
+          <ScalarProperty Name="DeveloperExpertiseId" ColumnName="DeveloperExpertiseId" />
+          <ScalarProperty Name="DeveloperId" ColumnName="DeveloperId" />
+          <ScalarProperty Name="ArtifactId" ColumnName="ArtifactId" />
+          <ScalarProperty Name="DeliveriesCount" ColumnName="DeliveriesCount" />
+          <ScalarProperty Name="IsFirstAuthor" ColumnName="IsFirstAuthor" />
+          <ScalarProperty Name="Inferred" ColumnName="Inferred" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="DeveloperExpertiseValues">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.DeveloperExpertiseValue)">
+        <MappingFragment StoreEntitySet="DeveloperExpertiseValues">
+          <ScalarProperty Name="DeveloperExpertiseValueId" ColumnName="DeveloperExpertiseValueId" />
+          <ScalarProperty Name="Value" ColumnName="Value" />
+          <ScalarProperty Name="DeveloperExpertiseId" ColumnName="DeveloperExpertiseId" />
+          <ScalarProperty Name="AlgorithmId" ColumnName="AlgorithmId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="ActualReviewers">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.ActualReviewer)">
+        <MappingFragment StoreEntitySet="ActualReviewers">
+          <ScalarProperty Name="ActualReviewerId" ColumnName="ActualReviewerId" />
+          <ScalarProperty Name="Time" ColumnName="Time" />
+          <ScalarProperty Name="BugId" ColumnName="BugId" />
+          <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
+          <ScalarProperty Name="Reviewer" ColumnName="Reviewer" />
+          <ScalarProperty Name="ArtifactId" ColumnName="ArtifactId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="ComputedReviewers">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.ComputedReviewer)">
+        <MappingFragment StoreEntitySet="ComputedReviewers">
+          <ScalarProperty Name="ComputedReviewerId" ColumnName="ComputedReviewerId" />
+          <ScalarProperty Name="Expert1" ColumnName="Expert1" />
+          <ScalarProperty Name="Expert1Value" ColumnName="Expert1Value" />
+          <ScalarProperty Name="Expert2" ColumnName="Expert2" />
+          <ScalarProperty Name="Expert2Value" ColumnName="Expert2Value" />
+          <ScalarProperty Name="Expert3" ColumnName="Expert3" />
+          <ScalarProperty Name="Expert3Value" ColumnName="Expert3Value" />
+          <ScalarProperty Name="Expert4" ColumnName="Expert4" />
+          <ScalarProperty Name="Expert4Value" ColumnName="Expert4Value" />
+          <ScalarProperty Name="Expert5" ColumnName="Expert5" />
+          <ScalarProperty Name="Expert5Value" ColumnName="Expert5Value" />
+          <ScalarProperty Name="ActualReviewerId" ColumnName="ActualReviewerId" />
+          <ScalarProperty Name="AlgorithmId" ColumnName="AlgorithmId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Filenames">
+      <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.Filename)">
+        <MappingFragment StoreEntitySet="Filenames">
+          <ScalarProperty Name="FilenameId" ColumnName="FilenameId" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="SourceRepositoryId" ColumnName="SourceRepositoryId" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+  </EntityContainerMapping>
+</Mapping></edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <edmx:Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </edmx:Connection>
+    <edmx:Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+        <DesignerProperty Name="DDLGenerationTemplate" Value="$(VSEFTools)\DBGen\SSDLToMySQL.tt" />
+      </DesignerInfoPropertySet>
+    </edmx:Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

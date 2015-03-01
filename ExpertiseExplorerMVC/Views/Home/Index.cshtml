@@ -1,0 +1,14 @@
+﻿@model List<ExpertiseDB.Repository>
+
+@{
+    ViewBag.Title = "Expertise Explorer";
+}
+
+<h2>Expertise Explorer</h2>
+
+<ol>
+@foreach (var repository in Model)
+{
+    <li>@Html.ActionLink(repository.Name, "Index", "Repository", new { id = repository.RepositoryId }, null)</li>
+}
+</ol>

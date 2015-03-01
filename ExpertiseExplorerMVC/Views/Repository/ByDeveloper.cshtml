@@ -1,0 +1,15 @@
+﻿@model ExpertiseExplorerMVC.Models.RepositoryViewModel
+
+@{
+    ViewBag.Title = string.Format("{0} by developer", Model.Name);
+}
+
+@Html.ActionLink("Back", "Index", "Repository", new { id = Model.Id }, null)
+
+<h2>@string.Format("{0} by developer", Model.Name)</h2>
+<ol>
+    @foreach (var developer in Model.Developers)
+    {
+        <li>@Html.ActionLink(string.Format("{0} - {1}", developer.Item1, developer.Item3), "Index", "Developer", new { id = developer.Item2 }, null)</li>
+    }
+</ol>

@@ -1,0 +1,15 @@
+﻿@model ExpertiseExplorerMVC.Models.DeveloperViewModel
+
+@{
+    ViewBag.Title = string.Format("Developer {0} is the sole expert for:", Model.Name);
+}
+
+@Html.ActionLink("Back", "Index", "Developer", new { id = Model.Id }, null)
+
+<h2>@string.Format("Developer {0} is the sole expert for {1} artifacts:", Model.Name, Model.Artifacts.Count)</h2>
+<ul>
+    @foreach (var artifact in Model.Artifacts.OrderByDescending(t => t.Item3))
+    {
+        <li>@Html.ActionLink(string.Format("{0} - {1}", artifact.Item1, artifact.Item3), "Index", "Artifact", new { id = artifact.Item2 }, null)</li>
+    }
+</ul>

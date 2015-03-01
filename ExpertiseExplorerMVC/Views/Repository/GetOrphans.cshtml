@@ -1,0 +1,15 @@
+﻿@model ExpertiseExplorerMVC.Models.OrphansViewModel
+
+@{
+    ViewBag.Title = string.Format("Potential orphans for {0}", Model.RepositoryName);
+}
+
+@Html.ActionLink("Back", "Index", "Repository", new { id = Model.RepositoryId }, null)
+
+<h2>@string.Format("{1} Potential orphans for {0}", Model.RepositoryName, Model.PotentialOrphans.Count)</h2>
+<ul>
+    @foreach (var artifact in Model.PotentialOrphans)
+    {
+        <li>@Html.ActionLink(artifact.Item1, "Index", "Artifact", new { id = artifact.Item2 }, null)</li>
+    }
+</ul>

@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{85A18B33-D1CC-42DA-9318-81E84BCFBD3F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Algorithms</RootNamespace>
+    <AssemblyName>Algorithms</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="EntityFramework">
+      <HintPath>..\ExpertiseDB\bin\Debug\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net.2.0.3\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AlgorithmBase.cs" />
+    <Compile Include="CodeOwnershipAlgorithm.cs" />
+    <Compile Include="ExperienceAtomsAlgorithm.cs" />
+    <Compile Include="ExpertiseCloudAlgorithm.cs" />
+    <Compile Include="ExpertiseIntersectionAlgorithm.cs" />
+    <Compile Include="LimitedConcurrencyLevelTaskScheduler.cs" />
+    <Compile Include="Line10RuleAlgorithm.cs" />
+    <Compile Include="MissingFilesAlgorithm.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DegreeOfAuthorshipAlgorithm.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ExpertiseDB\ExpertiseDB.csproj">
+      <Project>{afa7c444-d43d-4030-8539-a2177173d706}</Project>
+      <Name>ExpertiseDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ExpertiseExplorerCommon\ExpertiseExplorerCommon.csproj">
+      <Project>{6707ef18-0f6e-481a-b1c2-17f6a4222cb9}</Project>
+      <Name>ExpertiseExplorerCommon</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

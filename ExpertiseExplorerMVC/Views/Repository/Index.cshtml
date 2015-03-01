@@ -1,0 +1,20 @@
+﻿@model ExpertiseExplorerMVC.Models.RepositoryViewModel
+
+@{
+    ViewBag.Title = Model.Name;
+}
+
+@Html.ActionLink("Back", "Index", "Home")
+
+<h2>@Model.Name</h2>
+<h3>Top 10 Developers (by Expertise)</h3>
+<ol>
+    @foreach (var developer in Model.Developers)
+    {
+        <li>@Html.ActionLink(string.Format("{0} - {1}", developer.Item1, developer.Item3), "Index", "Developer", new { id = developer.Item2 }, null)</li>
+    }
+</ol>
+
+@Html.ActionLink("Browse by developer", "ByDeveloper", "Repository", new { id = Model.Id }, null)
+@Html.ActionLink("Browse by artifact", "ByArtifact", "Repository", new { id = Model.Id, active = "a" }, null)
+@Html.ActionLink("Potential orphan artifacts", "GetOrphans", "Repository", new { id = Model.Id }, null)

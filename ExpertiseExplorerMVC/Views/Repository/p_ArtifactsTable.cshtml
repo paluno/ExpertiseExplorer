@@ -1,0 +1,14 @@
+﻿@using ExpertiseExplorerMVC.Extensions
+
+@model ExpertiseExplorerMVC.Models.ListArtifactsViewModel
+
+@Html.GetAlphabetLinks("ByArtifact", "Repository", new { id = Model.RepositoryId }, Model.ActiveChar.ToCharArray().First())
+
+<div>
+    <ul>
+    @foreach (var artifact in Model.Artifacts)
+    {
+        <li>@Html.ActionLink(artifact.Item1, "Index", "Artifact", new { id = artifact.Item2 }, null)</li>
+    }
+    </ul>
+</div>

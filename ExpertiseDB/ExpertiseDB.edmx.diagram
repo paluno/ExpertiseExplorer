@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="788c00f2de0c4fb4a139f68bf4ca4403" Name="Diagram1" ZoomLevel="74" >
+        <EntityTypeShape EntityType="ExpertiseDB.SourceRepository" Width="1.5" PointX="0.5" PointY="0.5" />
+        <EntityTypeShape EntityType="ExpertiseDB.Revision" Width="1.5" PointX="3.125" PointY="0.5" />
+        <AssociationConnector Association="ExpertiseDB.SourceRepositoryRevision" />
+        <EntityTypeShape EntityType="ExpertiseDB.FileRevision" Width="1.5" PointX="5.625" PointY="0.5" IsExpanded="true" />
+        <AssociationConnector Association="ExpertiseDB.RevisionFile" />
+        <EntityTypeShape EntityType="ExpertiseDB.Repository" Width="1.5" PointX="4.625" PointY="3.75" />
+        <EntityTypeShape EntityType="ExpertiseDB.Developer" Width="1.5" PointX="2.25" PointY="6.125" />
+        <AssociationConnector Association="ExpertiseDB.RepositoryDeveloper" />
+        <EntityTypeShape EntityType="ExpertiseDB.Algorithm" Width="1.5" PointX="10.875" PointY="4.5" />
+        <EntityTypeShape EntityType="ExpertiseDB.Artifact" Width="1.5" PointX="7.25" PointY="6.125" />
+        <EntityTypeShape EntityType="ExpertiseDB.ArtifactType" Width="1.5" PointX="8" PointY="3.25" />
+        <AssociationConnector Association="ExpertiseDB.ArtifactTypeArtifact" />
+        <AssociationConnector Association="ExpertiseDB.RepositoryArtifact" />
+        <EntityTypeShape EntityType="ExpertiseDB.DeveloperExpertise" Width="1.5" PointX="5" PointY="9" />
+        <AssociationConnector Association="ExpertiseDB.DeveloperDeveloperExpertise" />
+        <AssociationConnector Association="ExpertiseDB.DeveloperExpertiseArtifact" />
+        <AssociationConnector Association="ExpertiseDB.ArtifactArtifact" />
+        <EntityTypeShape EntityType="ExpertiseDB.DeveloperExpertiseValue" Width="1.5" PointX="11" PointY="9.625" />
+        <AssociationConnector Association="ExpertiseDB.DeveloperExpertiseDeveloperExpertiseValue" />
+        <AssociationConnector Association="ExpertiseDB.DeveloperExpertiseValueAlgorithm" />
+        <EntityTypeShape EntityType="ExpertiseDB.ActualReviewer" Width="1.5" PointX="12.375" PointY="6.875" />
+        <AssociationConnector Association="ExpertiseDB.ArtifactActualReviewer" />
+        <EntityTypeShape EntityType="ExpertiseDB.ComputedReviewer" Width="1.5" PointX="15.625" PointY="5.75" />
+        <AssociationConnector Association="ExpertiseDB.ActualReviewerComputedReviewer" />
+        <EntityTypeShape EntityType="ExpertiseDB.Filename" Width="1.5" PointX="8.625" PointY="0.875" />
+        <AssociationConnector Association="ExpertiseDB.FilenameFileRevision" />
+        <AssociationConnector Association="ExpertiseDB.SourceRepositoryFileRevision" />
+        <AssociationConnector Association="ExpertiseDB.SourceRepositoryFilename" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>
