@@ -101,14 +101,22 @@
         {
             var artifacts = Artifacts.Include(a => a.DeveloperExpertises).Where(a => a.RepositoryId == repositoryId && a.DeveloperExpertises.Count < 2).AsNoTracking();
 
-            return artifacts.Select(artifact => new Tuple<string, int>(artifact.Name, artifact.ArtifactId)).ToList();
+                // LINQ to Entities does not support constructors with parameters, therefore the intermediate anonymous type
+                // exists to show LINQ to Entities which attributes are required from the server
+            return artifacts
+                .Select(artifact => new { artifact.Name, artifact.ArtifactId }).AsEnumerable()
+                .Select(artifact => new Tuple<string, int>(artifact.Name, artifact.ArtifactId)).ToList();
         }
 
         public List<Tuple<string, int>> GetFilesForRepositoryThatStartWithChar(int repositoryId, string startWith)
         {
             var query = Artifacts.Where(a => a.RepositoryId == repositoryId && a.Name.StartsWith(startWith));
 
-            return query.Select(artifact => new Tuple<string, int>(artifact.Name, artifact.ArtifactId)).ToList();
+                // LINQ to Entities does not support constructors with parameters, therefore the intermediate anonymous type
+                // exists to show LINQ to Entities which attributes are required from the server
+            return query
+                .Select(artifact => new { artifact.Name, artifact.ArtifactId }).AsEnumerable()
+                .Select(artifact => new Tuple<string, int>(artifact.Name, artifact.ArtifactId)).ToList();
         }
 
         public List<Revision> GetRevisionsFromSourceRepositoryBetween(int sourceRepositoryId, DateTime start, DateTime end)
