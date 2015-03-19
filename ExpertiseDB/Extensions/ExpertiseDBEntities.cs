@@ -119,7 +119,7 @@
         public string GetUserForLastRevisionOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
-            var sql = string.Format("CALL expertisedb.getuserforlastrevisionofbefore({0}, '{1}')", filenameId, sqlFormattedDate);
+            var sql = string.Format("CALL expertisedb.GetUserForLastRevisionOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
             var name = Database.SqlQuery<string>(sql).SingleOrDefault();
 
             // TODO: place this in a custom filter
@@ -133,7 +133,7 @@
         public List<string> GetUsersOfRevisionsOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
-            var sql = string.Format("CALL expertisedb.getusersofrevisionsofbefore({0}, '{1}')", filenameId, sqlFormattedDate);
+            var sql = string.Format("CALL expertisedb.GetUsersOfRevisionsOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
 
             // TODO: place this in a custom filter
             var rawNames = Database.SqlQuery<string>(sql).ToList();
@@ -160,14 +160,14 @@
 
         public List<DeveloperForPath> GetDeveloperForPath(string path)
         {
-            var sql = string.Format("CALL expertisedb.getdevelopersforpath('{0}')", path + "%");
+            var sql = string.Format("CALL expertisedb.GetDevelopersForPath('{0}')", path + "%");
 
             return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
 
         public List<DeveloperForPath> GetDeveloperWithoutPath()
         {
-            return Database.SqlQuery<DeveloperForPath>("CALL expertisedb.getdeveloperswopath()").ToList();
+            return Database.SqlQuery<DeveloperForPath>("CALL expertisedb.GetDevelopersWOPath()").ToList();
         }
 
         public List<ActualReviewersGrouped> GetActualReviewersGrouped()
@@ -177,7 +177,7 @@
 
         private IEnumerable<DeveloperExpertiseSum> GetDeveloperExpertiseSumForRepository(int repoditoryId, int numberOfHits = 0)
         {
-            var sql = string.Format("CALL expertisedb.getdeveloperexpertisesum({0})", repoditoryId);
+            var sql = string.Format("CALL expertisedb.GetDeveloperExpertiseSum({0})", repoditoryId);
 
             var result = numberOfHits > 0 ? Database.SqlQuery<DeveloperExpertiseSum>(sql).Take(numberOfHits).ToList() : Database.SqlQuery<DeveloperExpertiseSum>(sql).ToList();
 
