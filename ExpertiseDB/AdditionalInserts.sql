@@ -14,12 +14,12 @@ START TRANSACTION;
 USE `expertisedb`;
 
 CREATE PROCEDURE `GetDeveloperExpertiseSum`(IN repoId INT)
-SELECT developerexpertises.DeveloperId, RepositoryId, sum(developerexpertisevalues.Value) AS ExSum 
-FROM developerexpertises
-JOIN developers
-ON developerexpertises.DeveloperId = developers.DeveloperId
-JOIN developerexpertisevalues
-ON developerexpertises.DeveloperExpertiseId = developerexpertisevalues.DeveloperExpertiseId
+SELECT DeveloperExpertises.DeveloperId, RepositoryId, sum(DeveloperExpertiseValues.Value) AS ExSum 
+FROM DeveloperExpertises
+JOIN Developers
+ON DeveloperExpertises.DeveloperId = Developers.DeveloperId
+JOIN DeveloperExpertiseValues
+ON DeveloperExpertises.DeveloperExpertiseId = DeveloperExpertiseValues.DeveloperExpertiseId
 WHERE RepositoryId = repoId
 GROUP BY DeveloperId ORDER BY ExSum DESC;
 
@@ -33,10 +33,10 @@ START TRANSACTION;
 USE `expertisedb`;
 
 CREATE PROCEDURE `GetDevelopersForPath`(IN path VARCHAR(255))
-SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM expertisedb.developerexpertises
-JOIN expertisedb.artifacts
-ON artifacts.artifactId = developerexpertises.artifactId
-WHERE artifacts.Name LIKE path
+SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM expertisedb.DeveloperExpertises
+JOIN expertisedb.Artifacts
+ON Artifacts.artifactId = DeveloperExpertises.artifactId
+WHERE Artifacts.Name LIKE path
 GROUP BY DeveloperId;
 
 COMMIT;
@@ -49,10 +49,10 @@ START TRANSACTION;
 USE `expertisedb`;
 
 CREATE PROCEDURE `GetDevelopersWOPath`()
-SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM expertisedb.developerexpertises
-JOIN expertisedb.artifacts
-ON artifacts.artifactId = developerexpertises.artifactId
-WHERE artifacts.Name NOT LIKE '%/%'
+SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM expertisedb.DeveloperExpertises
+JOIN expertisedb.Artifacts
+ON Artifacts.artifactId = DeveloperExpertises.artifactId
+WHERE Artifacts.Name NOT LIKE '%/%'
 GROUP BY DeveloperId;
 
 COMMIT;
@@ -65,10 +65,10 @@ START TRANSACTION;
 USE `expertisedb`;
 
 CREATE PROCEDURE `GetUserForLastRevisionOfBefore`(IN filenameid int, IN beforeDatetime DATETIME)
-SELECT User FROM filerevisions
-JOIN revisions
-ON revisions.revisionid = filerevisions.revisionid
-WHERE filerevisions.filenameid = filenameid and time <= beforeDatetime
+SELECT User FROM FileRevisions
+JOIN Revisions
+ON Revisions.revisionid = FileRevisions.revisionid
+WHERE FileRevisions.filenameid = filenameid and time <= beforeDatetime
 ORDER BY time DESC
 LIMIT 1;
 
@@ -83,10 +83,10 @@ START TRANSACTION;
 USE `expertisedb`;
 
 CREATE PROCEDURE `GetUsersOfRevisionsOfBefore`(IN filenameid int, IN beforeDatetime DATETIME)
-SELECT User FROM filerevisions
-JOIN revisions
-ON revisions.revisionid = filerevisions.revisionid
-WHERE filerevisions.filenameid = filenameid and time <= beforeDatetime
+SELECT User FROM FileRevisions
+JOIN Revisions
+ON Revisions.revisionid = FileRevisions.revisionid
+WHERE FileRevisions.filenameid = filenameid and time <= beforeDatetime
 ORDER BY time DESC;
 
 COMMIT;
@@ -102,14 +102,14 @@ USE `expertisedb`;
 
 CREATE PROCEDURE `GetActualReviewersGrouped`()
 SELECT BugId, count(bugid) as Count
-FROM expertisedb.actualreviewers
-GROUP BY BugId
+FROM expertisedb.ActualReviewers
+GROUP BY BugId;
 
 COMMIT;
 
 -- -----------------------------------------------------
--- constraint for developerexpertisevalues
+-- constraint for DeveloperExpertiseValues
 -- -----------------------------------------------------
 
-ALTER TABLE expertisedb.developerexpertisevalues
+ALTER TABLE expertisedb.DeveloperExpertiseValues
 ADD CONSTRAINT uc_identity UNIQUE (DeveloperExpertiseId,AlgorithmId);
