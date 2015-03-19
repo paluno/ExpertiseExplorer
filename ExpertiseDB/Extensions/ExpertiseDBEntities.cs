@@ -119,7 +119,7 @@
         public string GetUserForLastRevisionOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
-            var sql = string.Format("CALL expertisedb.GetUserForLastRevisionOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
+            var sql = string.Format("CALL GetUserForLastRevisionOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
             var name = Database.SqlQuery<string>(sql).SingleOrDefault();
 
             // TODO: place this in a custom filter
@@ -133,7 +133,7 @@
         public List<string> GetUsersOfRevisionsOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
-            var sql = string.Format("CALL expertisedb.GetUsersOfRevisionsOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
+            var sql = string.Format("CALL GetUsersOfRevisionsOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
 
             // TODO: place this in a custom filter
             var rawNames = Database.SqlQuery<string>(sql).ToList();
@@ -160,24 +160,24 @@
 
         public List<DeveloperForPath> GetDeveloperForPath(string path)
         {
-            var sql = string.Format("CALL expertisedb.GetDevelopersForPath('{0}')", path + "%");
+            var sql = string.Format("CALL GetDevelopersForPath('{0}')", path + "%");
 
             return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
 
         public List<DeveloperForPath> GetDeveloperWithoutPath()
         {
-            return Database.SqlQuery<DeveloperForPath>("CALL expertisedb.GetDevelopersWOPath()").ToList();
+            return Database.SqlQuery<DeveloperForPath>("CALL GetDevelopersWOPath()").ToList();
         }
 
         public List<ActualReviewersGrouped> GetActualReviewersGrouped()
         {
-            return Database.SqlQuery<ActualReviewersGrouped>("CALL expertisedb.GetActualReviewersGrouped()").ToList();
+            return Database.SqlQuery<ActualReviewersGrouped>("CALL GetActualReviewersGrouped()").ToList();
         }
 
         private IEnumerable<DeveloperExpertiseSum> GetDeveloperExpertiseSumForRepository(int repoditoryId, int numberOfHits = 0)
         {
-            var sql = string.Format("CALL expertisedb.GetDeveloperExpertiseSum({0})", repoditoryId);
+            var sql = string.Format("CALL GetDeveloperExpertiseSum({0})", repoditoryId);
 
             var result = numberOfHits > 0 ? Database.SqlQuery<DeveloperExpertiseSum>(sql).Take(numberOfHits).ToList() : Database.SqlQuery<DeveloperExpertiseSum>(sql).ToList();
 
