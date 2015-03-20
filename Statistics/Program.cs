@@ -61,7 +61,7 @@
             Console.WriteLine("path: the path where all generated output will be saved");
             Console.WriteLine("operation: the operation that should be executed");
             Console.WriteLine("\t possible options:");
-            Console.WriteLine("\t 0 - Find actual reviewers that are missing in the db (only operation that needs no source argument)");
+            Console.WriteLine("\t 0 - Find actual reviewers that are missing in the db (this operation needs no source argument)");
             Console.WriteLine("\t 1 - AnalyzeActualReviews");
             Console.WriteLine("\t 2 - ComputeStatisticsForAllAlgorithmsAndActualReviews");
             Console.WriteLine("\t 3 - FindIntersectingEntriesForAllAlgorithms");
