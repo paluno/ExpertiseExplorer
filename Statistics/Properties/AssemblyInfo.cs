@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Statistics")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Evaluates how the calculated reviewers and actual reviewers fit together")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Statistics")]
+[assembly: AssemblyProduct("ExpertiseExplorer")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
