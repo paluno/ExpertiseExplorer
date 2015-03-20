@@ -360,21 +360,21 @@
 
         private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithId, IEnumerable<int> actualReviewerIds, string postfix)
         {
-            var originalData = File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithId));
-            var workingSet = originalData.Select(StatisticsResult.FromCSVLine).Where(tmp => actualReviewerIds.Contains(tmp.ActualReviewerId)).ToList();
+            string[] originalData = File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithId));
+            List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine).Where(tmp => actualReviewerIds.Contains(tmp.ActualReviewerId)).ToList();
 
-            var count = actualReviewerIds.Count();
-            var foundNo = workingSet.Count(sr => sr.AuthorWasFound);
-            var expertPlacements = new int[5];
+            int count = actualReviewerIds.Count();
+            int foundNo = workingSet.Count(sr => sr.AuthorWasFound);
+            int[] expertPlacements = new int[5];
 
-            for (var i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
             {
                 expertPlacements[i] = workingSet.Count(sr => sr.AuthorWasExpertNo == (i + 1));
             }
 
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             sb.AppendLine(string.Format("Expert was found: {0} / {1} ({2:P})", foundNo, count, (double)foundNo / count));
-            for (var i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)
                 sb.AppendLine(string.Format("Expert was No {0}:  {1} / {2} ({3:P})", i + 1, expertPlacements[i], count, (double)expertPlacements[i] / (double)count));
 
             File.WriteAllText(string.Format(basepath + "stats_{0}_analyzed{1}.txt", algorithId, postfix), sb.ToString());
