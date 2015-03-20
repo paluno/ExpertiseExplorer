@@ -33,8 +33,8 @@ START TRANSACTION;
 USE `expertisedb`;
 
 CREATE PROCEDURE `GetDevelopersForPath`(IN path VARCHAR(255))
-SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM expertisedb.DeveloperExpertises
-JOIN expertisedb.Artifacts
+SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM DeveloperExpertises
+JOIN Artifacts
 ON Artifacts.artifactId = DeveloperExpertises.artifactId
 WHERE Artifacts.Name LIKE path
 GROUP BY DeveloperId;
@@ -49,8 +49,8 @@ START TRANSACTION;
 USE `expertisedb`;
 
 CREATE PROCEDURE `GetDevelopersWOPath`()
-SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM expertisedb.DeveloperExpertises
-JOIN expertisedb.Artifacts
+SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM DeveloperExpertises
+JOIN Artifacts
 ON Artifacts.artifactId = DeveloperExpertises.artifactId
 WHERE Artifacts.Name NOT LIKE '%/%'
 GROUP BY DeveloperId;
@@ -102,7 +102,7 @@ USE `expertisedb`;
 
 CREATE PROCEDURE `GetActualReviewersGrouped`()
 SELECT BugId, count(bugid) as Count
-FROM expertisedb.ActualReviewers
+FROM ActualReviewers
 GROUP BY BugId;
 
 COMMIT;
@@ -111,5 +111,5 @@ COMMIT;
 -- constraint for DeveloperExpertiseValues
 -- -----------------------------------------------------
 
-ALTER TABLE expertisedb.DeveloperExpertiseValues
+ALTER TABLE DeveloperExpertiseValues
 ADD CONSTRAINT uc_identity UNIQUE (DeveloperExpertiseId,AlgorithmId);
