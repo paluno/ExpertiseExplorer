@@ -16,17 +16,6 @@
             Init();
         }
 
-        public override void CalculateExpertise()
-        {
-            List<string> filenames;
-            using (var repository = new ExpertiseDBEntities())
-            {
-                filenames = repository.Artifacts.Select(a => a.Name).ToList();
-            }
-
-            CalculateExpertiseForFiles(filenames);
-        }
-
         public override void CalculateExpertiseForFile(string filename)
         {
             var artifactId = GetArtifactIdFromArtifactnameApproximation(filename);

@@ -200,7 +200,8 @@
         }
         
         /// <summary>
-        /// Go through a list of review activities. For each review,
+        /// Go through a list of review activities. For each review, calculate expertises at the time of review and store five
+        /// computed reviewers
         /// </summary>
         private void HandleActivityInfoList(IEnumerable<ActivityInfo> activityInfo, DateTime resumeFrom, bool noComparison)
         {

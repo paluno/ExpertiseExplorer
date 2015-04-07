@@ -23,13 +23,7 @@
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
             Debug.Assert(RepositoryId > -1, "Initialize RepositoryId first");
 
-            List<string> filenames;
-            using (var repository = new ExpertiseDBEntities())
-            {
-                filenames = repository.Artifacts.Select(a => a.Name).ToList();
-            }
-
-            CalculateExpertiseForFiles(filenames);
+            base.CalculateExpertise();
         }
 
         public override void CalculateExpertiseForFile(string filename)
