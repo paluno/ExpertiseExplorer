@@ -15,20 +15,6 @@
 
     internal class AlgorithmComparisonRunner
     {
-        private const string FLAGS = "flags";
-
-        private const string REVIEWPLUS = "review+";
-
-        private const string REVIEWMINUS = "review-";
-
-        private const string SUPERREVIEWREQUEST = "superreview?";
-        
-        private const string SUPERREVIEWPLUS = "superreview+";
-
-        private const string SUPERREVIEWMINUS = "superreview-";
-
-        private const string ATTACHMENTIDENTIFIER = "attachment #";
-
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly Dictionary<int, List<string>> _attachments = new Dictionary<int, List<string>>();
@@ -87,7 +73,7 @@
             Debug.WriteLine("Starting parsing at: " + DateTime.Now);
             try
             {
-                filteredInput = ParseAndFilterInput(input);
+                filteredInput = ActivityInfo.ParseAndFilterInput(input);
             }
             finally
             {
@@ -110,7 +96,7 @@
             foreach (var activityInfo in list)
             {
                 // filter if not review
-                if (!IsReview(activityInfo))
+                if (!activityInfo.IsReview)
                     continue;
 
                 // filter if not in examined window of time
@@ -177,29 +163,6 @@
             }
         }
         
-        private static bool IsReview(ActivityInfo activityInfo)
-        {
-            return activityInfo.Added.Contains(REVIEWPLUS) || activityInfo.Added.Contains(REVIEWMINUS);
-        }
-
-        // removes supperreview strings and afterwards returns only lines that stll contain 'review+' or 'review-'
-        private static string ParseAndFilterInput(TextReader input)
-        {
-            var result = new StringBuilder();
-            string line;
-            while ((line = input.ReadLine()) != null)
-            {
-                line = line.ToLower();
-                line = line.Replace(SUPERREVIEWREQUEST, string.Empty);
-                line = line.Replace(SUPERREVIEWPLUS, string.Empty);
-                line = line.Replace(SUPERREVIEWMINUS, string.Empty);
-                if ((line.Contains(REVIEWMINUS) || line.Contains(REVIEWPLUS)) && line.Contains(FLAGS))
-                    result.AppendLine(line);
-            }
-
-            return result.ToString();
-        }
-
         private static IEnumerable<ActivityInfo> GetActivityInfoFromFile(string pathToInputFile)
         {
             var input = new StreamReader(pathToInputFile);
@@ -235,13 +198,10 @@
 
             return result;
         }
-        +
+        
         /// <summary>
         /// Go through a list of review activities. For each review,
         /// </summary>
-        /// <param name="activityInfo"></param>
-        /// <param name="resumeFrom"></param>
-        /// <param name="noComparison"></param>
         private void HandleActivityInfoList(IEnumerable<ActivityInfo> activityInfo, DateTime resumeFrom, bool noComparison)
         {
             StreamWriter found = new StreamWriter(_foundFilesOnlyPath, true);
@@ -352,19 +312,16 @@
             performanceLog.Close();
         }
 
+        /// <summary>
+        /// Get a list of all file names that are involved in a activity
+        /// </summary>
         private IList<string> GetFilesFromActivityInfo(ActivityInfo activityInfo)
         {
-            if (activityInfo.What.Contains(ATTACHMENTIDENTIFIER))
-            {
-                var attachmentIdString = activityInfo.What.Replace(ATTACHMENTIDENTIFIER, string.Empty);
-                attachmentIdString = attachmentIdString.Replace(FLAGS, string.Empty);
-                attachmentIdString = attachmentIdString.Trim();
-                var attachmentId = int.Parse(attachmentIdString);
-
-                return _attachments[attachmentId];
-            }
-
-            return new List<string>();
+            int? attachmentId = activityInfo.GetAttachmentId();
+            if (attachmentId.HasValue)
+                return _attachments[attachmentId.Value];
+            else
+                return new List<string>();
         }
 
         #endregion
