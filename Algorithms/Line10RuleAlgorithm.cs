@@ -60,15 +60,9 @@
                 foreach (var developerId in developerIds)
                 {
                     var fixMyClosure = developerId;
-                    var developerExpertiseId = entities.DeveloperExpertises.Where(de => de.DeveloperId == fixMyClosure && de.ArtifactId == artifactId).Select(de => de.DeveloperExpertiseId).First();
+                    var developerExpertise = entities.DeveloperExpertises.Where(de => de.DeveloperId == fixMyClosure && de.ArtifactId == artifactId).First();
 
-                    var expertiseValue = entities.DeveloperExpertiseValues.SingleOrDefault(
-                            dev => dev.AlgorithmId == AlgorithmId && dev.DeveloperExpertiseId == developerExpertiseId) ?? entities.DeveloperExpertiseValues.Add(
-                                new DeveloperExpertiseValue
-                                {
-                                    AlgorithmId = AlgorithmId,
-                                    DeveloperExpertiseId = developerExpertiseId
-                                });
+                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(entities, developerExpertise);
 
                     // reset all connected developer's expertise to 0
                     expertiseValue.Value = 0f;

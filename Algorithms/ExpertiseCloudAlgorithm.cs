@@ -79,16 +79,7 @@
                         developerExpertise = repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperId == developerForPath.DeveloperId && de.ArtifactId == artifactId);
                     }
 
-                    var expertiseValue =
-                        developerExpertise.DeveloperExpertiseValues.SingleOrDefault(
-                            dev => dev.AlgorithmId == AlgorithmId)
-                        ??
-                        repository.DeveloperExpertiseValues.Add(
-                            new DeveloperExpertiseValue
-                                {
-                                    AlgorithmId = AlgorithmId,
-                                    DeveloperExpertiseId = developerExpertise.DeveloperExpertiseId
-                                });
+                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
 
                     expertiseValue.Value = developerForPath.DeliveriesCount + developerForPath.IsFirstAuthorCount;
                 }

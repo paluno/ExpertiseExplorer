@@ -84,14 +84,7 @@
 
                     var expertise = 3.293d + fistAuthorshipValue + deliveriesValue - acceptancesValue;
 
-                    var expertiseValue =
-                        developerExpertise.DeveloperExpertiseValues.SingleOrDefault(
-                            dev => dev.AlgorithmId == AlgorithmId) ?? repository.DeveloperExpertiseValues.Add(
-                                new DeveloperExpertiseValue
-                                {
-                                    AlgorithmId = AlgorithmId,
-                                    DeveloperExpertiseId = developerExpertise.DeveloperExpertiseId
-                                });
+                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
 
                     expertiseValue.Value = expertise;
 

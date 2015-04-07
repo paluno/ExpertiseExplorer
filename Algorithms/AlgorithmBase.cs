@@ -11,6 +11,7 @@
     using ExpertiseDB;
 
     using ExpertiseExplorerCommon;
+    using ExpertiseDB.Extensions;
 
     public abstract class AlgorithmBase
     {
@@ -278,26 +279,11 @@
 
         private void LinkDeveloperAndArtifact(int developerId, FileRevision fileRevision, ArtifactTypeEnum artifactType)
         {
-            var artifactTypeId = (int)artifactType;
-
             using (var repository = new ExpertiseDBEntities())
             {
-                var developerExpertise = repository.DeveloperExpertises.SingleOrDefault(
-                    de => de.DeveloperId == developerId && de.Artifact.Name == fileRevision.Filename.Name);
+                string FileName = fileRevision.Filename.Name;
 
-                if (developerExpertise == null)
-                {
-                    var artifact = repository.Artifacts.SingleOrDefault(a => a.Name == fileRevision.Filename.Name && a.RepositoryId == RepositoryId)
-                                   ??
-                                   new Artifact { ArtifactTypeId = artifactTypeId, Name = fileRevision.Filename.Name, RepositoryId = RepositoryId };
-
-                    developerExpertise = repository.DeveloperExpertises.Add(
-                        new DeveloperExpertise
-                        {
-                            Artifact = artifact,
-                            DeveloperId = developerId
-                        });
-                }
+                var developerExpertise = FindOrCreateDeveloperExpertise(repository, developerId, FileName, artifactType);
 
                 developerExpertise.Artifact.ModificationCount++;
 
@@ -307,6 +293,67 @@
                     developerExpertise.DeliveriesCount++;
 
                 repository.SaveChanges();
+            }
+        }
+
+        protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, string FileName, ArtifactTypeEnum artifactType)
+        {
+            var artifactTypeId = (int)artifactType;
+
+            var developerExpertise = repository.DeveloperExpertises.SingleOrDefault(
+                de => de.DeveloperId == developerId && de.Artifact.Name == FileName);
+
+            if (developerExpertise == null)
+            {
+                var artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId)
+                               ??
+                               new Artifact { ArtifactTypeId = artifactTypeId, Name = FileName, RepositoryId = RepositoryId };
+
+                developerExpertise = repository.DeveloperExpertises.Add(
+                    new DeveloperExpertise
+                    {
+                        Artifact = artifact,
+                        DeveloperId = developerId
+                    });
+            }
+
+            return developerExpertise;
+        }
+
+        protected DeveloperExpertiseValue FindOrCreateDeveloperExpertiseValue(ExpertiseDBEntities repository, DeveloperExpertise developerExpertise)
+        {
+            return
+                developerExpertise.DeveloperExpertiseValues.SingleOrDefault(
+                    dev => dev.AlgorithmId == AlgorithmId) ?? repository.DeveloperExpertiseValues.Add(
+                        new DeveloperExpertiseValue
+                        {
+                            AlgorithmId = AlgorithmId,
+                            DeveloperExpertiseId = developerExpertise.DeveloperExpertiseId
+                        });
+        }
+
+        public virtual ComputedReviewer GetDevelopersForArtifact(int artifactId)
+        {
+            using (var entities = new ExpertiseDBEntities())
+            {
+                var developers = entities.GetDevelopersForArtifactAndAlgorithm(artifactId, AlgorithmId).OrderByDescending(sde => sde.Expertise).Take(5).ToList();
+                while (developers.Count < 5)
+                    developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, DeveloperName = string.Empty, Expertise = 0d });
+
+                return new ComputedReviewer
+                {
+                    Expert1 = developers[0].DeveloperName,
+                    Expert1Value = developers[0].Expertise,
+                    Expert2 = developers[1].DeveloperName,
+                    Expert2Value = developers[1].Expertise,
+                    Expert3 = developers[2].DeveloperName,
+                    Expert3Value = developers[2].Expertise,
+                    Expert4 = developers[3].DeveloperName,
+                    Expert4Value = developers[3].Expertise,
+                    Expert5 = developers[4].DeveloperName,
+                    Expert5Value = developers[4].Expertise,
+                    AlgorithmId = this.AlgorithmId
+                };
             }
         }
     }
