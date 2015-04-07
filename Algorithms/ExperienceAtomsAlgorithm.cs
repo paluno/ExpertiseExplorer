@@ -30,9 +30,9 @@
 
                 foreach (var developerId in developers)
                 {
-                    var developerExpertise = repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperId == developerId && de.ArtifactId == artifactId);
+                    DeveloperExpertise developerExpertise = repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperId == developerId && de.ArtifactId == artifactId);
 
-                    var expertiseValue =
+                    DeveloperExpertiseValue expertiseValue =
                         developerExpertise.DeveloperExpertiseValues.SingleOrDefault(
                             dev => dev.AlgorithmId == AlgorithmId) ?? repository.DeveloperExpertiseValues.Add(
                                 new DeveloperExpertiseValue
