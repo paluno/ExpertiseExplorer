@@ -105,7 +105,7 @@
             Console.WriteLine("\t additional argument: none\n");
             Console.WriteLine("\t a or algorithm for algorithm comparison");
             Console.WriteLine("\t additional argument: f or force for forcing an existing prepared input to be overwritten (optional)");
-            Console.WriteLine("\t additional argument: n or nocomp for only reating expertise values from revision, skipping the comparison (optional)");
+            Console.WriteLine("\t additional argument: n or nocomp for only creating expertise values from revision, skipping the comparison (optional)");
             Console.WriteLine("\t additional argument: r or resume arg for resuming the computation from arg datetime, arg has to be in unix time (optional)");
             Console.WriteLine("\t \t Useful for resuming the calculations after an error. Use repository.lastUpdate as the value for arg\n");
             Console.WriteLine("\t Example of usage:");
