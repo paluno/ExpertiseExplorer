@@ -34,7 +34,7 @@
 
         public abstract void CalculateExpertiseForFile(string filename);
 
-        public void CalculateExpertiseForFiles(List<string> filenames)
+        public void CalculateExpertiseForFiles(IEnumerable<string> filenames)
         {
             var tasks = new List<Task>();
             var stopwatch = new Stopwatch();

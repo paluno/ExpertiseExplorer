@@ -68,9 +68,9 @@
 
         public void StartComparisonFromFile(string filename, DateTime resumeFrom, bool noComparison = false)
         {
-            var starttime = DateTime.Now;
+            DateTime starttime = DateTime.Now;
             Debug.WriteLine("Starting comparison at: " + starttime);
-            var list = GetActivityInfoFromFile(filename);
+            IEnumerable<ActivityInfo> list = GetActivityInfoFromFile(filename);
             HandleActivityInfoList(list, resumeFrom, noComparison);
             Debug.WriteLine("Ending comparison at: " + DateTime.Now);
             Debug.WriteLine("Time: " + (DateTime.Now - starttime));
@@ -235,17 +235,23 @@
 
             return result;
         }
-
+        +
+        /// <summary>
+        /// Go through a list of review activities. For each review,
+        /// </summary>
+        /// <param name="activityInfo"></param>
+        /// <param name="resumeFrom"></param>
+        /// <param name="noComparison"></param>
         private void HandleActivityInfoList(IEnumerable<ActivityInfo> activityInfo, DateTime resumeFrom, bool noComparison)
         {
-            var found = new StreamWriter(_foundFilesOnlyPath, true);
-            var performanceLog = new StreamWriter(_performancePath, true);
-            var timeAfterOneK = DateTime.Now;
+            StreamWriter found = new StreamWriter(_foundFilesOnlyPath, true);
+            StreamWriter performanceLog = new StreamWriter(_performancePath, true);
+            DateTime timeAfterOneK = DateTime.Now;
 
-            var start = DateTime.MinValue;
-            var count = 0;
-            var stopwatch = new Stopwatch();
-            foreach (var info in activityInfo)
+            DateTime start = DateTime.MinValue;
+            int count = 0;
+            Stopwatch stopwatch = new Stopwatch();
+            foreach (ActivityInfo info in activityInfo)
             {
                 stopwatch.Start();
                 count++;
@@ -260,28 +266,28 @@
                 if (info.When < resumeFrom)
                     continue;
 
-                var involvedFiles = GetFilesFromActivityInfo(info);
+                IList<string> involvedFiles = GetFilesFromActivityInfo(info);
 
-                var end = info.When;
+                DateTime end = info.When;
                 Algorithms[0].BuildConnectionsForSourceRepositoryBetween(start, end);
                 start = end;
 
-                var maxDateTime = Algorithms[0].MaxDateTime;
-                var repositoryId = Algorithms[0].RepositoryId;
-                var sourceRepositoryId = Algorithms[0].SourceRepositoryId;
+                DateTime maxDateTime = Algorithms[0].MaxDateTime;
+                int repositoryId = Algorithms[0].RepositoryId;
+                int sourceRepositoryId = Algorithms[0].SourceRepositoryId;
                 
                 try
                 {
-                    var tasks = new List<Task>();
-                    foreach (var algorithm in Algorithms)
+                    List<Task> tasks = new List<Task>();
+                    foreach (AlgorithmBase algorithm in Algorithms)
                     {
                         algorithm.MaxDateTime = maxDateTime;
                         algorithm.RepositoryId = repositoryId;
                         algorithm.SourceRepositoryId = sourceRepositoryId;
 
-                        var fixMyClosure = algorithm;
+                        AlgorithmBase fixMyClosure = algorithm; // Maybe fixMyClosure is necessary as otherwise all tasks would use the last algorithm?
                         tasks.Add(Task.Factory.StartNew(
-                            input => fixMyClosure.CalculateExpertiseForFiles(input as List<string>),
+                            input => fixMyClosure.CalculateExpertiseForFiles(input as IList<string>),
                             involvedFiles));
                     }
 
@@ -309,11 +315,11 @@
 
                 foreach (var involvedFile in involvedFiles)
                 {
-                    var artifactId = Algorithms[0].GetArtifactIdFromArtifactnameApproximation(involvedFile);
+                    int artifactId = Algorithms[0].GetArtifactIdFromArtifactnameApproximation(involvedFile);
                     if (artifactId < 0)
                         throw new FileNotFoundException(string.Format("Artifact {0} not found", involvedFile));
 
-                    var actualReviewer = new ActualReviewer
+                    ActualReviewer actualReviewer = new ActualReviewer
                     {
                         ActivityId = info.ActivityId,
                         ArtifactId = artifactId,
@@ -322,10 +328,11 @@
                         Time = info.When
                     };
 
-                    var tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => GetDevelopersForArtifactAndAlgorithm(artifactId, algorithm.AlgorithmId))).ToList();
+                        // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
+                    IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => GetDevelopersForArtifactAndAlgorithm(artifactId, algorithm.AlgorithmId))).ToList();
 
                     Task.WaitAll(tasks.ToArray());
-                    foreach (var task in tasks)
+                    foreach (Task<ComputedReviewer> task in tasks)
                     {
                         actualReviewer.ComputedReviewers.Add(task.Result);
                     }
@@ -345,7 +352,7 @@
             performanceLog.Close();
         }
 
-        private List<string> GetFilesFromActivityInfo(ActivityInfo activityInfo)
+        private IList<string> GetFilesFromActivityInfo(ActivityInfo activityInfo)
         {
             if (activityInfo.What.Contains(ATTACHMENTIDENTIFIER))
             {
