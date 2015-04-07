@@ -25,11 +25,11 @@ namespace Statistics
         public static StatisticsResult FromCSVLine(string csvline)
         {
             var tmp = csvline.Split(';');
-            var actualReviuewerId = int.Parse(tmp[0]);
+            var actualReviewerId = int.Parse(tmp[0]);
             var authorWasExpertNo = int.Parse(tmp[1]);
             var expertiseValue = double.Parse(tmp[2]);
 
-            return new StatisticsResult(actualReviuewerId) { AuthorWasExpertNo = authorWasExpertNo, ExpertiseValue = expertiseValue };
+            return new StatisticsResult(actualReviewerId) { AuthorWasExpertNo = authorWasExpertNo, ExpertiseValue = expertiseValue };
         }
 
         public string ToCSV()
