@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Text;
 
@@ -55,12 +56,55 @@
                 );
         }
 
+        #region Factories
+        public ActivityInfo(string inputLine)
+        {
+            string line = inputLine.ToLower();
+            var fields = line.Split(';');
+
+            BugId = int.Parse(fields[0]);
+            ActivityId = int.Parse(fields[1]);
+            Author = fields[2];
+            What = fields[4];
+            Removed = fields[5];
+            Added = fields[6];
+
+            SetDateTimeFromUnixTime(long.Parse(fields[3]));
+        }
+
+        public static IEnumerable<ActivityInfo> GetActivityInfoFromFile(string pathToInputFile)
+        {
+            var input = new StreamReader(pathToInputFile);
+            var result = new List<ActivityInfo>();
+            Debug.WriteLine("Starting ActivityInfo parsing at: " + DateTime.Now);
+            try
+            {
+                string line;
+                while ((line = input.ReadLine()) != null)
+                    result.Add(new ActivityInfo(line));
+            }
+            finally
+            {
+                input.Close();
+            }
+
+            Debug.WriteLine("Finished ActivityInfo parsing at: " + DateTime.Now);
+
+            return result;
+        }
+        #endregion Factories
+
+        public static DateTime UnixTime2PDTDateTime(long unixTime)
+        {
+            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                .AddSeconds(unixTime)
+                .Subtract(new TimeSpan(0, 7, 0, 0)); // From Utc to PDT
+        }
+
         public void SetDateTimeFromUnixTime(long unixTime)
         {
             UnixTime = unixTime;
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            epoch = epoch.AddSeconds(unixTime);
-            When = epoch.Subtract(new TimeSpan(0, 7, 0, 0)); // From Utc to PDT
+            When = UnixTime2PDTDateTime(UnixTime);
         }
 
         public override string ToString()

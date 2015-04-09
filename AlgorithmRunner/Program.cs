@@ -28,10 +28,15 @@
 
                 case "a":
                 case "algorithm":
+                case "review":
                     var forceOverwrite = false;
                     var noComp = false;
                     var timeOfLastComparison = 0;
-                    var comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath);    
+                    AlgorithmComparisonRunner comparisonRunner;
+                    if ("review" == mode)
+                        comparisonRunner = new ReviewerAlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
+                    else                       
+                        comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath);    
                 
                     if (args.Length == 3)
                     {
@@ -78,13 +83,11 @@
                             }
                         }
 
-
-                        var resumeTime = new ActivityInfo();
-                        resumeTime.SetDateTimeFromUnixTime(timeOfLastComparison);
-                        resumeTime.When = resumeTime.When - new TimeSpan(0, 0, 0, 1);
+                        DateTime resumeTime = ActivityInfo.UnixTime2PDTDateTime(timeOfLastComparison)
+                            - new TimeSpan(0, 0, 0, 1);
 
                         comparisonRunner.PrepareInput(basepath + "input.txt", basepath + "input_final.txt", forceOverwrite);
-                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", resumeTime.When, noComp);
+                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", resumeTime, noComp);
                     }
 
                     return;
@@ -104,6 +107,7 @@
             Console.WriteLine("\t c or clean for filename cleanup of crawled filenames (filters everything that does not belong to the Firefox project e.g. files from camino, wallet)");
             Console.WriteLine("\t additional argument: none\n");
             Console.WriteLine("\t a or algorithm for algorithm comparison");
+            Console.WriteLine("\t review is also algorithm comparision, but using the review algorithm set instead of the usual algorithms");
             Console.WriteLine("\t additional argument: f or force for forcing an existing prepared input to be overwritten (optional)");
             Console.WriteLine("\t additional argument: n or nocomp for only creating expertise values from revision, skipping the comparison (optional)");
             Console.WriteLine("\t additional argument: r or resume arg for resuming the computation from arg datetime, arg has to be in unix time (optional)");

@@ -36,7 +36,12 @@
                 _attachments.Add(attachmentId, attachmentLine.Split(';')[2].Split(',').Distinct().ToList());
             }
 
-            Algorithms = new List<AlgorithmBase>
+            InitAlgorithms(sourceUrl);
+        }
+
+        protected virtual void InitAlgorithms(string sourceUrl)
+        {
+            Algorithms = new AlgorithmBase[]
             { 
                 new Line10RuleAlgorithm(),
                 new ExpertiseCloudAlgorithm(),
@@ -50,13 +55,13 @@
             Algorithms[0].InitIdsFromDbForSourceUrl(sourceUrl, false);
         }
 
-        public List<AlgorithmBase> Algorithms { get; set; }
+        public IList<AlgorithmBase> Algorithms { get; set; }
 
         public void StartComparisonFromFile(string filename, DateTime resumeFrom, bool noComparison = false)
         {
             DateTime starttime = DateTime.Now;
             Debug.WriteLine("Starting comparison at: " + starttime);
-            IEnumerable<ActivityInfo> list = GetActivityInfoFromFile(filename);
+            IEnumerable<ActivityInfo> list = ActivityInfo.GetActivityInfoFromFile(filename);
             HandleActivityInfoList(list, resumeFrom, noComparison);
             Debug.WriteLine("Ending comparison at: " + DateTime.Now);
             Debug.WriteLine("Time: " + (DateTime.Now - starttime));
@@ -86,7 +91,7 @@
 
             Debug.WriteLine("Starting ordering at: " + DateTime.Now);
 
-            var list = GetActivityInfoFromFile(pathToOutputFile);
+            var list = ActivityInfo.GetActivityInfoFromFile(pathToOutputFile);
             
             // ordering of & another filter pass on the activities
             var mercurialTransferDate = new DateTime(2007, 3, 22, 18, 29, 0); // date of Mozilla's move to hg
@@ -137,67 +142,6 @@
         }
 
         #region Private Methods
-
-        private static ComputedReviewer GetDevelopersForArtifactAndAlgorithm(int artifactId, int algorithmId)
-        {
-            using (var entities = new ExpertiseDBEntities())
-            {
-                var developers = entities.GetDevelopersForArtifactAndAlgorithm(artifactId, algorithmId).OrderByDescending(sde => sde.Expertise).Take(5).ToList();
-                while (developers.Count < 5)
-                    developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, DeveloperName = string.Empty, Expertise = 0d });
-
-                return new ComputedReviewer
-                {
-                    Expert1 = developers[0].DeveloperName,
-                    Expert1Value = developers[0].Expertise,
-                    Expert2 = developers[1].DeveloperName,
-                    Expert2Value = developers[1].Expertise,
-                    Expert3 = developers[2].DeveloperName,
-                    Expert3Value = developers[2].Expertise,
-                    Expert4 = developers[3].DeveloperName,
-                    Expert4Value = developers[3].Expertise,
-                    Expert5 = developers[4].DeveloperName,
-                    Expert5Value = developers[4].Expertise,
-                    AlgorithmId = algorithmId
-                };
-            }
-        }
-        
-        private static IEnumerable<ActivityInfo> GetActivityInfoFromFile(string pathToInputFile)
-        {
-            var input = new StreamReader(pathToInputFile);
-            var result = new List<ActivityInfo>();
-            Debug.WriteLine("Starting ActivityInfo parsing at: " + DateTime.Now);
-            try
-            {
-                string line;
-                while ((line = input.ReadLine()) != null)
-                {
-                    line = line.ToLower();
-                    var fields = line.Split(';');
-                    var activityInfo = new ActivityInfo
-                    {
-                        BugId = int.Parse(fields[0]),
-                        ActivityId = int.Parse(fields[1]),
-                        Author = fields[2],
-                        What = fields[4],
-                        Removed = fields[5],
-                        Added = fields[6]
-                    };
-
-                    activityInfo.SetDateTimeFromUnixTime(long.Parse(fields[3]));
-                    result.Add(activityInfo);
-                }
-            }
-            finally
-            {
-                input.Close();
-            }
-
-            Debug.WriteLine("Finished ActivityInfo parsing at: " + DateTime.Now);
-
-            return result;
-        }
         
         /// <summary>
         /// Go through a list of review activities. For each review, calculate expertises at the time of review and store five
@@ -233,43 +177,7 @@
                 Algorithms[0].BuildConnectionsForSourceRepositoryBetween(start, end);
                 start = end;
 
-                DateTime maxDateTime = Algorithms[0].MaxDateTime;
-                int repositoryId = Algorithms[0].RepositoryId;
-                int sourceRepositoryId = Algorithms[0].SourceRepositoryId;
-                
-                try
-                {
-                    List<Task> tasks = new List<Task>();
-                    foreach (AlgorithmBase algorithm in Algorithms)
-                    {
-                        algorithm.MaxDateTime = maxDateTime;
-                        algorithm.RepositoryId = repositoryId;
-                        algorithm.SourceRepositoryId = sourceRepositoryId;
-
-                        AlgorithmBase fixMyClosure = algorithm; // Maybe fixMyClosure is necessary as otherwise all tasks would use the last algorithm?
-                        tasks.Add(Task.Factory.StartNew(
-                            input => fixMyClosure.CalculateExpertiseForFiles(input as IList<string>),
-                            involvedFiles));
-                    }
-
-                    Task.WaitAll(tasks.ToArray());
-                    stopwatch.Stop();
-                    Log.Info("- " + stopwatch.Elapsed);
-                    stopwatch.Start();
-
-                    found.WriteLine(info.ToString());
-                    found.Flush();
-                }
-                catch (AggregateException ae)
-                {
-                    foreach (var ex in ae.Flatten().InnerExceptions)
-                    {
-                        if (ex is FileNotFoundException)
-                            Log.Error(ex.Message);
-                        else
-                            throw;
-                    }
-                }
+                ProcessActivityInfo(info, involvedFiles, found, stopwatch);
 
                 if (noComparison)
                     continue;
@@ -290,7 +198,7 @@
                     };
 
                         // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
-                    IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => GetDevelopersForArtifactAndAlgorithm(artifactId, algorithm.AlgorithmId))).ToList();
+                    IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
 
                     Task.WaitAll(tasks.ToArray());
                     foreach (Task<ComputedReviewer> task in tasks)
@@ -311,6 +219,49 @@
 
             found.Close();
             performanceLog.Close();
+        }
+
+        protected virtual void ProcessActivityInfo(ActivityInfo info, IList<string> involvedFiles, StreamWriter found, Stopwatch stopwatch)
+        {
+            DateTime maxDateTime = Algorithms[0].MaxDateTime;
+            int repositoryId = Algorithms[0].RepositoryId;
+            int sourceRepositoryId = Algorithms[0].SourceRepositoryId;
+
+            try
+            {
+                List<Task> tasks = new List<Task>();
+                foreach (AlgorithmBase algorithm in Algorithms)
+                {
+                    algorithm.MaxDateTime = maxDateTime;
+                    algorithm.RepositoryId = repositoryId;
+                    algorithm.SourceRepositoryId = sourceRepositoryId;
+
+                    AlgorithmBase fixMyClosure = algorithm; // Maybe fixMyClosure is necessary as otherwise all tasks would use the last algorithm?
+                    tasks.Add(Task.Factory.StartNew(
+                        input => fixMyClosure.CalculateExpertiseForFiles(input as IList<string>),
+                        involvedFiles));
+                }
+
+                Task.WaitAll(tasks.ToArray());
+                stopwatch.Stop();
+                Log.Info("- " + stopwatch.Elapsed);
+                stopwatch.Start();
+
+                found.WriteLine(info.ToString());
+                found.Flush();
+            }
+            catch (AggregateException ae)
+            {
+                foreach (var ex in ae.Flatten().InnerExceptions)
+                {
+                    if (ex is FileNotFoundException)
+                        Log.Error(ex.Message);
+                    else
+                        throw;
+                }
+            }
+
+            return;
         }
 
         /// <summary>
