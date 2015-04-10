@@ -72,19 +72,19 @@
             {
                 using (var repository = new ExpertiseDBEntities())
                 {
-                    var developerExpertise = repository.DeveloperExpertises.Include(de => de.Artifact).Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperExpertiseId == developerExpertiseId);
+                    DeveloperExpertise developerExpertise = repository.DeveloperExpertises.Include(de => de.Artifact).Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperExpertiseId == developerExpertiseId);
 
-                    var firstAuthorship = developerExpertise.IsFirstAuthor ? 1 : 0;
+                    int firstAuthorship = developerExpertise.IsFirstAuthor ? 1 : 0;
 
-                    var fistAuthorshipValue = 1.098d * firstAuthorship;
+                    double fistAuthorshipValue = 1.098d * firstAuthorship;
 
-                    var deliveriesValue = 0.164d * developerExpertise.DeliveriesCount;
+                    double deliveriesValue = 0.164d * developerExpertise.DeliveriesCount;
 
-                    var acceptancesValue = 0.321 * Math.Log(1 + developerExpertise.Artifact.ModificationCount - (developerExpertise.DeliveriesCount + firstAuthorship));
+                    double acceptancesValue = 0.321 * Math.Log(1 + developerExpertise.Artifact.ModificationCount - (developerExpertise.DeliveriesCount + firstAuthorship));
 
-                    var expertise = 3.293d + fistAuthorshipValue + deliveriesValue - acceptancesValue;
+                    double expertise = 3.293d + fistAuthorshipValue + deliveriesValue - acceptancesValue;
 
-                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
+                    DeveloperExpertiseValue expertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
 
                     expertiseValue.Value = expertise;
 

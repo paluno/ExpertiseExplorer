@@ -72,13 +72,13 @@
             BuildConnectionsFromRevisions(GetRevisionsFromSourceRepository());
         }
 
-        public void BuildConnectionsForSourceRepositoryBetween(string sourceUrl, DateTime start, DateTime end)
-        {
-            InitIdsFromDbForSourceUrl(sourceUrl, false);
-            BuildConnectionsForSourceRepositoryBetween(start, end);
-        }
+        //public void BuildConnectionsForSourceRepositoryBetween(string sourceUrl, DateTime start, DateTime end)
+        //{
+        //    InitIdsFromDbForSourceUrl(sourceUrl, false);
+        //    BuildConnectionsForSourceRepositoryBetween(start, end);
+        //}
 
-        public void BuildConnectionsForSourceRepositoryBetween(DateTime start, DateTime end)
+        public virtual void BuildConnectionsForSourceRepositoryBetween(DateTime start, DateTime end)
         {
             Debug.Assert(RepositoryId != -1, "Set RepositoryId first!");
 

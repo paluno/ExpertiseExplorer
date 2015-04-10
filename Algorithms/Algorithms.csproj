@@ -51,11 +51,14 @@
     <Compile Include="ExperienceAtomsAlgorithm.cs" />
     <Compile Include="ExpertiseCloudAlgorithm.cs" />
     <Compile Include="ExpertiseIntersectionAlgorithm.cs" />
+    <Compile Include="FPSReviewAlgorithm.cs" />
+    <Compile Include="WeighedReviewCountAlgorithm.cs" />
     <Compile Include="LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Line10RuleAlgorithm.cs" />
     <Compile Include="MissingFilesAlgorithm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DegreeOfAuthorshipAlgorithm.cs" />
+    <Compile Include="ReviewAlgorithmBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ExpertiseDB\ExpertiseDB.csproj">

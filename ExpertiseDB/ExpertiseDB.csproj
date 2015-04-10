@@ -35,6 +35,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Runtime.Serialization" />
@@ -70,6 +71,7 @@
     <Compile Include="DeveloperExpertiseValue.cs">
       <DependentUpon>ExpertiseDB.tt</DependentUpon>
     </Compile>
+    <Compile Include="DirectExpertiseDB.cs" />
     <Compile Include="ExpertiseDB.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
