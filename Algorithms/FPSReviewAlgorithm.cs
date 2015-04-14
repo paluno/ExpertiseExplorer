@@ -56,12 +56,12 @@ namespace Algorithms
                 //                      devExpertise.DeveloperExpertiseValues.Any(devExValue => devExValue.AlgorithmId == weighedReviewAlgorithmId)
                 //                  )
                 //    ).ToList();
-                using (IDbConnection con = repository.Database.Connection) // no using, as the connection is managed by the Entity Framework
+                using (IDbConnection con = repository.Database.Connection)
                 {
                     con.Open();
                     using (IDbCommand com = con.CreateCommand())
                     {
-                        com.CommandText = "SELECT DeveloperExpertises.DeveloperId " +
+                        com.CommandText = "SELECT DISTINCT DeveloperExpertises.DeveloperId " +
                             "FROM DeveloperExpertises " +
                             "INNER JOIN Artifacts ON DeveloperExpertises.ArtifactId = Artifacts.ArtifactId " +
                             "INNER JOIN DeveloperExpertiseValues ON DeveloperExpertises.DeveloperExpertiseId = DeveloperExpertiseValues.DeveloperExpertiseId " +
@@ -82,21 +82,22 @@ namespace Algorithms
                 }
             }
 
-            foreach (int developerId in experiencedDevelopersIds)
+            Parallel.ForEach(experiencedDevelopersIds, developerId =>
+            //foreach (int developerId in experiencedDevelopersIds)
             {
                 using (var repository = new ExpertiseDBEntities())
                 {
-                    double developerFPSExpertiseValue = 
+                    double developerFPSExpertiseValue =
                         repository.DeveloperExpertiseValues
-                                    // All WeighedReviewCount expertises of the developer for relevant files
+                        // All WeighedReviewCount expertises of the developer for relevant files
                             .Where(devExpValue => devExpValue.DeveloperExpertise.DeveloperId == developerId
                                     && devExpValue.AlgorithmId == weighedReviewAlgorithmId
                                     && //similarFiles.ContainsKey(devExpValue.DeveloperExpertise.ArtifactId)    // This might be very slow
                                         devExpValue.DeveloperExpertise.Artifact.Name.StartsWith(firstComponent) // The same as for similarFiles, but can be translated to SQL
-                                    && devExpValue.DeveloperExpertise.Artifact.ArtifactTypeId == (int) ArtifactTypeEnum.File
+                                    && devExpValue.DeveloperExpertise.Artifact.ArtifactTypeId == (int)ArtifactTypeEnum.File
                                     )
                             .ToArray()  // execute query
-                                // Sum up the file similarities weighed by the individual developer's review expertise with the files
+                        // Sum up the file similarities weighed by the individual developer's review expertise with the files
                             .Aggregate<DeveloperExpertiseValue, double>(0D, (accumulated, devExpValue) => accumulated + devExpValue.Value * similarFiles[devExpValue.DeveloperExpertise.ArtifactId]);
 
                     DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, developerId, filename, ArtifactTypeEnum.File);
@@ -105,6 +106,7 @@ namespace Algorithms
                     repository.SaveChanges();
                 }
             }
+            );
         }
 
         /// <summary>

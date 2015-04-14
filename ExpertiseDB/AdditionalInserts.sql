@@ -113,3 +113,9 @@ COMMIT;
 
 ALTER TABLE DeveloperExpertiseValues
 ADD CONSTRAINT uc_identity UNIQUE (DeveloperExpertiseId,AlgorithmId);
+
+-- -----------------------------------------------------
+-- Index for faster LIKE searches on artifact names (e.g. for FPS algorithm)
+-- -----------------------------------------------------
+ALTER TABLE Artifacts
+ADD INDEX IX_ArtifactName USING BTREE (Name ASC);
