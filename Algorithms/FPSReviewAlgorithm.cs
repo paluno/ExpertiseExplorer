@@ -89,6 +89,7 @@ namespace Algorithms
                 {
                     double developerFPSExpertiseValue =
                         repository.DeveloperExpertiseValues
+                            .Include("DeveloperExpertise")
                         // All WeighedReviewCount expertises of the developer for relevant files
                             .Where(devExpValue => devExpValue.DeveloperExpertise.DeveloperId == developerId
                                     && devExpValue.AlgorithmId == weighedReviewAlgorithmId
@@ -96,7 +97,7 @@ namespace Algorithms
                                         devExpValue.DeveloperExpertise.Artifact.Name.StartsWith(firstComponent) // The same as for similarFiles, but can be translated to SQL
                                     && devExpValue.DeveloperExpertise.Artifact.ArtifactTypeId == (int)ArtifactTypeEnum.File
                                     )
-                            .ToArray()  // execute query
+                            .ToArray()  // execute query, as otherwise LINQ wants to Aggregate, but throws an exception as it cannot
                         // Sum up the file similarities weighed by the individual developer's review expertise with the files
                             .Aggregate<DeveloperExpertiseValue, double>(0D, (accumulated, devExpValue) => accumulated + devExpValue.Value * similarFiles[devExpValue.DeveloperExpertise.ArtifactId]);
 
