@@ -42,7 +42,7 @@
                     if (args.Length == 3)
                     {
                         comparisonRunner.PrepareInput(basepath + "input.txt", basepath + "input_final.txt");
-                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", DateTime.MinValue);
+                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", DateTime.MinValue, DateTime.MaxValue);
                     }
                     else
                     {
