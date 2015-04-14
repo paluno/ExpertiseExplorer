@@ -31,7 +31,8 @@
                 case "review":
                     var forceOverwrite = false;
                     var noComp = false;
-                    var timeOfLastComparison = 0;
+                    int timeOfLastComparison = 0;
+                    int timeOfMaxComparison = int.MaxValue;
                     AlgorithmComparisonRunner comparisonRunner;
                     if ("review" == mode)
                         comparisonRunner = new ReviewerAlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
@@ -45,7 +46,7 @@
                     }
                     else
                     {
-                        for (int i = 2; i < args.Length; i++)
+                        for (int i = 3; i < args.Length; i++)
                         {
                             switch (args[i].ToLower())
                             {
@@ -62,21 +63,34 @@
                                 case "r":
                                 case "resume":
 
-                                    if (i == args.Length - 1)
+                                    if (++i == args.Length)
                                     {
                                         Console.WriteLine("Error: resume argument is missing the parameter.");
                                         return;
                                     }
 
-                                    if (!int.TryParse(args[i + 1], out timeOfLastComparison))
+                                    if (!int.TryParse(args[i], out timeOfLastComparison))
                                     {
-                                        Console.WriteLine("Error: Unable to parse {0} as int.", args[i + 1]);
+                                        Console.WriteLine("Error: Unable to parse {0} as int.", args[i]);
                                         return;
                                     }
 
-                                    i++;
                                     break;
+                                case "m":
+                                case "max":
+                                    if (++i >= args.Length)
+                                    {
+                                        Console.WriteLine("Error: max argument is missing the parameter.");
+                                        return;
+                                    }
 
+                                    if (!int.TryParse(args[i], out timeOfMaxComparison))
+                                    {
+                                        Console.WriteLine("Error: Unable to parse {0} as int.", args[i]);
+                                        return;
+                                    }
+
+                                    break;
                                 default:
                                     Console.WriteLine("Error: Unknown argument {0}.", args[i]);
                                     break;
@@ -85,9 +99,10 @@
 
                         DateTime resumeTime = ActivityInfo.UnixTime2PDTDateTime(timeOfLastComparison)
                             - new TimeSpan(0, 0, 0, 1);
+                        DateTime maxTime = ActivityInfo.UnixTime2PDTDateTime(timeOfMaxComparison);
 
                         comparisonRunner.PrepareInput(basepath + "input.txt", basepath + "input_final.txt", forceOverwrite);
-                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", resumeTime, noComp);
+                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", resumeTime, maxTime, noComp);
                     }
 
                     return;
@@ -112,6 +127,7 @@
             Console.WriteLine("\t additional argument: n or nocomp for only creating expertise values from revision, skipping the comparison (optional)");
             Console.WriteLine("\t additional argument: r or resume arg for resuming the computation from arg datetime, arg has to be in unix time (optional)");
             Console.WriteLine("\t \t Useful for resuming the calculations after an error. Use repository.lastUpdate as the value for arg\n");
+            Console.WriteLine("\t additional argument: m or max to compute expertises only up to arg datetime, arg has to be in unix time (optional)");
             Console.WriteLine("\t Example of usage:");
             Console.WriteLine("\t AlgorithmRunner.exe Firefox C:\\ExpertiseExplorerOutput\\ a f r 1353412846\n");
         }

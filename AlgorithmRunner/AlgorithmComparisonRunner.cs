@@ -57,12 +57,12 @@
 
         public IList<AlgorithmBase> Algorithms { get; set; }
 
-        public void StartComparisonFromFile(string filename, DateTime resumeFrom, bool noComparison = false)
+        public void StartComparisonFromFile(string filename, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
         {
             DateTime starttime = DateTime.Now;
             Debug.WriteLine("Starting comparison at: " + starttime);
             IEnumerable<ActivityInfo> list = ActivityInfo.GetActivityInfoFromFile(filename);
-            HandleActivityInfoList(list, resumeFrom, noComparison);
+            HandleActivityInfoList(list, resumeFrom, continueUntil, noComparison);
             Debug.WriteLine("Ending comparison at: " + DateTime.Now);
             Debug.WriteLine("Time: " + (DateTime.Now - starttime));
         }
@@ -147,78 +147,79 @@
         /// Go through a list of review activities. For each review, calculate expertises at the time of review and store five
         /// computed reviewers
         /// </summary>
-        private void HandleActivityInfoList(IEnumerable<ActivityInfo> activityInfo, DateTime resumeFrom, bool noComparison)
+        private void HandleActivityInfoList(IEnumerable<ActivityInfo> activityInfo, DateTime resumeFrom, DateTime continueUntil, bool noComparison)
         {
-            StreamWriter found = new StreamWriter(_foundFilesOnlyPath, true);
-            StreamWriter performanceLog = new StreamWriter(_performancePath, true);
-            DateTime timeAfterOneK = DateTime.Now;
-
-            DateTime start = DateTime.MinValue;
-            int count = 0;
-            Stopwatch stopwatch = new Stopwatch();
-            foreach (ActivityInfo info in activityInfo)
+            using (StreamWriter found = new StreamWriter(_foundFilesOnlyPath, true))
+            using (StreamWriter performanceLog = new StreamWriter(_performancePath, true))
             {
-                stopwatch.Start();
-                count++;
-                if (count % 1000 == 0)
+                DateTime timeAfterOneK = DateTime.Now;
+
+                DateTime start = DateTime.MinValue;
+                int count = 0;
+                Stopwatch stopwatch = new Stopwatch();
+                foreach (ActivityInfo info in activityInfo)
                 {
-                    Console.WriteLine("Now at: " + count);
-                    performanceLog.WriteLine(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
-                    timeAfterOneK = DateTime.Now;
-                    performanceLog.Flush();
-                }
-
-                if (info.When < resumeFrom)
-                    continue;
-
-                IList<string> involvedFiles = GetFilesFromActivityInfo(info);
-
-                DateTime end = info.When;
-                Algorithms[0].BuildConnectionsForSourceRepositoryBetween(start, end);
-                start = end;
-
-                ProcessActivityInfo(info, involvedFiles, found, stopwatch);
-
-                if (noComparison)
-                    continue;
-
-                foreach (var involvedFile in involvedFiles)
-                {
-                    int artifactId = Algorithms[0].GetArtifactIdFromArtifactnameApproximation(involvedFile);
-                    if (artifactId < 0)
-                        throw new FileNotFoundException(string.Format("Artifact {0} not found", involvedFile));
-
-                    ActualReviewer actualReviewer = new ActualReviewer
+                    stopwatch.Start();
+                    count++;
+                    if (count % 1000 == 0)
                     {
-                        ActivityId = info.ActivityId,
-                        ArtifactId = artifactId,
-                        BugId = info.BugId,
-                        Reviewer = info.Author,
-                        Time = info.When
-                    };
+                        Console.WriteLine("Now at: " + count);
+                        performanceLog.WriteLine(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
+                        timeAfterOneK = DateTime.Now;
+                        performanceLog.Flush();
+                    }
+
+                    if (info.When > continueUntil)
+                        break;
+                    if (info.When < resumeFrom)
+                        continue;
+
+                    IList<string> involvedFiles = GetFilesFromActivityInfo(info);
+
+                    DateTime end = info.When;
+                    Algorithms[0].BuildConnectionsForSourceRepositoryBetween(start, end);
+                    start = end;
+
+                    ProcessActivityInfo(info, involvedFiles, found, stopwatch);
+
+                    if (noComparison)
+                        continue;
+
+                    foreach (var involvedFile in involvedFiles)
+                    {
+                        int artifactId = Algorithms[0].GetArtifactIdFromArtifactnameApproximation(involvedFile);
+                        if (artifactId < 0)
+                            throw new FileNotFoundException(string.Format("Artifact {0} not found", involvedFile));
+
+                        ActualReviewer actualReviewer = new ActualReviewer
+                        {
+                            ActivityId = info.ActivityId,
+                            ArtifactId = artifactId,
+                            BugId = info.BugId,
+                            Reviewer = info.Author,
+                            Time = info.When
+                        };
 
                         // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
-                    IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
+                        IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
 
-                    Task.WaitAll(tasks.ToArray());
-                    foreach (Task<ComputedReviewer> task in tasks)
-                    {
-                        actualReviewer.ComputedReviewers.Add(task.Result);
+                        Task.WaitAll(tasks.ToArray());
+                        foreach (Task<ComputedReviewer> task in tasks)
+                        {
+                            actualReviewer.ComputedReviewers.Add(task.Result);
+                        }
+
+                        using (var entities = new ExpertiseDBEntities())
+                        {
+                            entities.ActualReviewers.Add(actualReviewer);
+                            entities.SaveChanges();
+                        }
                     }
 
-                    using (var entities = new ExpertiseDBEntities())
-                    {
-                        entities.ActualReviewers.Add(actualReviewer);
-                        entities.SaveChanges();
-                    }
+                    stopwatch.Stop();
+                    Log.Info("-- " + stopwatch.Elapsed);
                 }
-
-                stopwatch.Stop();
-                Log.Info("-- " + stopwatch.Elapsed);
             }
-
-            found.Close();
-            performanceLog.Close();
         }
 
         protected virtual void ProcessActivityInfo(ActivityInfo info, IList<string> involvedFiles, StreamWriter found, Stopwatch stopwatch)
