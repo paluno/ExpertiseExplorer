@@ -23,8 +23,28 @@
 
         private readonly string _performancePath;
 
+        public IList<AlgorithmBase> Algorithms { get; set; }
+
         public AlgorithmComparisonRunner(string sourceUrl, string basepath)
+            : this(
+                sourceUrl, 
+                basepath, 
+                new AlgorithmBase[]
+                { 
+                    new Line10RuleAlgorithm(),
+                    new ExpertiseCloudAlgorithm(),
+                    new DegreeOfAuthorshipAlgorithm(),
+                    new ExperienceAtomsAlgorithm(),
+                    new CodeOwnershipAlgorithm(),
+                    new ExpertiseIntersectionAlgorithm()
+                })
         {
+        }
+
+        public AlgorithmComparisonRunner(string sourceUrl, string basepath, IList<AlgorithmBase> algorithmsToEvaluate)
+        {
+            Algorithms = algorithmsToEvaluate;
+
             _foundFilesOnlyPath = basepath + "output.txt";
             _performancePath = basepath + "performance_log.txt";
 
@@ -36,26 +56,14 @@
                 _attachments.Add(attachmentId, attachmentLine.Split(';')[2].Split(',').Distinct().ToList());
             }
 
-            InitAlgorithms(sourceUrl);
+            InitAlgorithms(sourceUrl);  
         }
 
-        protected virtual void InitAlgorithms(string sourceUrl)
+        protected void InitAlgorithms(string sourceUrl)
         {
-            Algorithms = new AlgorithmBase[]
-            { 
-                new Line10RuleAlgorithm(),
-                new ExpertiseCloudAlgorithm(),
-                new DegreeOfAuthorshipAlgorithm(),
-                new ExperienceAtomsAlgorithm(),
-                new CodeOwnershipAlgorithm(),
-                new ExpertiseIntersectionAlgorithm()
-            };
-
             // Load Ids from DB for first algorithm, gets set for all other later
             Algorithms[0].InitIdsFromDbForSourceUrl(sourceUrl, false);
         }
-
-        public IList<AlgorithmBase> Algorithms { get; set; }
 
         public void StartComparisonFromFile(string filename, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
         {
