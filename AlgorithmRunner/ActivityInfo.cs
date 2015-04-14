@@ -101,6 +101,15 @@
                 .Subtract(new TimeSpan(0, 7, 0, 0)); // From Utc to PDT
         }
 
+        public static long PDTDateTime2unixTime(DateTime pdtTime)
+        {
+            return Convert.ToInt64(                
+                pdtTime.AddHours(7)  // to UTC
+                    .Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
+                    .TotalSeconds
+                );
+        }
+
         public void SetDateTimeFromUnixTime(long unixTime)
         {
             UnixTime = unixTime;

@@ -177,8 +177,31 @@
                         performanceLog.Flush();
                     }
 
+                    if (Console.KeyAvailable)
+                    {
+                        ConsoleKeyInfo keypressed = Console.ReadKey(true);
+                        switch(keypressed.Key)
+                        {
+                            case ConsoleKey.X:
+                                Console.WriteLine("Now at: " + count);
+                                Console.WriteLine("Time of next item (use with resume): " + ActivityInfo.PDTDateTime2unixTime(info.When));
+                                Console.WriteLine("Stopping due to user request.");
+
+                                Log.Info("Stopping due to user request.");
+                                return;
+                            case ConsoleKey.S:
+                                Console.WriteLine("Now at: " + count);
+                                break;
+                            default:
+                                Console.WriteLine("Press \"S\" for current status or \"X\" to initiate a stop of calculations.");
+                                break;
+                        }
+                        while (Console.KeyAvailable)
+                            Console.ReadKey(true);  // Flush input buffer
+                    }
+
                     if (info.When > continueUntil)
-                        break;
+                        return;
                     if (info.When < resumeFrom)
                         continue;
 
