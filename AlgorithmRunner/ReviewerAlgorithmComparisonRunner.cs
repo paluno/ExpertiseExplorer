@@ -21,12 +21,12 @@ namespace AlgorithmRunner
 
         protected override void ProcessActivityInfo(ActivityInfo info, IList<string> involvedFiles, System.IO.StreamWriter found, System.Diagnostics.Stopwatch stopwatch)
         {
-                // Calculate new values for reviewer scores
+            base.ProcessActivityInfo(info, involvedFiles, found, stopwatch);
+
+            // Calculate new values for reviewer scores
             if (info.IsReview)
                 foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
-                    reviewAlgorithm.AddReviewScore(info.Author,involvedFiles);
-
-            base.ProcessActivityInfo(info, involvedFiles, found, stopwatch);
+                    reviewAlgorithm.AddReviewScore(info.Author, involvedFiles);
         }
     }
 }
