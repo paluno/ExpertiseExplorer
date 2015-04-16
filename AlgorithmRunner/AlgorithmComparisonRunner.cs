@@ -259,39 +259,58 @@
             int repositoryId = Algorithms[0].RepositoryId;
             int sourceRepositoryId = Algorithms[0].SourceRepositoryId;
 
-            try
+            const int NUMBER_OF_FAIL_RETRIES = 5;
+            int retryNumber = 0;
+            bool fSuccess = false;
+            do
             {
-                List<Task> tasks = new List<Task>();
-                foreach (AlgorithmBase algorithm in Algorithms)
+                try
                 {
-                    algorithm.MaxDateTime = maxDateTime;
-                    algorithm.RepositoryId = repositoryId;
-                    algorithm.SourceRepositoryId = sourceRepositoryId;
+                    List<Task> tasks = new List<Task>();
+                    foreach (AlgorithmBase algorithm in Algorithms)
+                    {
+                        algorithm.MaxDateTime = maxDateTime;
+                        algorithm.RepositoryId = repositoryId;
+                        algorithm.SourceRepositoryId = sourceRepositoryId;
 
-                    AlgorithmBase fixMyClosure = algorithm; // Maybe fixMyClosure is necessary as otherwise all tasks would use the last algorithm?
-                    tasks.Add(Task.Factory.StartNew(
-                        input => fixMyClosure.CalculateExpertiseForFiles(input as IList<string>),
-                        involvedFiles));
+                        AlgorithmBase fixMyClosure = algorithm; // Maybe fixMyClosure is necessary as otherwise all tasks would use the last algorithm?
+                        tasks.Add(Task.Factory.StartNew(
+                            input => fixMyClosure.CalculateExpertiseForFiles(input as IList<string>),
+                            involvedFiles));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
+                    stopwatch.Stop();
+                    Log.Info("- " + stopwatch.Elapsed);
+                    stopwatch.Start();
+
+                    found.WriteLine(info.ToString());
+                    found.Flush();
+                    fSuccess = true;
                 }
-
-                Task.WaitAll(tasks.ToArray());
-                stopwatch.Stop();
-                Log.Info("- " + stopwatch.Elapsed);
-                stopwatch.Start();
-
-                found.WriteLine(info.ToString());
-                found.Flush();
-            }
-            catch (AggregateException ae)
-            {
-                foreach (var ex in ae.Flatten().InnerExceptions)
+                catch (AggregateException ae)
                 {
-                    if (ex is FileNotFoundException)
-                        Log.Error(ex.Message);
+                    if (++retryNumber <= NUMBER_OF_FAIL_RETRIES)
+                    {        // try again, but wait a little, up to 50 * 5^3 = 6.25 seconds
+                        Log.Error(ae);
+                        System.Threading.Thread.Sleep(50 * retryNumber * retryNumber * retryNumber);
+                    }
                     else
+                    {
+                        Log.Fatal(ae);
                         throw;
+                    }
+
+                    //foreach (var ex in ae.Flatten().InnerExceptions)
+                    //{
+                    //    if (ex is FileNotFoundException)
+                    //        Log.Error(ex.Message);
+                    //    else
+                    //        throw;
+                    //}
                 }
             }
+            while (!fSuccess);
 
             return;
         }
