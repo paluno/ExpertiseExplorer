@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3933F9CD-218A-4101-AFD3-48BE5E0E8A1C}"
 	ProjectSection(SolutionItems) = preProject
@@ -26,6 +26,8 @@ EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "AttachmentCrawler", "AttachmentCrawler\AttachmentCrawler.pyproj", "{36CBB186-E44D-4D43-AF20-76C2BB332DE1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Statistics", "Statistics\Statistics.csproj", "{61316512-170E-4EBE-9CBF-B5C174D9D212}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GerritCSVImporter", "GerritCSVImporter\GerritCSVImporter.csproj", "{77E722B7-8F1F-492D-9E86-555977137584}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +131,16 @@ Global
 		{61316512-170E-4EBE-9CBF-B5C174D9D212}.Release|ARM.ActiveCfg = Release|Any CPU
 		{61316512-170E-4EBE-9CBF-B5C174D9D212}.Release|x64.ActiveCfg = Release|Any CPU
 		{61316512-170E-4EBE-9CBF-B5C174D9D212}.Release|x86.ActiveCfg = Release|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Release|ARM.ActiveCfg = Release|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Release|x64.ActiveCfg = Release|Any CPU
+		{77E722B7-8F1F-492D-9E86-555977137584}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
