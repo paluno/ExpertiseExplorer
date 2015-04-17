@@ -119,3 +119,10 @@ ADD CONSTRAINT uc_identity UNIQUE (DeveloperExpertiseId,AlgorithmId);
 -- -----------------------------------------------------
 ALTER TABLE Artifacts
 ADD INDEX IX_ArtifactName USING BTREE (Name ASC);
+
+
+-- -----------------------------------------------------
+-- Index for faster VCS log inserts
+-- -----------------------------------------------------
+ALTER TABLE FileNames
+ADD INDEX IX_FileNamesName USING BTREE (Name ASC);
