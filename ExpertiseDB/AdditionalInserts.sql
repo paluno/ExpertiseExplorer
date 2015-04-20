@@ -101,9 +101,9 @@ START TRANSACTION;
 USE `expertisedb`;
 
 CREATE PROCEDURE `GetActualReviewersGrouped`()
-SELECT BugId, count(bugid) as Count
+SELECT ChangeId, count(changeid) as Count-- Shouldn't it count on artifactid?
 FROM ActualReviewers
-GROUP BY BugId;
+GROUP BY ChangeId;
 
 COMMIT;
 

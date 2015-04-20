@@ -183,7 +183,7 @@
     </Key>
     <Property Name="ActualReviewerId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
     <Property Name="Time" Type="datetime" Nullable="false" />
-    <Property Name="BugId" Type="int" Nullable="false" />
+    <Property Name="ChangeId" Type="varchar" Nullable="false" />
     <Property Name="ActivityId" Type="int" Nullable="false" />
     <Property Name="Reviewer" Type="varchar" Nullable="false" />
     <Property Name="ArtifactId" Type="int" Nullable="false" />
@@ -767,7 +767,7 @@
           </Key>
           <Property Type="Int32" Name="ActualReviewerId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Type="DateTime" Name="Time" Nullable="false" />
-          <Property Type="Int32" Name="BugId" Nullable="false" />
+          <Property Type="String" Name="ChangeId" Nullable="false" />
           <Property Type="Int32" Name="ActivityId" Nullable="false" />
           <Property Type="String" Name="Reviewer" Nullable="false" />
           <NavigationProperty Name="Artifact" Relationship="ExpertiseDB.ArtifactActualReviewer" FromRole="ActualReviewer" ToRole="Artifact" />
@@ -993,7 +993,7 @@
         <MappingFragment StoreEntitySet="ActualReviewers">
           <ScalarProperty Name="ActualReviewerId" ColumnName="ActualReviewerId" />
           <ScalarProperty Name="Time" ColumnName="Time" />
-          <ScalarProperty Name="BugId" ColumnName="BugId" />
+          <ScalarProperty Name="ChangeId" ColumnName="ChangeId" />
           <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
           <ScalarProperty Name="Reviewer" ColumnName="Reviewer" />
           <ScalarProperty Name="ArtifactId" ColumnName="ArtifactId" />

@@ -21,7 +21,7 @@ namespace ExpertiseDB
     
         public int ActualReviewerId { get; set; }
         public System.DateTime Time { get; set; }
-        public int BugId { get; set; }
+        public string ChangeId { get; set; }
         public int ActivityId { get; set; }
         public string Reviewer { get; set; }
         public int ArtifactId { get; set; }

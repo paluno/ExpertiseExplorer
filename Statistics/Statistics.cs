@@ -343,7 +343,7 @@
                 var actualReviewersGrouped = context.GetActualReviewersGrouped();
                 actualReviewersGrouped = actualReviewersGrouped.Where(arg => arg.Count == 1).ToList();
 
-                result.AddRange(from reviewersGrouped in actualReviewersGrouped where reviewersGrouped.Count == 1 select context.ActualReviewers.First(ar => ar.BugId == reviewersGrouped.BugId).ActualReviewerId);
+                result.AddRange(from reviewersGrouped in actualReviewersGrouped where reviewersGrouped.Count == 1 select context.ActualReviewers.First(ar => ar.ChangeId == reviewersGrouped.ChangeId).ActualReviewerId);
             }
 
             return result;

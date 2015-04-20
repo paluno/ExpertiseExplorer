@@ -17,8 +17,6 @@
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        private readonly Dictionary<int, List<string>> _attachments = new Dictionary<int, List<string>>();
-
         private readonly string _foundFilesOnlyPath;
 
         private readonly string _performancePath;
@@ -27,8 +25,8 @@
 
         public AlgorithmComparisonRunner(string sourceUrl, string basepath)
             : this(
-                sourceUrl, 
-                basepath, 
+                sourceUrl,
+                basepath,
                 new AlgorithmBase[]
                 { 
                     new Line10RuleAlgorithm(),
@@ -48,15 +46,9 @@
             _foundFilesOnlyPath = basepath + "output.txt";
             _performancePath = basepath + "performance_log.txt";
 
-            var attachmentFilePath = basepath + @"CrawlerOutput\attachments.txt";
-            var attachmentLines = File.ReadAllLines(attachmentFilePath);
-            foreach (var attachmentLine in attachmentLines)
-            {
-                var attachmentId = int.Parse(attachmentLine.Split(';')[1]);
-                _attachments.Add(attachmentId, attachmentLine.Split(';')[2].Split(',').Distinct().ToList());
-            }
+            //var attachmentFilePath = basepath + @"CrawlerOutput\attachments.txt";
 
-            InitAlgorithms(sourceUrl);  
+            InitAlgorithms(sourceUrl);
         }
 
         protected void InitAlgorithms(string sourceUrl)
@@ -65,18 +57,18 @@
             Algorithms[0].InitIdsFromDbForSourceUrl(sourceUrl, false);
         }
 
-        public void StartComparisonFromFile(string filename, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
+        public void StartComparisonFromFile(string path2ActivityLog, string path2Attachments, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
         {
             DateTime starttime = DateTime.Now;
             Debug.WriteLine("Starting comparison at: " + starttime);
-            IEnumerable<ActivityInfo> list = ActivityInfo.GetActivityInfoFromFile(filename);
-            HandleActivityInfoList(list, resumeFrom, continueUntil, noComparison);
+            IEnumerable<ReviewInfo> list = ActivityInfo.GetActivityInfoFromFile(path2ActivityLog, path2Attachments);
+            HandleReviewInfoList(list, resumeFrom, continueUntil, noComparison);
             Debug.WriteLine("Ending comparison at: " + DateTime.Now);
             Debug.WriteLine("Time: " + (DateTime.Now - starttime));
         }
 
         // parses, filters and orders the bugzilla activity log
-        public void PrepareInput(string pathToInputFile, string pathToOutputFile, bool overwrite = false)
+        public void PrepareInput(string pathToInputFile, string pathToAttachmentFile, string pathToOutputFile, bool overwrite = false)
         {
             if (!overwrite && File.Exists(pathToOutputFile))
                 return;
@@ -99,8 +91,8 @@
 
             Debug.WriteLine("Starting ordering at: " + DateTime.Now);
 
-            var list = ActivityInfo.GetActivityInfoFromFile(pathToOutputFile);
-            
+            var list = ActivityInfo.GetActivityInfoFromFile(pathToOutputFile, pathToAttachmentFile);
+
             // ordering of & another filter pass on the activities
             var mercurialTransferDate = new DateTime(2007, 3, 22, 18, 29, 0); // date of Mozilla's move to hg
             var endOfHgDump = new DateTime(2013, 3, 8, 16, 15, 44); // last date of the hg dump
@@ -116,10 +108,10 @@
                 if (activityInfo.When < mercurialTransferDate || activityInfo.When > endOfHgDump)
                     continue;
 
-                var involvedFiles = GetFilesFromActivityInfo(activityInfo);
+                IList<String> involvedFiles = activityInfo.Filenames;
 
                 // filter if there are no files
-                if (involvedFiles.Count == 0)
+                if (!involvedFiles.Any())
                     continue;
 
                 // filter if there is only one file with no name 
@@ -150,12 +142,12 @@
         }
 
         #region Private Methods
-        
+
         /// <summary>
         /// Go through a list of review activities. For each review, calculate expertises at the time of review and store five
         /// computed reviewers
         /// </summary>
-        private void HandleActivityInfoList(IEnumerable<ActivityInfo> activityInfo, DateTime resumeFrom, DateTime continueUntil, bool noComparison)
+        private void HandleReviewInfoList(IEnumerable<ReviewInfo> reviewInfo, DateTime resumeFrom, DateTime continueUntil, bool noComparison)
         {
             using (StreamWriter found = new StreamWriter(_foundFilesOnlyPath, true))
             using (StreamWriter performanceLog = new StreamWriter(_performancePath, true))
@@ -165,7 +157,7 @@
                 DateTime start = DateTime.MinValue;
                 int count = 0;
                 Stopwatch stopwatch = new Stopwatch();
-                foreach (ActivityInfo info in activityInfo)
+                foreach (ReviewInfo info in reviewInfo)
                 {
                     stopwatch.Start();
                     count++;
@@ -180,7 +172,7 @@
                     if (Console.KeyAvailable)
                     {
                         ConsoleKeyInfo keypressed = Console.ReadKey(true);
-                        switch(keypressed.Key)
+                        switch (keypressed.Key)
                         {
                             case ConsoleKey.X:
                                 Console.WriteLine("Now at: " + count);
@@ -205,13 +197,13 @@
                     if (info.When < resumeFrom)
                         continue;
 
-                    IList<string> involvedFiles = GetFilesFromActivityInfo(info);
+                    IList<string> involvedFiles = info.Filenames;
 
                     DateTime end = info.When;
                     Algorithms[0].BuildConnectionsForSourceRepositoryBetween(start, end);
                     start = end;
 
-                    ProcessActivityInfo(info, involvedFiles, found, stopwatch);
+                    ProcessReviewInfo(info, involvedFiles, found, stopwatch);
 
                     if (noComparison)
                         continue;
@@ -226,7 +218,7 @@
                         {
                             ActivityId = info.ActivityId,
                             ArtifactId = artifactId,
-                            BugId = info.BugId,
+                            ChangeId = info.ChangeId,
                             Reviewer = info.Author,
                             Time = info.When
                         };
@@ -253,7 +245,7 @@
             }
         }
 
-        protected virtual void ProcessActivityInfo(ActivityInfo info, IList<string> involvedFiles, StreamWriter found, Stopwatch stopwatch)
+        protected virtual void ProcessReviewInfo(ReviewInfo info, IList<string> involvedFiles, StreamWriter found, Stopwatch stopwatch)
         {
             DateTime maxDateTime = Algorithms[0].MaxDateTime;
             int repositoryId = Algorithms[0].RepositoryId;
@@ -315,17 +307,7 @@
             return;
         }
 
-        /// <summary>
-        /// Get a list of all file names that are involved in a activity
-        /// </summary>
-        private IList<string> GetFilesFromActivityInfo(ActivityInfo activityInfo)
-        {
-            int? attachmentId = activityInfo.GetAttachmentId();
-            if (attachmentId.HasValue)
-                return _attachments[attachmentId.Value];
-            else
-                return new List<string>();
-        }
+
 
         #endregion
     }

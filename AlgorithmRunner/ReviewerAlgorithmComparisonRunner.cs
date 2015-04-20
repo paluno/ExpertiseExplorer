@@ -19,12 +19,12 @@ namespace AlgorithmRunner
         {
         }
 
-        protected override void ProcessActivityInfo(ActivityInfo info, IList<string> involvedFiles, System.IO.StreamWriter found, System.Diagnostics.Stopwatch stopwatch)
+        protected override void ProcessReviewInfo(ReviewInfo info, IList<string> involvedFiles, System.IO.StreamWriter found, System.Diagnostics.Stopwatch stopwatch)
         {
-            base.ProcessActivityInfo(info, involvedFiles, found, stopwatch);
+            base.ProcessReviewInfo(info, involvedFiles, found, stopwatch);
 
             // Calculate new values for reviewer scores
-            if (info.IsReview)
+//            if (info.IsReview)
                 foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
                     reviewAlgorithm.AddReviewScore(info.Author, involvedFiles);
         }

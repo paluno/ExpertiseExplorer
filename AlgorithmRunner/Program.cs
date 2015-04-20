@@ -36,13 +36,13 @@
                     AlgorithmComparisonRunner comparisonRunner;
                     if ("review" == mode)
                         comparisonRunner = new ReviewerAlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
-                    else                       
-                        comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath);    
-                
+                    else
+                        comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
+
                     if (args.Length == 3)
                     {
-                        comparisonRunner.PrepareInput(basepath + "input.txt", basepath + "input_final.txt");
-                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", DateTime.MinValue, DateTime.MaxValue);
+                        comparisonRunner.PrepareInput(basepath + "input.txt", basepath + @"CrawlerOutput\attachments.txt", basepath + "input_final.txt");
+                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", basepath + @"CrawlerOutput\attachments.txt", DateTime.MinValue, DateTime.MaxValue);
                     }
                     else
                     {
@@ -101,8 +101,8 @@
                             - new TimeSpan(0, 0, 0, 1);
                         DateTime maxTime = ActivityInfo.UnixTime2PDTDateTime(timeOfMaxComparison);
 
-                        comparisonRunner.PrepareInput(basepath + "input.txt", basepath + "input_final.txt", forceOverwrite);
-                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", resumeTime, maxTime, noComp);
+                        comparisonRunner.PrepareInput(basepath + "input.txt", basepath + @"CrawlerOutput\attachments.txt", basepath + "input_final.txt", forceOverwrite);
+                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", basepath + @"CrawlerOutput\attachments.txt", resumeTime, maxTime, noComp);
                     }
 
                     return;

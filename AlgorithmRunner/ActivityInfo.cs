@@ -5,8 +5,9 @@
     using System.Diagnostics;
     using System.IO;
     using System.Text;
+    using System.Linq;
 
-    internal class ActivityInfo
+    internal class ActivityInfo : ReviewInfo
     {
         #region Constant Strings from Bugzilla Logs
 
@@ -22,11 +23,19 @@
 
         public int BugId { get; set; }
 
-        public int ActivityId { get; set; }
+        public override string ChangeId
+        {
+            get
+            {
+                return BugId.ToString();
+            }
+            set
+            {
+                BugId = int.Parse(value);
+            }
+        }
 
-        public string Author { get; set; }
-
-        public DateTime When { get; set; }
+        public override int ActivityId { get; set; }
 
         public string What { get; set; }
 
@@ -57,7 +66,7 @@
         }
 
         #region Factories
-        public ActivityInfo(string inputLine)
+        private ActivityInfo(string inputLine)
         {
             string line = inputLine.ToLower();
             var fields = line.Split(';');
@@ -72,8 +81,17 @@
             SetDateTimeFromUnixTime(long.Parse(fields[3]));
         }
 
-        public static IEnumerable<ActivityInfo> GetActivityInfoFromFile(string pathToInputFile)
+        public static IEnumerable<ActivityInfo> GetActivityInfoFromFile(string pathToInputFile, string pathToAttachments)
         {
+            Dictionary<int, List<string>> attachments = new Dictionary<int, List<string>>();
+            var attachmentLines = File.ReadAllLines(pathToAttachments);
+            foreach (var attachmentLine in attachmentLines)
+            {
+                var attachmentId = int.Parse(attachmentLine.Split(';')[1]);
+                attachments.Add(attachmentId, attachmentLine.Split(';')[2].Split(',').Distinct().ToList());
+            }
+
+
             var input = new StreamReader(pathToInputFile);
             var result = new List<ActivityInfo>();
             Debug.WriteLine("Starting ActivityInfo parsing at: " + DateTime.Now);
@@ -81,12 +99,25 @@
             {
                 string line;
                 while ((line = input.ReadLine()) != null)
-                    result.Add(new ActivityInfo(line));
+                {
+                    ActivityInfo activityInfo = new ActivityInfo(line);
+                    int? attachmentId = activityInfo.GetAttachmentId();
+
+                    if (attachmentId != null)
+                    {
+                        activityInfo.Filenames = attachments[(int)attachmentId];
+                    }
+
+                    result.Add(activityInfo);
+                }
             }
             finally
             {
                 input.Close();
             }
+
+
+
 
             Debug.WriteLine("Finished ActivityInfo parsing at: " + DateTime.Now);
 
@@ -103,7 +134,7 @@
 
         public static long PDTDateTime2unixTime(DateTime pdtTime)
         {
-            return Convert.ToInt64(                
+            return Convert.ToInt64(
                 pdtTime.AddHours(7)  // to UTC
                     .Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
                     .TotalSeconds
