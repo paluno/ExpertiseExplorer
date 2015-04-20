@@ -26,7 +26,7 @@ namespace AlgorithmRunner
             // Calculate new values for reviewer scores
 //            if (info.IsReview)
                 foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
-                    reviewAlgorithm.AddReviewScore(info.Author, involvedFiles);
+                    reviewAlgorithm.AddReviewScore(info.Reviewer, involvedFiles);
         }
     }
 }

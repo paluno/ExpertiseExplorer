@@ -50,12 +50,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActivityInfo.cs" />
+    <Compile Include="ActivityInfoFactory.cs" />
     <Compile Include="AlgorithmComparisonRunner.cs" />
     <Compile Include="FilenameCleanup.cs" />
+    <Compile Include="GerritReview.cs" />
+    <Compile Include="GerritReviewFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReviewerAlgorithmComparisonRunner.cs" />
     <Compile Include="ReviewInfo.cs" />
+    <Compile Include="ReviewInfoFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

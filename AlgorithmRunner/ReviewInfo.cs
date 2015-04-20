@@ -10,9 +10,9 @@ namespace AlgorithmRunner
     {
         public virtual string ChangeId { get; set; }
 
-        public abstract int ActivityId { get; set; }
+        public virtual int ActivityId { get; set; }
 
-        public virtual string Author { get; set; }
+        public virtual string Reviewer { get; set; }
 
         public virtual DateTime When { get; set; }
 

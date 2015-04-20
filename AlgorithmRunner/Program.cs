@@ -8,15 +8,16 @@
         {
             log4net.Config.XmlConfigurator.Configure();
 
-            if (args.Length < 3)
+            if (args.Length < 4)
             {
                 ShowHelp();
                 return;
             }
 
-            var sourceUrlIdentifier = args[0];
-            var basepath = args[1];
-            var mode = args[2].ToLower();
+            string sourceUrlIdentifier = args[0];
+            string reviewSourceType = args[1].ToLower();
+            string basepath = args[2];
+            string mode = args[3].ToLower();
 
             switch (mode)
             {
@@ -33,20 +34,18 @@
                     var noComp = false;
                     int timeOfLastComparison = 0;
                     int timeOfMaxComparison = int.MaxValue;
+                    DateTime resumeTime = DateTime.MinValue;
+                    DateTime maxTime = DateTime.MaxValue;
+
                     AlgorithmComparisonRunner comparisonRunner;
                     if ("review" == mode)
                         comparisonRunner = new ReviewerAlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
                     else
                         comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
 
-                    if (args.Length == 3)
+                    if (args.Length > 4)
                     {
-                        comparisonRunner.PrepareInput(basepath + "input.txt", basepath + @"CrawlerOutput\attachments.txt", basepath + "input_final.txt");
-                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", basepath + @"CrawlerOutput\attachments.txt", DateTime.MinValue, DateTime.MaxValue);
-                    }
-                    else
-                    {
-                        for (int i = 3; i < args.Length; i++)
+                        for (int i = 4; i < args.Length; i++)
                         {
                             switch (args[i].ToLower())
                             {
@@ -97,13 +96,28 @@
                             }
                         }
 
-                        DateTime resumeTime = ActivityInfo.UnixTime2PDTDateTime(timeOfLastComparison)
-                            - new TimeSpan(0, 0, 0, 1);
-                        DateTime maxTime = ActivityInfo.UnixTime2PDTDateTime(timeOfMaxComparison);
-
-                        comparisonRunner.PrepareInput(basepath + "input.txt", basepath + @"CrawlerOutput\attachments.txt", basepath + "input_final.txt", forceOverwrite);
-                        comparisonRunner.StartComparisonFromFile(basepath + @"input_final.txt", basepath + @"CrawlerOutput\attachments.txt", resumeTime, maxTime, noComp);
+                        resumeTime = ActivityInfo.UnixTime2PDTDateTime(timeOfLastComparison) - new TimeSpan(0, 0, 0, 1);
+                        maxTime = ActivityInfo.UnixTime2PDTDateTime(timeOfMaxComparison);
                     }
+
+                    ReviewInfoFactory factory;
+                
+                    switch(reviewSourceType)
+                    {
+                        case "mozilla":
+                            factory = new ActivityInfoFactory(basepath + "input.txt", basepath + @"CrawlerOutput\attachments.txt");
+                            ((ActivityInfoFactory)factory).PrepareInputFromMozillaLog(basepath + "input_final.txt", forceOverwrite);
+                            break;
+                        case "gerrit":
+                            factory = new GerritReviewFactory(basepath + "input.csv");
+                            break;
+                        default:
+                            Console.WriteLine("Error: Unknown type of review data: {0}", reviewSourceType);
+                            ShowHelp();
+                            return;
+                    }
+
+                    comparisonRunner.StartComparisonFromFile(factory, resumeTime, maxTime, noComp);
 
                     return;
 
@@ -115,9 +129,10 @@
 
         private static void ShowHelp()
         {
-            Console.WriteLine("AlgorithmRunner.exe name path mode [arg0....argN]");
+            Console.WriteLine("AlgorithmRunner.exe name type path mode [arg0....argN]");
             Console.WriteLine("name: the sourceRepository.sourceUrl identifier");
-            Console.WriteLine("path: the path where the crawler output is saved and where all generated output will be saved");
+            Console.WriteLine("type: the type of review data to read: BUGZILLA or GERRIT");
+            Console.WriteLine("path: the path from which to read the crawler output and where all generated output will be saved");
             Console.WriteLine("mode: the operating mode, can be:");
             Console.WriteLine("\t c or clean for filename cleanup of crawled filenames (filters everything that does not belong to the Firefox project e.g. files from camino, wallet)");
             Console.WriteLine("\t additional argument: none\n");

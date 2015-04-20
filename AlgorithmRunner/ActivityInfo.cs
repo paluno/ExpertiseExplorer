@@ -65,65 +65,20 @@
                 );
         }
 
-        #region Factories
-        private ActivityInfo(string inputLine)
+        internal ActivityInfo(string inputLine)
         {
             string line = inputLine.ToLower();
             var fields = line.Split(';');
 
             BugId = int.Parse(fields[0]);
             ActivityId = int.Parse(fields[1]);
-            Author = fields[2];
+            Reviewer = fields[2];
             What = fields[4];
             Removed = fields[5];
             Added = fields[6];
 
             SetDateTimeFromUnixTime(long.Parse(fields[3]));
         }
-
-        public static IEnumerable<ActivityInfo> GetActivityInfoFromFile(string pathToInputFile, string pathToAttachments)
-        {
-            Dictionary<int, List<string>> attachments = new Dictionary<int, List<string>>();
-            var attachmentLines = File.ReadAllLines(pathToAttachments);
-            foreach (var attachmentLine in attachmentLines)
-            {
-                var attachmentId = int.Parse(attachmentLine.Split(';')[1]);
-                attachments.Add(attachmentId, attachmentLine.Split(';')[2].Split(',').Distinct().ToList());
-            }
-
-
-            var input = new StreamReader(pathToInputFile);
-            var result = new List<ActivityInfo>();
-            Debug.WriteLine("Starting ActivityInfo parsing at: " + DateTime.Now);
-            try
-            {
-                string line;
-                while ((line = input.ReadLine()) != null)
-                {
-                    ActivityInfo activityInfo = new ActivityInfo(line);
-                    int? attachmentId = activityInfo.GetAttachmentId();
-
-                    if (attachmentId != null)
-                    {
-                        activityInfo.Filenames = attachments[(int)attachmentId];
-                    }
-
-                    result.Add(activityInfo);
-                }
-            }
-            finally
-            {
-                input.Close();
-            }
-
-
-
-
-            Debug.WriteLine("Finished ActivityInfo parsing at: " + DateTime.Now);
-
-            return result;
-        }
-        #endregion Factories
 
         public static DateTime UnixTime2PDTDateTime(long unixTime)
         {
@@ -152,7 +107,7 @@
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var originalUtc = When.Add(new TimeSpan(0, 7, 0, 0));
             var secondspassed = Convert.ToInt64((originalUtc - epoch).TotalSeconds);
-            return BugId + ";" + ActivityId + ";" + Author + ";" + secondspassed + ";" + What + ";" + Removed + ";" + Added;
+            return BugId + ";" + ActivityId + ";" + Reviewer + ";" + secondspassed + ";" + What + ";" + Removed + ";" + Added;
         }
 
         /// <summary>

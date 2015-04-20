@@ -57,90 +57,16 @@
             Algorithms[0].InitIdsFromDbForSourceUrl(sourceUrl, false);
         }
 
-        public void StartComparisonFromFile(string path2ActivityLog, string path2Attachments, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
+        public void StartComparisonFromFile(ReviewInfoFactory factory, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
         {
             DateTime starttime = DateTime.Now;
             Debug.WriteLine("Starting comparison at: " + starttime);
-            IEnumerable<ReviewInfo> list = ActivityInfo.GetActivityInfoFromFile(path2ActivityLog, path2Attachments);
+            IEnumerable<ReviewInfo> list = factory.parseReviewInfos();
             HandleReviewInfoList(list, resumeFrom, continueUntil, noComparison);
             Debug.WriteLine("Ending comparison at: " + DateTime.Now);
             Debug.WriteLine("Time: " + (DateTime.Now - starttime));
         }
-
-        // parses, filters and orders the bugzilla activity log
-        public void PrepareInput(string pathToInputFile, string pathToAttachmentFile, string pathToOutputFile, bool overwrite = false)
-        {
-            if (!overwrite && File.Exists(pathToOutputFile))
-                return;
-
-            var input = new StreamReader(pathToInputFile);
-            string filteredInput;
-            Debug.WriteLine("Starting parsing at: " + DateTime.Now);
-            try
-            {
-                filteredInput = ActivityInfo.ParseAndFilterInput(input);
-            }
-            finally
-            {
-                input.Close();
-            }
-
-            Debug.WriteLine("Finished parsing at: " + DateTime.Now);
-
-            File.WriteAllText(pathToOutputFile, filteredInput);
-
-            Debug.WriteLine("Starting ordering at: " + DateTime.Now);
-
-            var list = ActivityInfo.GetActivityInfoFromFile(pathToOutputFile, pathToAttachmentFile);
-
-            // ordering of & another filter pass on the activities
-            var mercurialTransferDate = new DateTime(2007, 3, 22, 18, 29, 0); // date of Mozilla's move to hg
-            var endOfHgDump = new DateTime(2013, 3, 8, 16, 15, 44); // last date of the hg dump
-            var timeOrder = new List<long>();
-            var activityLookupTable = new Dictionary<long, List<ActivityInfo>>();
-            foreach (var activityInfo in list)
-            {
-                // filter if not review
-                if (!activityInfo.IsReview)
-                    continue;
-
-                // filter if not in examined window of time
-                if (activityInfo.When < mercurialTransferDate || activityInfo.When > endOfHgDump)
-                    continue;
-
-                IList<String> involvedFiles = activityInfo.Filenames;
-
-                // filter if there are no files
-                if (!involvedFiles.Any())
-                    continue;
-
-                // filter if there is only one file with no name 
-                if (involvedFiles.Count == 1 && involvedFiles[0] == string.Empty)
-                    continue;
-
-                var key = activityInfo.UnixTime;
-                timeOrder.Add(key);
-
-                if (!activityLookupTable.ContainsKey(key))
-                    activityLookupTable.Add(key, new List<ActivityInfo>());
-
-                activityLookupTable[key].Add(activityInfo);
-            }
-
-            // needed b/c bugzilla logs are ordered according to bugid, not datetime
-            timeOrder = timeOrder.Distinct().ToList();
-            timeOrder.Sort();
-            var sb = new StringBuilder();
-            foreach (var activityInfo in timeOrder.SelectMany(unixTime => activityLookupTable[unixTime]))
-            {
-                sb.AppendLine(activityInfo.ToString());
-            }
-
-            Debug.WriteLine("Finished ordering at: " + DateTime.Now);
-
-            File.WriteAllText(pathToOutputFile, sb.ToString());
-        }
-
+  
         #region Private Methods
 
         /// <summary>
@@ -219,7 +145,7 @@
                             ActivityId = info.ActivityId,
                             ArtifactId = artifactId,
                             ChangeId = info.ChangeId,
-                            Reviewer = info.Author,
+                            Reviewer = info.Reviewer,
                             Time = info.When
                         };
 
