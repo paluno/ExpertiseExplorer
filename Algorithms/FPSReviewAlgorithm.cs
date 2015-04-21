@@ -39,7 +39,7 @@ namespace Algorithms
                     // Find files that match at least with the first component
                     // Index is the ArtifactID, value is the similarity to the given file
                 similarFiles = repository.Artifacts
-                    .Where(artifact => artifact.Name.StartsWith(firstComponent) && artifact.ArtifactTypeId == (int)ArtifactTypeEnum.File)
+                    .Where(artifact => artifact.Name.StartsWith(firstComponent) && artifact.ArtifactTypeId == (int)ArtifactTypeEnum.File && artifact.RepositoryId == RepositoryId)
                     .ToDictionary(
                         artifact => artifact.ArtifactId, 
                         artifact => FileSimilarity(fileNameComponents, artifact.Name.Split('/'))

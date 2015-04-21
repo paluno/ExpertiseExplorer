@@ -12,7 +12,7 @@
 
     using ExpertiseExplorerCommon;
     using ExpertiseDB.Extensions;
-using System.Collections.Concurrent;
+    using System.Collections.Concurrent;
 
     public abstract class AlgorithmBase
     {
@@ -137,10 +137,10 @@ using System.Collections.Concurrent;
                     {
                         case 0:
                             return -1;
-                            
+
                         case 1:
                             return files.First().FilenameId;
-                            
+
                         default:
                             return -2;
                     }
@@ -247,7 +247,7 @@ using System.Collections.Concurrent;
                 repository.SaveChanges();
             }
         }
-        
+
         private void HandleRevision(Revision revision)
         {
             List<int> developerIds;
@@ -290,7 +290,7 @@ using System.Collections.Concurrent;
 
                 if (fileRevision.IsNew)
                     developerExpertise.IsFirstAuthor = true;
-                else 
+                else
                     developerExpertise.DeliveriesCount++;
 
                 repository.SaveChanges();
@@ -307,9 +307,10 @@ using System.Collections.Concurrent;
         private static object acquireArtifactLock(string artifactName)
         {
             Tuple<int, object> lockWithCounter = dictArtifactLocks.AddOrUpdate(
-                artifactName, 
-                new Tuple<int,object>(1, new object()),     // this is a new lock pair
-                delegate(string theName, Tuple<int,object> lockPair) {
+                artifactName,
+                new Tuple<int, object>(1, new object()),     // this is a new lock pair
+                delegate(string theName, Tuple<int, object> lockPair)
+                {
                     if (lockPair.Item1 > 0)
                         return new Tuple<int, object>(lockPair.Item1 + 1, lockPair.Item2);  // there are a number of reference already, everything's okay, just increase the counter
                     else
@@ -339,7 +340,7 @@ using System.Collections.Concurrent;
             );
 
             if (0 == remainingLock.Item1)    // nobody uses the lock anymore, we can delete it
-                lock(dictArtifactLocks)
+                lock (dictArtifactLocks)
                 {
                     if (dictArtifactLocks[artifactName].Item1 > 0)
                         return;     // the lock was recreated in between and must not be released
@@ -355,27 +356,33 @@ using System.Collections.Concurrent;
 
             var developerExpertise = repository.DeveloperExpertises.SingleOrDefault(
                 de => de.DeveloperId == developerId && de.Artifact.Name == FileName);
-            
+
             if (developerExpertise == null)
             {
                 Artifact artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
                 if (null == artifact)   // thread-safe artifact insertion
                 {
-                    lock(acquireArtifactLock(FileName))
+                    lock (acquireArtifactLock(FileName))
                     {
                         using (ExpertiseDBEntities freshRepository = new ExpertiseDBEntities())
                         {
                             artifact = freshRepository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
                             if (null == artifact)
+                            {
                                 artifact = new Artifact { ArtifactTypeId = artifactTypeId, Name = FileName, RepositoryId = RepositoryId };
-                            freshRepository.Artifacts.Add(artifact);
-                            freshRepository.SaveChanges();
+                                freshRepository.Artifacts.Add(artifact);
+                                freshRepository.SaveChanges();
+                            }
                         }
                     }
                     releaseArtifactLock(FileName);
 
                     artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId); // re-retrieve from other repository
                 }
+
+                // There is exactly one thread for each developer/artifact combination if this method was called from FPSAlgorithm. Therefore only one thread
+                // tries to create this specific DeveloperExpertise entry. Thus, no thread safety measures must be taken.
+                // If this method is called from LinkDeveloperAndArtifact or WeighedReviewCountAlgorithm, there is only one thread.
 
                 developerExpertise = repository.DeveloperExpertises.Add(
                     new DeveloperExpertise
