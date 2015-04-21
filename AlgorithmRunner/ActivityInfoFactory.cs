@@ -22,12 +22,12 @@ namespace AlgorithmRunner
         /// <summary>
         /// parses, filters and orders the bugzilla activity log respecting the specifics of Bugzilla
         /// </summary>
-        public void PrepareInputFromMozillaLog(string pathToOutputFile, bool overwrite = false)
+        public void PrepareInputFromMozillaLog(string pathToRawInputFile, bool overwrite = false)
         {
-            if (!overwrite && File.Exists(pathToOutputFile))
+            if (!overwrite && File.Exists(ActivityLogPath))
                 return;
 
-            var input = new StreamReader(ActivityLogPath);
+            var input = new StreamReader(pathToRawInputFile);
             string filteredInput;
             Debug.WriteLine("Starting parsing at: " + DateTime.Now);
             try
@@ -41,11 +41,11 @@ namespace AlgorithmRunner
 
             Debug.WriteLine("Finished parsing at: " + DateTime.Now);
 
-            File.WriteAllText(pathToOutputFile, filteredInput);
+            File.WriteAllText(ActivityLogPath, filteredInput);
 
             Debug.WriteLine("Starting ordering at: " + DateTime.Now);
 
-            ActivityInfoFactory factory = new ActivityInfoFactory(pathToOutputFile, AttachmentPath);
+            ActivityInfoFactory factory = new ActivityInfoFactory(ActivityLogPath, AttachmentPath);
             IEnumerable<ActivityInfo> list = (IEnumerable<ActivityInfo>)factory.parseReviewInfos();
 
             // ordering of & another filter pass on the activities
@@ -93,7 +93,7 @@ namespace AlgorithmRunner
 
             Debug.WriteLine("Finished ordering at: " + DateTime.Now);
 
-            File.WriteAllText(pathToOutputFile, sb.ToString());
+            File.WriteAllText(ActivityLogPath, sb.ToString());
         }
 
         public override IEnumerable<ReviewInfo> parseReviewInfos()

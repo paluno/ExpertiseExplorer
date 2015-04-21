@@ -4,6 +4,8 @@
 
     public class Program
     {
+        public enum ReviewSourceType { Bugzilla, Gerrit };
+
         public static void Main(string[] args)
         {
             log4net.Config.XmlConfigurator.Configure();
@@ -15,7 +17,7 @@
             }
 
             string sourceUrlIdentifier = args[0];
-            string reviewSourceType = args[1].ToLower();
+            ReviewSourceType reviewSourceType = (ReviewSourceType)Enum.Parse(typeof(ReviewSourceType), args[1], true);
             string basepath = args[2];
             string mode = args[3].ToLower();
 
@@ -104,11 +106,11 @@
                 
                     switch(reviewSourceType)
                     {
-                        case "mozilla":
-                            factory = new ActivityInfoFactory(basepath + "input.txt", basepath + @"CrawlerOutput\attachments.txt");
-                            ((ActivityInfoFactory)factory).PrepareInputFromMozillaLog(basepath + "input_final.txt", forceOverwrite);
+                        case ReviewSourceType.Bugzilla:
+                            factory = new ActivityInfoFactory(basepath + "input_final.txt", basepath + @"CrawlerOutput\attachments.txt");
+                            ((ActivityInfoFactory)factory).PrepareInputFromMozillaLog(basepath + "input.txt", forceOverwrite);
                             break;
-                        case "gerrit":
+                        case ReviewSourceType.Gerrit:
                             factory = new GerritReviewFactory(basepath + "input.csv");
                             break;
                         default:

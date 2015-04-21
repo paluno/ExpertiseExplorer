@@ -113,7 +113,7 @@
         /// <summary>
         /// removes supperreview strings and afterwards returns only lines that stll contain 'review+' or 'review-'
         /// </summary>
-        public static string ParseAndFilterInput(TextReader input)
+        internal static string ParseAndFilterInput(TextReader input)
         {
             StringBuilder result = new StringBuilder();
             string line;
