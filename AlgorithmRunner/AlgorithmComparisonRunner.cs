@@ -66,7 +66,7 @@
             Debug.WriteLine("Ending comparison at: " + DateTime.Now);
             Debug.WriteLine("Time: " + (DateTime.Now - starttime));
         }
-  
+
         #region Private Methods
 
         /// <summary>
@@ -105,7 +105,7 @@
                                 Console.WriteLine("Time of next item (use with resume): " + ActivityInfo.PDTDateTime2unixTime(info.When));
                                 Console.WriteLine("Stopping due to user request.");
 
-                                Log.Info("Stopping due to user request.");
+                                Log.Info("Stopping due to user request. Time of next item (use with resume): " + ActivityInfo.PDTDateTime2unixTime(info.When));
                                 return;
                             case ConsoleKey.S:
                                 Console.WriteLine("Now at: " + count);

@@ -17,7 +17,7 @@ namespace Algorithms
         public FPSReviewAlgorithm()
         {
             Guid = new Guid("F1C17EA9-81E8-4F2B-A08D-A2DBC056F36D");
-            Init();
+            Init(30);
         }
 
         public override void CalculateExpertiseForFile(string filename)

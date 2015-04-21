@@ -206,7 +206,7 @@ using System.Collections.Concurrent;
             }
         }
 
-        protected void Init()
+        protected void Init(int numberOfParallelTasks = NumberOfTasks)
         {
             using (var repository = new ExpertiseDBEntities())
             {
@@ -224,7 +224,7 @@ using System.Collections.Concurrent;
             RepositoryId = -1;
             SourceRepositoryId = -1;
 
-            TaskFactory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(NumberOfTasks));
+            TaskFactory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(numberOfParallelTasks));
         }
 
         private List<Revision> GetRevisionsFromSourceRepository()
