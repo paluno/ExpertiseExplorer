@@ -82,32 +82,43 @@ namespace Algorithms
                 }
             }
 
-            Parallel.ForEach(experiencedDevelopersIds, developerId =>
-            //foreach (int developerId in experiencedDevelopersIds)
+            List<Task> tasks = new List<Task>();
+            foreach (int developerId in experiencedDevelopersIds)
             {
-                using (var repository = new ExpertiseDBEntities())
-                {
-                    double developerFPSExpertiseValue =
-                        repository.DeveloperExpertiseValues
-                            .Include("DeveloperExpertise")
-                        // All WeighedReviewCount expertises of the developer for relevant files
-                            .Where(devExpValue => devExpValue.DeveloperExpertise.DeveloperId == developerId
-                                    && devExpValue.AlgorithmId == weighedReviewAlgorithmId
-                                    && //similarFiles.ContainsKey(devExpValue.DeveloperExpertise.ArtifactId)    // This might be very slow
-                                        devExpValue.DeveloperExpertise.Artifact.Name.StartsWith(firstComponent) // The same as for similarFiles, but can be translated to SQL
-                                    && devExpValue.DeveloperExpertise.Artifact.ArtifactTypeId == (int)ArtifactTypeEnum.File
-                                    )
-                            .ToArray()  // execute query, as otherwise LINQ wants to Aggregate, but throws an exception as it cannot
-                        // Sum up the file similarities weighed by the individual developer's review expertise with the files
-                            .Aggregate<DeveloperExpertiseValue, double>(0D, (accumulated, devExpValue) => accumulated + devExpValue.Value * similarFiles[devExpValue.DeveloperExpertise.ArtifactId]);
-
-                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, developerId, filename, ArtifactTypeEnum.File);
-                    DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
-                    devExpertiseValue.Value = developerFPSExpertiseValue;
-                    repository.SaveChanges();
-                }
+                tasks.Add(
+                    TaskFactory.StartNew(
+                        input => CalculateExpertiseForDeveloper((int)input, weighedReviewAlgorithmId, firstComponent, filename, similarFiles),
+                        developerId,
+                            TaskCreationOptions.AttachedToParent));
             }
-            );
+
+            Task.WaitAll(tasks.ToArray());
+        }
+
+        private void CalculateExpertiseForDeveloper(int developerId, int weighedReviewAlgorithmId, string firstComponent, string filename, Dictionary<int,double> similarFiles)
+        {
+            using (var repository = new ExpertiseDBEntities())
+            {
+                double developerFPSExpertiseValue =
+                    repository.DeveloperExpertiseValues
+                        .Include("DeveloperExpertise")
+                    // All WeighedReviewCount expertises of the developer for relevant files
+                        .Where(devExpValue => devExpValue.DeveloperExpertise.DeveloperId == developerId
+                                && devExpValue.AlgorithmId == weighedReviewAlgorithmId
+                                && //similarFiles.ContainsKey(devExpValue.DeveloperExpertise.ArtifactId)    // This might be very slow
+                                    devExpValue.DeveloperExpertise.Artifact.Name.StartsWith(firstComponent) // The same as for similarFiles, but can be translated to SQL
+                                && devExpValue.DeveloperExpertise.Artifact.ArtifactTypeId == (int)ArtifactTypeEnum.File
+                                )
+                        .ToArray()  // execute query, as otherwise LINQ wants to Aggregate, but throws an exception as it cannot
+                    // Sum up the file similarities weighed by the individual developer's review expertise with the files
+                        .Aggregate<DeveloperExpertiseValue, double>(0D, (accumulated, devExpValue) => accumulated + devExpValue.Value * similarFiles[devExpValue.DeveloperExpertise.ArtifactId]);
+
+                DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, developerId, filename, ArtifactTypeEnum.File);
+                DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
+                devExpertiseValue.Value = developerFPSExpertiseValue;
+                repository.SaveChanges();
+            }
+
         }
 
         /// <summary>

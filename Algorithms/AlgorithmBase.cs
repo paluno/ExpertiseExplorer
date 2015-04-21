@@ -20,7 +20,7 @@ using System.Collections.Concurrent;
 
         private const int NumberOfTasks = 5;
 
-        private TaskFactory taskFactory;
+        protected TaskFactory TaskFactory { get; private set; }
 
         public int AlgorithmId { get; protected set; }
 
@@ -56,7 +56,7 @@ using System.Collections.Concurrent;
                     continue;
 
                 tasks.Add(
-                    taskFactory.StartNew(
+                    TaskFactory.StartNew(
                         input => CalculateExpertiseForFile(input as string),
                         filename,
                             TaskCreationOptions.AttachedToParent));
@@ -224,7 +224,7 @@ using System.Collections.Concurrent;
             RepositoryId = -1;
             SourceRepositoryId = -1;
 
-            taskFactory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(NumberOfTasks));
+            TaskFactory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(NumberOfTasks));
         }
 
         private List<Revision> GetRevisionsFromSourceRepository()
