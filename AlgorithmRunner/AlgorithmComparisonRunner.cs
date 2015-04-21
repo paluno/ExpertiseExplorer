@@ -216,6 +216,7 @@
                     else
                     {
                         Log.Fatal(ae);
+                        Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + ActivityInfo.PDTDateTime2unixTime(info.When));
                         throw;
                     }
 
