@@ -52,6 +52,7 @@
     <Compile Include="ExpertiseCloudAlgorithm.cs" />
     <Compile Include="ExpertiseIntersectionAlgorithm.cs" />
     <Compile Include="FPSReviewAlgorithm.cs" />
+    <Compile Include="NameLockFactory.cs" />
     <Compile Include="WeighedReviewCountAlgorithm.cs" />
     <Compile Include="LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Line10RuleAlgorithm.cs" />

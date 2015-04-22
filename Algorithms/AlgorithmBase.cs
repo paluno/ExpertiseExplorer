@@ -297,58 +297,7 @@
             }
         }
 
-        /// <summary>
-        /// Stores locks for each artifact by artifact name. A counter exists for every artifact and the dicitionary empties itself again if 
-        /// the locks are not needed anymore. Access only through acquireArtifactLock and releaseArtifactLock!
-        /// </summary>
-        private static readonly ConcurrentDictionary<string, Tuple<int, object>> dictArtifactLocks = new ConcurrentDictionary<string, Tuple<int, object>>();
-        private static readonly ConcurrentDictionary<string, int> dictArtifactLockCounter = new ConcurrentDictionary<string, int>();
-
-        private static object acquireArtifactLock(string artifactName)
-        {
-            Tuple<int, object> lockWithCounter = dictArtifactLocks.AddOrUpdate(
-                artifactName,
-                new Tuple<int, object>(1, new object()),     // this is a new lock pair
-                delegate(string theName, Tuple<int, object> lockPair)
-                {
-                    if (lockPair.Item1 > 0)
-                        return new Tuple<int, object>(lockPair.Item1 + 1, lockPair.Item2);  // there are a number of reference already, everything's okay, just increase the counter
-                    else
-                        return lockPair;    // the lock was supposed to be deleted. Proceed with caution!
-                }
-            );
-
-            if (0 == lockWithCounter.Item1)    // deletion was in progress
-                lock (dictArtifactLocks)
-                {
-                    lockWithCounter = dictArtifactLocks.AddOrUpdate(
-                        artifactName,
-                        new Tuple<int, object>(1, new object()),     // this is a new lock pair, the old one was deleted already
-                        (theName, lockPair) => new Tuple<int, object>(lockPair.Item1 + 1, lockPair.Item2)   // it's okay even to increase a zero counter because "release" will check before deletion if at all
-                    );
-                }
-
-            return lockWithCounter.Item2;
-        }
-
-        private static void releaseArtifactLock(string artifactName)
-        {
-            Tuple<int, object> remainingLock = dictArtifactLocks.AddOrUpdate(
-                artifactName,
-                delegate(string theName) { throw new InvalidOperationException("A lock was released more often than retrieved"); },
-                (theName, lockPair) => new Tuple<int, object>(lockPair.Item1 - 1, lockPair.Item2)   // decrease counter
-            );
-
-            if (0 == remainingLock.Item1)    // nobody uses the lock anymore, we can delete it
-                lock (dictArtifactLocks)
-                {
-                    if (dictArtifactLocks[artifactName].Item1 > 0)
-                        return;     // the lock was recreated in between and must not be released
-
-                    Tuple<int, object> dummy;
-                    dictArtifactLocks.TryRemove(artifactName, out dummy);   // this always succeeds
-                }
-        }
+        private static NameLockFactory artifactLocks = new NameLockFactory();
 
         protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, string FileName, ArtifactTypeEnum artifactType)
         {
@@ -359,10 +308,13 @@
 
             if (developerExpertise == null)
             {
-                Artifact artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
+                Artifact artifact;
+
+                artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
+
                 if (null == artifact)   // thread-safe artifact insertion
                 {
-                    lock (acquireArtifactLock(FileName))
+                    lock (artifactLocks.acquireLock(FileName))
                     {
                         using (ExpertiseDBEntities freshRepository = new ExpertiseDBEntities())
                         {
@@ -375,7 +327,7 @@
                             }
                         }
                     }
-                    releaseArtifactLock(FileName);
+                    artifactLocks.releaseLock(FileName);
 
                     artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId); // re-retrieve from other repository
                 }
