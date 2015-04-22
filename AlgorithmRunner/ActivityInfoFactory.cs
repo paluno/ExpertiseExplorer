@@ -10,95 +10,18 @@ namespace AlgorithmRunner
 {
     class ActivityInfoFactory : ReviewInfoFactory
     {
-        public string ActivityLogPath { get; private set; }
+
         public string AttachmentPath { get; private set; }
 
         public ActivityInfoFactory(string pathToActivityLog, string pathToAttachments)
+            : base(pathToActivityLog)
         {
-            ActivityLogPath = pathToActivityLog;
             AttachmentPath = pathToAttachments;
-        }
-
-        /// <summary>
-        /// parses, filters and orders the bugzilla activity log respecting the specifics of Bugzilla
-        /// </summary>
-        public void PrepareInputFromMozillaLog(string pathToRawInputFile, bool overwrite = false)
-        {
-            if (!overwrite && File.Exists(ActivityLogPath))
-                return;
-
-            var input = new StreamReader(pathToRawInputFile);
-            string filteredInput;
-            Debug.WriteLine("Starting parsing at: " + DateTime.Now);
-            try
-            {
-                filteredInput = ActivityInfo.ParseAndFilterInput(input);
-            }
-            finally
-            {
-                input.Close();
-            }
-
-            Debug.WriteLine("Finished parsing at: " + DateTime.Now);
-
-            File.WriteAllText(ActivityLogPath, filteredInput);
-
-            Debug.WriteLine("Starting ordering at: " + DateTime.Now);
-
-            ActivityInfoFactory factory = new ActivityInfoFactory(ActivityLogPath, AttachmentPath);
-            IEnumerable<ActivityInfo> list = (IEnumerable<ActivityInfo>)factory.parseReviewInfos();
-
-            // ordering of & another filter pass on the activities
-            var mercurialTransferDate = new DateTime(2007, 3, 22, 18, 29, 0); // date of Mozilla's move to hg
-            var endOfHgDump = new DateTime(2013, 3, 8, 16, 15, 44); // last date of the hg dump
-            var timeOrder = new List<long>();
-            var activityLookupTable = new Dictionary<long, List<ActivityInfo>>();
-            foreach (var activityInfo in list)
-            {
-                // filter if not review
-                if (!activityInfo.IsReview)
-                    continue;
-
-                // filter if not in examined window of time
-                if (activityInfo.When < mercurialTransferDate || activityInfo.When > endOfHgDump)
-                    continue;
-
-                IList<String> involvedFiles = activityInfo.Filenames;
-
-                // filter if there are no files
-                if (!involvedFiles.Any())
-                    continue;
-
-                // filter if there is only one file with no name 
-                if (involvedFiles.Count == 1 && involvedFiles[0] == string.Empty)
-                    continue;
-
-                var key = activityInfo.UnixTime;
-                timeOrder.Add(key);
-
-                if (!activityLookupTable.ContainsKey(key))
-                    activityLookupTable.Add(key, new List<ActivityInfo>());
-
-                activityLookupTable[key].Add(activityInfo);
-            }
-
-            // needed b/c bugzilla logs are ordered according to bugid, not datetime
-            timeOrder = timeOrder.Distinct().ToList();
-            timeOrder.Sort();
-            var sb = new StringBuilder();
-            foreach (var activityInfo in timeOrder.SelectMany(unixTime => activityLookupTable[unixTime]))
-            {
-                sb.AppendLine(activityInfo.ToString());
-            }
-
-            Debug.WriteLine("Finished ordering at: " + DateTime.Now);
-
-            File.WriteAllText(ActivityLogPath, sb.ToString());
         }
 
         public override IEnumerable<ReviewInfo> parseReviewInfos()
         {
-            return GetActivityInfoFromFile(ActivityLogPath, AttachmentPath);
+            return GetActivityInfoFromFile(InputFilePath, AttachmentPath);
         }
 
         private static IEnumerable<ActivityInfo> GetActivityInfoFromFile(string pathToInputFile, string pathToAttachments)
@@ -140,6 +63,27 @@ namespace AlgorithmRunner
             Debug.WriteLine("Finished ActivityInfo parsing at: " + DateTime.Now);
 
             return result;
+        }
+
+        protected override void PrefilterRawInput(string pathToRawInputFile)
+        {
+            var input = new StreamReader(pathToRawInputFile);
+            string filteredInput;
+            Debug.WriteLine("Starting parsing at: " + DateTime.Now);
+            try
+            {
+                filteredInput = ActivityInfo.ParseAndFilterInput(input);
+            }
+            finally
+            {
+                input.Close();
+            }
+
+            Debug.WriteLine("Finished parsing at: " + DateTime.Now);
+
+            File.WriteAllText(InputFilePath, filteredInput);
+
+            Debug.WriteLine("Starting ordering at: " + DateTime.Now);
         }
     }
 }

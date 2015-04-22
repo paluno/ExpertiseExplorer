@@ -33,11 +33,12 @@
 
             var filenameId = GetFilenameIdFromFilenameApproximation(filename);
             if (filenameId < 0)
-                throw new FileNotFoundException(string.Format("Filename {0} not found", filename));
+            {
+                ClearExpertiseForAllDevelopers(filename);
+                return;
+            }
 
-            var artifactId = GetArtifactIdFromArtifactnameApproximation(filename);
-            if (artifactId < 0)
-                throw new FileNotFoundException(string.Format("Artifact {0} not found", filename));
+            var artifactId = FindOrCreateFileArtifactIdFromArtifactnameApproximation(filename);
 
             var orderedAuthorIds = new List<int>();
             stopwatch.Start();
@@ -46,7 +47,10 @@
                 var authors = repository.GetUsersOfRevisionsOfBefore(filenameId, MaxDateTime);
 
                 if (authors.Count == 0)
-                    throw new FileNotFoundException(string.Format("No revisions of {0} before {1} found", filename, MaxDateTime));
+                {
+                    ClearExpertiseForAllDevelopers(filename);
+                    return;
+                }
 
                 var alreadyIn = new HashSet<string>();
                 foreach (var author in authors)

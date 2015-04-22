@@ -80,6 +80,32 @@
             SetDateTimeFromUnixTime(long.Parse(fields[3]));
         }
 
+        private readonly DateTime mercurialTransferDate = new DateTime(2007, 3, 22, 18, 29, 0); // date of Mozilla's move to hg
+        private readonly DateTime endOfHgDump = new DateTime(2013, 3, 8, 16, 15, 44); // last date of the hg dump
+
+        public override bool isValid()
+        {
+            // filter if not review
+            if (IsReview)
+                return false;
+
+            // filter if not in examined window of time
+            if (When < mercurialTransferDate || When > endOfHgDump)
+                return false;
+
+            IList<String> involvedFiles = Filenames;
+
+            // filter if there are no files
+            if (!involvedFiles.Any())
+                return false;
+
+            // filter if there is only one file with no name 
+            if (involvedFiles.Count == 1 && involvedFiles[0] == string.Empty)
+                return false;
+
+            return true;
+        }
+
         public static DateTime UnixTime2PDTDateTime(long unixTime)
         {
             return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
@@ -104,10 +130,7 @@
 
         public override string ToString()
         {
-            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            var originalUtc = When.Add(new TimeSpan(0, 7, 0, 0));
-            var secondspassed = Convert.ToInt64((originalUtc - epoch).TotalSeconds);
-            return BugId + ";" + ActivityId + ";" + Reviewer + ";" + secondspassed + ";" + What + ";" + Removed + ";" + Added;
+            return base.ToString() + ";" + What + ";" + Removed + ";" + Added;
         }
 
         /// <summary>

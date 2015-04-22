@@ -121,7 +121,7 @@
 
         public List<Revision> GetRevisionsFromSourceRepositoryBetween(int sourceRepositoryId, DateTime start, DateTime end)
         {
-            return Revisions.Where(r => r.SourceRepositoryId == sourceRepositoryId && r.Time > start && r.Time <= end).ToList();
+            return Revisions.Where(r => r.SourceRepositoryId == sourceRepositoryId && r.Time >= start && r.Time < end).ToList();
         }
 
         public string GetUserForLastRevisionOfBefore(int filenameId, DateTime before)

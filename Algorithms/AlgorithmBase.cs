@@ -67,6 +67,21 @@
             Log.Info(GetType() + " - " + stopwatch.Elapsed);
         }
 
+        protected void ClearExpertiseForAllDevelopers(string filename)
+        {
+            using (var entities = new ExpertiseDBEntities())
+            {
+                Artifact artifact = FindOrCreateArtifact(entities, filename, ExpertiseExplorerCommon.ArtifactTypeEnum.File);
+                foreach (DeveloperExpertise expertise in artifact.DeveloperExpertises)
+                {
+                    IEnumerator<DeveloperExpertiseValue> iteratorOnValuesToClear = expertise.DeveloperExpertiseValues.Where(dev => dev.AlgorithmId == AlgorithmId).GetEnumerator();
+                    while(iteratorOnValuesToClear.MoveNext())
+                        expertise.DeveloperExpertiseValues.Remove(iteratorOnValuesToClear.Current);
+                }
+                entities.SaveChanges();
+            }
+        }
+
         public void BuildConnectionsFromSourceUrl(string sourceUrl, bool failIfAlreadyExists = true)
         {
             InitIdsFromDbForSourceUrl(sourceUrl, failIfAlreadyExists);
@@ -150,7 +165,7 @@
             }
         }
 
-        public int GetArtifactIdFromArtifactnameApproximation(string artifactname)
+        public int FindOrCreateFileArtifactIdFromArtifactnameApproximation(string artifactname)
         {
             Debug.Assert(RepositoryId > -1, "Initialize RepositoryId first");
 
@@ -159,18 +174,9 @@
                 var artifact = repository.Artifacts.SingleOrDefault(a => a.Name == artifactname && a.RepositoryId == RepositoryId);
                 if (artifact == null)
                 {
-                    var artifacts = repository.Artifacts.Where(a => a.Name.EndsWith(artifactname) && a.RepositoryId == RepositoryId).ToList();
-                    switch (artifacts.Count)
-                    {
-                        case 0:
-                            return -1;
-
-                        case 1:
-                            return artifacts.First().ArtifactId;
-
-                        default:
-                            return -2;
-                    }
+                    artifact = repository.Artifacts.SingleOrDefault(a => a.Name.EndsWith(artifactname) && a.RepositoryId == RepositoryId);
+                    if (null == artifact)
+                        artifact = FindOrCreateArtifact(repository, artifactname, ArtifactTypeEnum.File);
                 }
 
                 return artifact.ArtifactId;
@@ -301,36 +307,12 @@
 
         protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, string FileName, ArtifactTypeEnum artifactType)
         {
-            var artifactTypeId = (int)artifactType;
-
             var developerExpertise = repository.DeveloperExpertises.SingleOrDefault(
                 de => de.DeveloperId == developerId && de.Artifact.Name == FileName);
 
             if (developerExpertise == null)
             {
-                Artifact artifact;
-
-                artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
-
-                if (null == artifact)   // thread-safe artifact insertion
-                {
-                    lock (artifactLocks.acquireLock(FileName))
-                    {
-                        using (ExpertiseDBEntities freshRepository = new ExpertiseDBEntities())
-                        {
-                            artifact = freshRepository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
-                            if (null == artifact)
-                            {
-                                artifact = new Artifact { ArtifactTypeId = artifactTypeId, Name = FileName, RepositoryId = RepositoryId };
-                                freshRepository.Artifacts.Add(artifact);
-                                freshRepository.SaveChanges();
-                            }
-                        }
-                    }
-                    artifactLocks.releaseLock(FileName);
-
-                    artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId); // re-retrieve from other repository
-                }
+                Artifact artifact = FindOrCreateArtifact(repository, FileName, artifactType);
 
                 // There is exactly one thread for each developer/artifact combination if this method was called from FPSAlgorithm. Therefore only one thread
                 // tries to create this specific DeveloperExpertise entry. Thus, no thread safety measures must be taken.
@@ -345,6 +327,32 @@
             }
 
             return developerExpertise;
+        }
+
+        protected Artifact FindOrCreateArtifact(ExpertiseDBEntities repository, string FileName, ArtifactTypeEnum artifactType)
+        {
+            Artifact artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
+
+            if (null == artifact)   // thread-safe artifact insertion
+            {
+                lock (artifactLocks.acquireLock(FileName))
+                {
+                    using (ExpertiseDBEntities freshRepository = new ExpertiseDBEntities())
+                    {
+                        artifact = freshRepository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
+                        if (null == artifact)
+                        {
+                            artifact = new Artifact { ArtifactTypeId = (int)artifactType, Name = FileName, RepositoryId = RepositoryId };
+                            freshRepository.Artifacts.Add(artifact);
+                            freshRepository.SaveChanges();
+                        }
+                    }
+                }
+                artifactLocks.releaseLock(FileName);
+
+                artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId); // re-retrieve from other repository
+            }
+            return artifact;
         }
 
         protected DeveloperExpertiseValue FindOrCreateDeveloperExpertiseValue(ExpertiseDBEntities repository, DeveloperExpertise developerExpertise)

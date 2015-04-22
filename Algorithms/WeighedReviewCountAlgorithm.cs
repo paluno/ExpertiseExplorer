@@ -30,7 +30,6 @@ namespace Algorithms
 
             foreach(string reviewedFileName in involvedFiles)
             {
-                int idOfReviewedArtifact = GetArtifactIdFromArtifactnameApproximation(reviewedFileName);
                 using (var repository = new ExpertiseDBEntities())
                 {
                     DeveloperExpertise devExpertise = FindOrCreateDeveloperExpertise(repository, idReviewer, reviewedFileName, ArtifactTypeEnum.File);

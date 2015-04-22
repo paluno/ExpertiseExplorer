@@ -18,11 +18,7 @@
 
         public override void CalculateExpertiseForFile(string filename)
         {
-            var artifactId = GetArtifactIdFromArtifactnameApproximation(filename);
-            if (artifactId < 0)
-            {
-                throw new FileNotFoundException(string.Format("Artifact {0} not found", filename));
-            }
+            var artifactId = FindOrCreateFileArtifactIdFromArtifactnameApproximation(filename);
 
             using (var repository = new ExpertiseDBEntities())
             {

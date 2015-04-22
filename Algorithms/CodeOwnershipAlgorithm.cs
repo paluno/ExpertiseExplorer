@@ -34,20 +34,27 @@
 
             var filenameId = GetFilenameIdFromFilenameApproximation(filename);
             if (filenameId < 0)
-                throw new FileNotFoundException(string.Format("Filename {0} not found", filename));
+            {
+                ClearExpertiseForAllDevelopers(filename);
+                return;
+            }
 
             List<FileRevision> fileRevisions;
             stopwatch.Start();
             using (var repository = new ExpertiseDBEntities())
             {
-                fileRevisions = repository.FileRevisions.Include(fr => fr.Revision).Where(f => f.FilenameId == filenameId && f.Revision.Time <= MaxDateTime).OrderBy(f => f.Revision.Time).AsNoTracking().ToList();
+                fileRevisions = repository.FileRevisions.Include(fr => fr.Revision).Where(f => f.FilenameId == filenameId && f.Revision.Time < MaxDateTime).OrderBy(f => f.Revision.Time).AsNoTracking().ToList();
             }
 
             stopwatch.Stop();
             Log.Info(GetType() + " - fileRevisions - " + stopwatch.Elapsed);
 
             if (fileRevisions.Count == 0)
-                throw new FileNotFoundException(string.Format("LastRevision for {0} not found", filename));
+            {
+                // no file revisions yet => no prior changes => nobody knows anything about the file
+                ClearExpertiseForAllDevelopers(filename);
+                return;
+            }
 
             // first author is handles seperately
             var added = fileRevisions[0].LinesAdded;
@@ -66,9 +73,7 @@
             computedsize = Math.Abs(minsize);
 
             // second pass to compute the actual ownership
-            var artifactId = GetArtifactIdFromArtifactnameApproximation(filename);
-            if (artifactId < 0)
-                throw new FileNotFoundException(string.Format("Artifact {0} not found", filename));
+            var artifactId = FindOrCreateFileArtifactIdFromArtifactnameApproximation(filename);
 
             var developerLookup = new Dictionary<string, DeveloperExpertiseValue>();
             stopwatch.Start();

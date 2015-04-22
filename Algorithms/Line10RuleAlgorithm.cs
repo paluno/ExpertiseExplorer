@@ -28,33 +28,34 @@
         {
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
-            var stopwatch = new Stopwatch();
 
-            var filenameId = GetFilenameIdFromFilenameApproximation(filename);
+            int artifactId;
+            int lastDeveloperId;
+            int filenameId = GetFilenameIdFromFilenameApproximation(filename);
             if (filenameId < 0)
-                throw new FileNotFoundException(string.Format("Filename {0} not found", filename));
+            {
+                ClearExpertiseForAllDevelopers(filename);
+                return;
+            }
 
-            var artifactId = GetArtifactIdFromArtifactnameApproximation(filename);
+            artifactId = FindOrCreateFileArtifactIdFromArtifactnameApproximation(filename);
             if (artifactId < 0)
                 throw new FileNotFoundException(string.Format("Artifact {0} not found", filename));
 
             string lastUser;
-            stopwatch.Start();
             using (var entities = new ExpertiseDBEntities())
             {
                 lastUser = entities.GetUserForLastRevisionOfBefore(filenameId, MaxDateTime);
+
+                if (lastUser == null)
+                    throw new FileNotFoundException(string.Format("LastRevision for {0} not found", filename));
+
+                lastDeveloperId = entities.Developers.Where(d => d.Name == lastUser && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId).First();
             }
 
-            stopwatch.Stop();
-            Log.Info(GetType() + " - GetUserForLastRevisionOfBefore() - " + stopwatch.Elapsed);
 
-            if (lastUser == null)
-                throw new FileNotFoundException(string.Format("LastRevision for {0} not found", filename));
-
-            stopwatch.Start();
             using (var entities = new ExpertiseDBEntities())
             {
-                var lastDeveloperId = entities.Developers.Where(d => d.Name == lastUser && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId).First();
 
                 var developerIds = entities.DeveloperExpertises.Where(de => de.ArtifactId == artifactId && de.Inferred == false).Select(de => de.DeveloperId).Distinct().ToList();
                 foreach (var developerId in developerIds)
@@ -66,17 +67,14 @@
 
                     // reset all connected developer's expertise to 0
                     expertiseValue.Value = 0f;
-                    
+
                     // except of the last one's who did a modification to the artifact
                     if (developerId == lastDeveloperId)
                         expertiseValue.Value = 1f;
                 }
-                
+
                 entities.SaveChanges();
             }
-
-            stopwatch.Stop();
-            Log.Info(GetType() + " - SaveChanges() - " + stopwatch.Elapsed);
         }
     }
 }
