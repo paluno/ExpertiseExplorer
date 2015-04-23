@@ -59,7 +59,7 @@ namespace AlgorithmRunner
 
         protected virtual void PrefilterRawInput(string pathToRawInputFile)
         {
-            File.Copy(pathToRawInputFile, InputFilePath);
+            File.Copy(pathToRawInputFile, InputFilePath, true);
         }
     }
 }
