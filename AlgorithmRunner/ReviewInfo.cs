@@ -18,5 +18,14 @@ namespace AlgorithmRunner
 
         public virtual IList<String> Filenames { get; set; }
 
+        public abstract bool isValid();
+
+        public override string ToString()
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var originalUtc = When.Add(new TimeSpan(0, 7, 0, 0));
+            var secondspassed = Convert.ToInt64((originalUtc - epoch).TotalSeconds);
+            return ChangeId + ";" + ActivityId + ";" + Reviewer + ";" + secondspassed;
+        }
     }
 }

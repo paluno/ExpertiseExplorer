@@ -57,6 +57,7 @@
     <Compile Include="FPS\VCSDirectory.cs" />
     <Compile Include="FPS\VCSFile.cs" />
     <Compile Include="FPS\VCSObject.cs" />
+    <Compile Include="NameLockFactory.cs" />
     <Compile Include="WeighedReviewCountAlgorithm.cs" />
     <Compile Include="LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Line10RuleAlgorithm.cs" />

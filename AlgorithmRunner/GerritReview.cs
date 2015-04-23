@@ -8,6 +8,8 @@ namespace AlgorithmRunner
 {
     class GerritReview : ReviewInfo
     {
+        public string RevisionId { get; private set; }
+
         public GerritReview(string reviewLine)
         {
             string[] reviewValues = reviewLine.Split(';');
@@ -16,12 +18,23 @@ namespace AlgorithmRunner
             When = DateTime.Parse(reviewValues[2]);
             Reviewer = reviewValues[8];
             Filenames = reviewValues[6].Split(',').Select(filenameWithLineNumbers => parseFilename(filenameWithLineNumbers)).ToList();
-            ActivityId = reviewValues[5].GetHashCode(); // revisionId
+            RevisionId = reviewValues[5];
+            ActivityId = reviewValues[5].GetHashCode();
         }
 
         private string parseFilename(string filenameWithLineNumbers)
         {
             return filenameWithLineNumbers.Split(':')[0];
+        }
+
+        public override bool isValid()
+        {
+            return true;
+        }
+
+        public override string ToString()
+        {
+            return ";" + ChangeId + ";" + When + ";;;" + RevisionId + ";" + string.Join(",", Filenames) + ";;" + Reviewer;
         }
     }
 }

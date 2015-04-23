@@ -136,9 +136,7 @@
 
                     foreach (var involvedFile in involvedFiles)
                     {
-                        int artifactId = Algorithms[0].GetArtifactIdFromArtifactnameApproximation(involvedFile);
-                        if (artifactId < 0)
-                            throw new FileNotFoundException(string.Format("Artifact {0} not found", involvedFile));
+                        int artifactId = Algorithms[0].FindOrCreateFileArtifactIdFromArtifactnameApproximation(involvedFile);
 
                         ActualReviewer actualReviewer = new ActualReviewer
                         {

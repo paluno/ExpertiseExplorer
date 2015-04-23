@@ -67,6 +67,21 @@
             Log.Info(GetType() + " - " + stopwatch.Elapsed);
         }
 
+        protected void ClearExpertiseForAllDevelopers(string filename)
+        {
+            using (var entities = new ExpertiseDBEntities())
+            {
+                Artifact artifact = FindOrCreateArtifact(entities, filename, ExpertiseExplorerCommon.ArtifactTypeEnum.File);
+                foreach (DeveloperExpertise expertise in artifact.DeveloperExpertises)
+                {
+                    IEnumerator<DeveloperExpertiseValue> iteratorOnValuesToClear = expertise.DeveloperExpertiseValues.Where(dev => dev.AlgorithmId == AlgorithmId).GetEnumerator();
+                    while(iteratorOnValuesToClear.MoveNext())
+                        expertise.DeveloperExpertiseValues.Remove(iteratorOnValuesToClear.Current);
+                }
+                entities.SaveChanges();
+            }
+        }
+
         public void BuildConnectionsFromSourceUrl(string sourceUrl, bool failIfAlreadyExists = true)
         {
             InitIdsFromDbForSourceUrl(sourceUrl, failIfAlreadyExists);
@@ -150,7 +165,7 @@
             }
         }
 
-        public int GetArtifactIdFromArtifactnameApproximation(string artifactname)
+        public int FindOrCreateFileArtifactIdFromArtifactnameApproximation(string artifactname)
         {
             Debug.Assert(RepositoryId > -1, "Initialize RepositoryId first");
 
@@ -159,18 +174,9 @@
                 var artifact = repository.Artifacts.SingleOrDefault(a => a.Name == artifactname && a.RepositoryId == RepositoryId);
                 if (artifact == null)
                 {
-                    var artifacts = repository.Artifacts.Where(a => a.Name.EndsWith(artifactname) && a.RepositoryId == RepositoryId).ToList();
-                    switch (artifacts.Count)
-                    {
-                        case 0:
-                            return -1;
-
-                        case 1:
-                            return artifacts.First().ArtifactId;
-
-                        default:
-                            return -2;
-                    }
+                    artifact = repository.Artifacts.SingleOrDefault(a => a.Name.EndsWith(artifactname) && a.RepositoryId == RepositoryId);
+                    if (null == artifact)
+                        artifact = FindOrCreateArtifact(repository, artifactname, ArtifactTypeEnum.File);
                 }
 
                 return artifact.ArtifactId;
@@ -297,88 +303,16 @@
             }
         }
 
-        /// <summary>
-        /// Stores locks for each artifact by artifact name. A counter exists for every artifact and the dicitionary empties itself again if 
-        /// the locks are not needed anymore. Access only through acquireArtifactLock and releaseArtifactLock!
-        /// </summary>
-        private static readonly ConcurrentDictionary<string, Tuple<int, object>> dictArtifactLocks = new ConcurrentDictionary<string, Tuple<int, object>>();
-        private static readonly ConcurrentDictionary<string, int> dictArtifactLockCounter = new ConcurrentDictionary<string, int>();
-
-        private static object acquireArtifactLock(string artifactName)
-        {
-            Tuple<int, object> lockWithCounter = dictArtifactLocks.AddOrUpdate(
-                artifactName,
-                new Tuple<int, object>(1, new object()),     // this is a new lock pair
-                delegate(string theName, Tuple<int, object> lockPair)
-                {
-                    if (lockPair.Item1 > 0)
-                        return new Tuple<int, object>(lockPair.Item1 + 1, lockPair.Item2);  // there are a number of reference already, everything's okay, just increase the counter
-                    else
-                        return lockPair;    // the lock was supposed to be deleted. Proceed with caution!
-                }
-            );
-
-            if (0 == lockWithCounter.Item1)    // deletion was in progress
-                lock (dictArtifactLocks)
-                {
-                    lockWithCounter = dictArtifactLocks.AddOrUpdate(
-                        artifactName,
-                        new Tuple<int, object>(1, new object()),     // this is a new lock pair, the old one was deleted already
-                        (theName, lockPair) => new Tuple<int, object>(lockPair.Item1 + 1, lockPair.Item2)   // it's okay even to increase a zero counter because "release" will check before deletion if at all
-                    );
-                }
-
-            return lockWithCounter.Item2;
-        }
-
-        private static void releaseArtifactLock(string artifactName)
-        {
-            Tuple<int, object> remainingLock = dictArtifactLocks.AddOrUpdate(
-                artifactName,
-                delegate(string theName) { throw new InvalidOperationException("A lock was released more often than retrieved"); },
-                (theName, lockPair) => new Tuple<int, object>(lockPair.Item1 - 1, lockPair.Item2)   // decrease counter
-            );
-
-            if (0 == remainingLock.Item1)    // nobody uses the lock anymore, we can delete it
-                lock (dictArtifactLocks)
-                {
-                    if (dictArtifactLocks[artifactName].Item1 > 0)
-                        return;     // the lock was recreated in between and must not be released
-
-                    Tuple<int, object> dummy;
-                    dictArtifactLocks.TryRemove(artifactName, out dummy);   // this always succeeds
-                }
-        }
+        private static NameLockFactory artifactLocks = new NameLockFactory();
 
         protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, string FileName, ArtifactTypeEnum artifactType)
         {
-            var artifactTypeId = (int)artifactType;
-
             var developerExpertise = repository.DeveloperExpertises.SingleOrDefault(
                 de => de.DeveloperId == developerId && de.Artifact.Name == FileName);
 
             if (developerExpertise == null)
             {
-                Artifact artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
-                if (null == artifact)   // thread-safe artifact insertion
-                {
-                    lock (acquireArtifactLock(FileName))
-                    {
-                        using (ExpertiseDBEntities freshRepository = new ExpertiseDBEntities())
-                        {
-                            artifact = freshRepository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
-                            if (null == artifact)
-                            {
-                                artifact = new Artifact { ArtifactTypeId = artifactTypeId, Name = FileName, RepositoryId = RepositoryId };
-                                freshRepository.Artifacts.Add(artifact);
-                                freshRepository.SaveChanges();
-                            }
-                        }
-                    }
-                    releaseArtifactLock(FileName);
-
-                    artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId); // re-retrieve from other repository
-                }
+                Artifact artifact = FindOrCreateArtifact(repository, FileName, artifactType);
 
                 // There is exactly one thread for each developer/artifact combination if this method was called from FPSAlgorithm. Therefore only one thread
                 // tries to create this specific DeveloperExpertise entry. Thus, no thread safety measures must be taken.
@@ -393,6 +327,32 @@
             }
 
             return developerExpertise;
+        }
+
+        protected Artifact FindOrCreateArtifact(ExpertiseDBEntities repository, string FileName, ArtifactTypeEnum artifactType)
+        {
+            Artifact artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
+
+            if (null == artifact)   // thread-safe artifact insertion
+            {
+                lock (artifactLocks.acquireLock(FileName))
+                {
+                    using (ExpertiseDBEntities freshRepository = new ExpertiseDBEntities())
+                    {
+                        artifact = freshRepository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId);
+                        if (null == artifact)
+                        {
+                            artifact = new Artifact { ArtifactTypeId = (int)artifactType, Name = FileName, RepositoryId = RepositoryId };
+                            freshRepository.Artifacts.Add(artifact);
+                            freshRepository.SaveChanges();
+                        }
+                    }
+                }
+                artifactLocks.releaseLock(FileName);
+
+                artifact = repository.Artifacts.SingleOrDefault(a => a.Name == FileName && a.RepositoryId == RepositoryId); // re-retrieve from other repository
+            }
+            return artifact;
         }
 
         protected DeveloperExpertiseValue FindOrCreateDeveloperExpertiseValue(ExpertiseDBEntities repository, DeveloperExpertise developerExpertise)

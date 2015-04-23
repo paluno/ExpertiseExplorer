@@ -2,7 +2,7 @@
 {
     public class ActualReviewersGrouped
     {
-        public int BugId { get; set; }
+        public string ChangeId { get; set; }
 
         public int Count { get; set; }
     }

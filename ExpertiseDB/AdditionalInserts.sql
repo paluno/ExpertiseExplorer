@@ -68,7 +68,7 @@ CREATE PROCEDURE `GetUserForLastRevisionOfBefore`(IN filenameid int, IN beforeDa
 SELECT User FROM FileRevisions
 JOIN Revisions
 ON Revisions.revisionid = FileRevisions.revisionid
-WHERE FileRevisions.filenameid = filenameid and time <= beforeDatetime
+WHERE FileRevisions.filenameid = filenameid and time < beforeDatetime
 ORDER BY time DESC
 LIMIT 1;
 
@@ -86,7 +86,7 @@ CREATE PROCEDURE `GetUsersOfRevisionsOfBefore`(IN filenameid int, IN beforeDatet
 SELECT User FROM FileRevisions
 JOIN Revisions
 ON Revisions.revisionid = FileRevisions.revisionid
-WHERE FileRevisions.filenameid = filenameid and time <= beforeDatetime
+WHERE FileRevisions.filenameid = filenameid and time < beforeDatetime
 ORDER BY time DESC;
 
 COMMIT;

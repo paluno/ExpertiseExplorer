@@ -99,19 +99,58 @@ namespace Algorithms
         {
             using (var repository = new ExpertiseDBEntities())
             {
+                    // Surprisingly, this code is slower than Entity Framework's
+                IDictionary<int, double> dictWeighedReviewValue;
+                using (IDbConnection con = repository.Database.Connection)
+                {
+                    con.Open();
+                    using (IDbCommand com = con.CreateCommand())
+                    {
+                        com.CommandText = "SELECT ArtifactId,Value " +
+                //            "FROM DeveloperExpertiseValues dev " +
+                //            "INNER JOIN DeveloperExpertises de ON de.DeveloperExpertiseId = dev.DeveloperExpertiseId " +
+                //            "INNER JOIN Artifacts a ON de.ArtifactId = a.ArtifactId " +
+                //            "WHERE a.RepositoryId=@RepositoryId " +
+                //            "AND de.DeveloperId=@DeveloperId " +
+                //            "AND a.ArtifactTypeId=@ArtifactTypeId " +
+                //            "AND dev.AlgorithmId=@AlgorithmId " +
+                //            "AND a.Name LIKE @FileNameStart";
+                              "FROM ArtifactExpertiseValues " +
+                            "WHERE RepositoryId=@RepositoryId " +
+                            "AND DeveloperId=@DeveloperId " +
+                            "AND AlgorithmId=@AlgorithmId " +
+                            "AND Name LIKE @FileNameStart";
+
+
+
+                        com.addDBParameter("@RepositoryId", DbType.Int32, RepositoryId);
+                        com.addDBParameter("@DeveloperId", DbType.Int32, developerId);
+//                        com.addDBParameter("@ArtifactTypeId", DbType.Int32, ArtifactTypeEnum.File);
+                        com.addDBParameter("@AlgorithmId", DbType.Int32, weighedReviewAlgorithmId);
+                        com.addDBParameter("@FileNameStart", DbType.String, firstComponent + "%");
+
+                        DataTable dtWeighedReviewValues = new DataTable();
+                        dtWeighedReviewValues.Load(com.ExecuteReader());
+                        dictWeighedReviewValue = dtWeighedReviewValues.Rows.OfType<DataRow>().ToDictionary(row => (int)row["ArtifactId"], row => (double)row["Value"]);
+                    }
+                }
+
                 double developerFPSExpertiseValue =
-                    repository.DeveloperExpertiseValues
-                        .Include("DeveloperExpertise")
-                    // All WeighedReviewCount expertises of the developer for relevant files
-                        .Where(devExpValue => devExpValue.DeveloperExpertise.DeveloperId == developerId
-                                && devExpValue.AlgorithmId == weighedReviewAlgorithmId
-                                && //similarFiles.ContainsKey(devExpValue.DeveloperExpertise.ArtifactId)    // This might be very slow
-                                    devExpValue.DeveloperExpertise.Artifact.Name.StartsWith(firstComponent) // The same as for similarFiles, but can be translated to SQL
-                                && devExpValue.DeveloperExpertise.Artifact.ArtifactTypeId == (int)ArtifactTypeEnum.File
-                                )
-                        .ToArray()  // execute query, as otherwise LINQ wants to Aggregate, but throws an exception as it cannot
-                    // Sum up the file similarities weighed by the individual developer's review expertise with the files
-                        .Aggregate<DeveloperExpertiseValue, double>(0D, (accumulated, devExpValue) => accumulated + devExpValue.Value * similarFiles[devExpValue.DeveloperExpertise.ArtifactId]);
+                    //repository.DeveloperExpertiseValues
+                    //    .Include("DeveloperExpertise")
+                    //// All WeighedReviewCount expertises of the developer for relevant files
+                    //    .Where(devExpValue => devExpValue.DeveloperExpertise.DeveloperId == developerId
+                    //            && devExpValue.AlgorithmId == weighedReviewAlgorithmId
+                    //            && //similarFiles.ContainsKey(devExpValue.DeveloperExpertise.ArtifactId)    // This might be very slow
+                    //                devExpValue.DeveloperExpertise.Artifact.Name.StartsWith(firstComponent) // The same as for similarFiles, but can be translated to SQL
+                    //            && devExpValue.DeveloperExpertise.Artifact.ArtifactTypeId == (int)ArtifactTypeEnum.File
+                    //            )
+                    //    .ToArray()  // execute query, as otherwise LINQ wants to Aggregate, but throws an exception as it cannot
+                    //// Sum up the file similarities weighed by the individual developer's review expertise with the files
+                    //    .Aggregate<DeveloperExpertiseValue, double>(0D, (accumulated, devExpValue) => accumulated + devExpValue.Value * similarFiles[devExpValue.DeveloperExpertise.ArtifactId]);
+                    
+                    dictWeighedReviewValue.Join(similarFiles, pair => pair.Key, pair => pair.Key, (pairWeight, pairSimilarity) => pairWeight.Value * pairSimilarity.Value)
+                                          .Sum();
 
                 DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, developerId, filename, ArtifactTypeEnum.File);
                 DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);

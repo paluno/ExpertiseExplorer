@@ -121,14 +121,17 @@
 
         public List<Revision> GetRevisionsFromSourceRepositoryBetween(int sourceRepositoryId, DateTime start, DateTime end)
         {
-            return Revisions.Where(r => r.SourceRepositoryId == sourceRepositoryId && r.Time > start && r.Time <= end).ToList();
+            return Revisions.Where(r => r.SourceRepositoryId == sourceRepositoryId && r.Time >= start && r.Time < end).ToList();
         }
 
         public string GetUserForLastRevisionOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
             var sql = string.Format("CALL GetUserForLastRevisionOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
-            var name = Database.SqlQuery<string>(sql).SingleOrDefault();
+            string name = Database.SqlQuery<string>(sql).SingleOrDefault();
+
+            if (string.IsNullOrEmpty(name))
+                return null;
 
             // TODO: place this in a custom filter
             name = name.Replace("plus ", string.Empty);

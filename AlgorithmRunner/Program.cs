@@ -108,10 +108,9 @@
                     {
                         case ReviewSourceType.Bugzilla:
                             factory = new ActivityInfoFactory(basepath + "input_final.txt", basepath + @"CrawlerOutput\attachments.txt");
-                            ((ActivityInfoFactory)factory).PrepareInputFromMozillaLog(basepath + "input.txt", forceOverwrite);
                             break;
                         case ReviewSourceType.Gerrit:
-                            factory = new GerritReviewFactory(basepath + "input.csv");
+                            factory = new GerritReviewFactory(basepath + "input_final.csv");
                             break;
                         default:
                             Console.WriteLine("Error: Unknown type of review data: {0}", reviewSourceType);
@@ -119,6 +118,7 @@
                             return;
                     }
 
+                    factory.PrepareInput(basepath + "input.txt", forceOverwrite);
                     comparisonRunner.StartComparisonFromFile(factory, resumeTime, maxTime, noComp);
 
                     return;
