@@ -47,12 +47,14 @@
             {
                 lastUser = entities.GetUserForLastRevisionOfBefore(filenameId, MaxDateTime);
 
-                if (lastUser == null)
-                    throw new FileNotFoundException(string.Format("LastRevision for {0} not found", filename));
+                if (lastUser == null)   // the file exists but is has not been edited until MaxDateTime. Thus, nobody has expertise.
+                {
+                    ClearExpertiseForAllDevelopers(filename);
+                    return;
+                }
 
                 lastDeveloperId = entities.Developers.Where(d => d.Name == lastUser && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId).First();
             }
-
 
             using (var entities = new ExpertiseDBEntities())
             {
