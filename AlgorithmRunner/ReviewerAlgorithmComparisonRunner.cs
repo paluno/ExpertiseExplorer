@@ -17,15 +17,20 @@ namespace AlgorithmRunner
                 new AlgorithmBase[]
                 {
                     new WeighedReviewCountAlgorithm(fpsTree),
-                    new FPSReviewAlgorithm()
+                    new FPSReviewAlgorithm(fpsTree)
                 })
         {
             FpsTree = fpsTree;
         }
 
         public ReviewerAlgorithmComparisonRunner(string sourceUrl, string basepath)
-            : this (sourceUrl, basepath, new RootDirectory())
+            : this(sourceUrl, basepath, new RootDirectory())
         {
+        }
+
+        public void InitFromDB()
+        {
+            Algorithms.OfType<WeighedReviewCountAlgorithm>().First().LoadReviewScoresFromDB();
         }
 
         protected override void ProcessReviewInfo(ReviewInfo info, IList<string> involvedFiles, System.IO.StreamWriter found, System.Diagnostics.Stopwatch stopwatch)
@@ -33,9 +38,9 @@ namespace AlgorithmRunner
             base.ProcessReviewInfo(info, involvedFiles, found, stopwatch);
 
             // Calculate new values for reviewer scores
-//            if (info.IsReview)
-                foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
-                    reviewAlgorithm.AddReviewScore(info.Reviewer, involvedFiles);
+            //            if (info.IsReview)
+            foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
+                reviewAlgorithm.AddReviewScore(info.Reviewer, involvedFiles);
         }
     }
 }

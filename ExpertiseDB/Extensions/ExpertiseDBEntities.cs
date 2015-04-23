@@ -186,13 +186,19 @@
             return Database.SqlQuery<ActualReviewersGrouped>("CALL GetActualReviewersGrouped()").ToList();
         }
 
-        private IEnumerable<DeveloperExpertiseSum> GetDeveloperExpertiseSumForRepository(int repoditoryId, int numberOfHits = 0)
+        private IEnumerable<DeveloperExpertiseSum> GetDeveloperExpertiseSumForRepository(int repositoryId, int numberOfHits = 0)
         {
-            var sql = string.Format("CALL GetDeveloperExpertiseSum({0})", repoditoryId);
+            var sql = string.Format("CALL GetDeveloperExpertiseSum({0})", repositoryId);
 
             var result = numberOfHits > 0 ? Database.SqlQuery<DeveloperExpertiseSum>(sql).Take(numberOfHits).ToList() : Database.SqlQuery<DeveloperExpertiseSum>(sql).ToList();
 
             return result;
+        }
+
+        public void StoreDeveloperExpertiseValue(string developerName, double expertiseValue, int artifactId, int repositoryId, int algorithmId)
+        {
+            string sql = string.Format("CALL StoreDeveloperExpertiseValue({0},{1},{2},{3},{4})", developerName, expertiseValue, artifactId, repositoryId, algorithmId);
+            Database.ExecuteSqlCommand(sql);
         }
     }
 }

@@ -41,7 +41,10 @@
 
                     AlgorithmComparisonRunner comparisonRunner;
                     if ("review" == mode)
+                    {
                         comparisonRunner = new ReviewerAlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
+                        ((ReviewerAlgorithmComparisonRunner)comparisonRunner).InitFromDB();
+                    }
                     else
                         comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
 
@@ -103,8 +106,8 @@
                     }
 
                     ReviewInfoFactory factory;
-                
-                    switch(reviewSourceType)
+
+                    switch (reviewSourceType)
                     {
                         case ReviewSourceType.Bugzilla:
                             factory = new ActivityInfoFactory(basepath + "input_final.txt", basepath + @"CrawlerOutput\attachments.txt");
@@ -146,7 +149,7 @@
             Console.WriteLine("\t \t Useful for resuming the calculations after an error. Use repository.lastUpdate as the value for arg\n");
             Console.WriteLine("\t additional argument: m or max to compute expertises only up to arg datetime, arg has to be in unix time (optional)");
             Console.WriteLine("\t Example of usage:");
-            Console.WriteLine("\t AlgorithmRunner.exe Firefox C:\\ExpertiseExplorerOutput\\ a f r 1353412846\n");
+            Console.WriteLine("\t AlgorithmRunner.exe Firefox Bugzilla C:\\ExpertiseExplorerOutput\\ a f r 1353412846\n");
         }
     }
 }

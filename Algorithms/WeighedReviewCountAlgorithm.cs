@@ -30,7 +30,8 @@ namespace Algorithms
             using (var repository = new ExpertiseDBEntities())
             {
                 foreach (DeveloperExpertiseValue dev in repository.DeveloperExpertiseValues
-                    .Include("Artifacts.Developers")
+                    .Include("DeveloperExpertise.Artifact")
+                    .Include("DeveloperExpertise.Developer")
                     .Where(dev => dev.AlgorithmId == AlgorithmId && dev.DeveloperExpertise.Artifact.RepositoryId == RepositoryId))
                     FpsTree.AddReview(dev.DeveloperExpertise.Developer.Name, dev.DeveloperExpertise.Artifact.Name.Split('/'), dev.Value);
             }
@@ -42,7 +43,11 @@ namespace Algorithms
 
             int idReviewer = FindOrCreateDeveloperFromDevelopernameApproximation(authorName);
 
-            foreach(string reviewedFileName in involvedFiles)
+                // write to tree
+            FpsTree.AddReview(authorName, involvedFiles);
+
+                // write to DB
+            foreach (string reviewedFileName in involvedFiles)
             {
                 using (var repository = new ExpertiseDBEntities())
                 {
