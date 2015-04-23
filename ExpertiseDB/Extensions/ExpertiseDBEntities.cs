@@ -169,16 +169,18 @@
             return cleanNames.ToList();
         }
 
-        public List<DeveloperForPath> GetDeveloperForPath(string path)
+        public List<DeveloperForPath> GetDeveloperForPath(int repositoryId, string path)
         {
-            var sql = string.Format("CALL GetDevelopersForPath('{0}')", path + "%");
+            string sql = string.Format("CALL GetDevelopersForPath({0},'{1}')", repositoryId, path + "%");
 
             return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
 
-        public List<DeveloperForPath> GetDeveloperWithoutPath()
+        public List<DeveloperForPath> GetDeveloperWithoutPath(int repositoryId)
         {
-            return Database.SqlQuery<DeveloperForPath>("CALL GetDevelopersWOPath()").ToList();
+            string sql = string.Format("CALL GetDevelopersWOPath({0})", repositoryId);
+
+            return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
 
         public List<ActualReviewersGrouped> GetActualReviewersGrouped()

@@ -32,11 +32,12 @@ COMMIT;
 START TRANSACTION;
 USE `expertisedb`;
 
-CREATE PROCEDURE `GetDevelopersForPath`(IN path VARCHAR(255))
+CREATE PROCEDURE `GetDevelopersForPath`(IN repId INT, IN path VARCHAR(255))
 SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM DeveloperExpertises
 JOIN Artifacts
 ON Artifacts.artifactId = DeveloperExpertises.artifactId
 WHERE Artifacts.Name LIKE path
+AND Artifacts.RepositoryId=repId
 GROUP BY DeveloperId;
 
 COMMIT;
@@ -48,11 +49,12 @@ COMMIT;
 START TRANSACTION;
 USE `expertisedb`;
 
-CREATE PROCEDURE `GetDevelopersWOPath`()
+CREATE PROCEDURE `GetDevelopersWOPath`(IN repId INT)
 SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM DeveloperExpertises
 JOIN Artifacts
 ON Artifacts.artifactId = DeveloperExpertises.artifactId
 WHERE Artifacts.Name NOT LIKE '%/%'
+AND Artifacts.RepositoryId=repId
 GROUP BY DeveloperId;
 
 COMMIT;
