@@ -1,4 +1,5 @@
 ﻿using Algorithms;
+using Algorithms.FPS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +10,21 @@ namespace AlgorithmRunner
 {
     internal class ReviewerAlgorithmComparisonRunner : AlgorithmComparisonRunner
     {
-        public ReviewerAlgorithmComparisonRunner(string sourceUrl, string basepath)
+        RootDirectory FpsTree { get; set; }
+
+        private ReviewerAlgorithmComparisonRunner(string sourceUrl, string basepath, RootDirectory fpsTree)
             : base(sourceUrl, basepath,
                 new AlgorithmBase[]
                 {
-                    new WeighedReviewCountAlgorithm(),
+                    new WeighedReviewCountAlgorithm(fpsTree),
                     new FPSReviewAlgorithm()
                 })
+        {
+            FpsTree = fpsTree;
+        }
+
+        public ReviewerAlgorithmComparisonRunner(string sourceUrl, string basepath)
+            : this (sourceUrl, basepath, new RootDirectory())
         {
         }
 

@@ -16,10 +16,24 @@ namespace Algorithms
     {
         internal static Guid WEIGHEDREVIEWCOUNTGUID = new Guid("9F03D6DB-7DE8-4826-9B69-7E79C766959D");
 
-        public WeighedReviewCountAlgorithm()
+        private FPS.RootDirectory FpsTree { get; set; }
+
+        public WeighedReviewCountAlgorithm(FPS.RootDirectory fpsTree)
         {
+            this.FpsTree = fpsTree;
             Guid = WEIGHEDREVIEWCOUNTGUID;
             Init();
+        }
+
+        public void LoadReviewScoresFromDB()
+        {
+            using (var repository = new ExpertiseDBEntities())
+            {
+                foreach (DeveloperExpertiseValue dev in repository.DeveloperExpertiseValues
+                    .Include("Artifacts.Developers")
+                    .Where(dev => dev.AlgorithmId == AlgorithmId && dev.DeveloperExpertise.Artifact.RepositoryId == RepositoryId))
+                    FpsTree.AddReview(dev.DeveloperExpertise.Developer.Name, dev.DeveloperExpertise.Artifact.Name.Split('/'), dev.Value);
+            }
         }
 
         public override void AddReviewScore(string authorName, IList<string> involvedFiles)
