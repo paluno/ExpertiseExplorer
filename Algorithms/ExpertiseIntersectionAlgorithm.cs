@@ -78,8 +78,8 @@
             stopwatch.Start();
             using (var repository = new ExpertiseDBEntities())
             {
-                var developers = repository.DeveloperExpertises.Where(de => de.ArtifactId == artifactId && de.Inferred == false).Select(de => de.DeveloperId).Distinct().ToList();
-                foreach (var developerId in developers)
+                //var developers = repository.DeveloperExpertises.Where(de => de.ArtifactId == artifactId && de.Inferred == false).Select(de => de.DeveloperId).Distinct().ToList();
+                foreach (var developerId in orderedAuthorIds)
                 {
                     var developerExpertise = repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperId == developerId && de.ArtifactId == artifactId);
 
