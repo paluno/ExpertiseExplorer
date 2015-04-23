@@ -26,5 +26,25 @@ namespace Algorithms.FPS
             else
                 WeighedDeveloperExpertise.Add(reviewer, reviewWeight);
         }
+
+        internal override void CalculateDeveloperExpertises(System.Collections.Concurrent.ConcurrentDictionary<string, double> dictExpertises, string[] filenameComponents, int currentDepth, int numberOfMatchingComponents)
+        {
+            int maxLength = Math.Max(filenameComponents.Length, currentDepth);
+            int matchLength = numberOfMatchingComponents;   // there will be some difference, unless ...
+            if (currentDepth - 1 == matchLength && currentDepth == filenameComponents.Length && filenameComponents[currentDepth - 1] == RelativeName)
+                ++matchLength;                              // ... unless it's an edit of the file itself
+
+            double fileSimilarity = matchLength / (double)maxLength;
+
+            foreach(KeyValuePair<string,double> weighedExpertise in WeighedDeveloperExpertise)
+            {
+                double weighedValue = weighedExpertise.Value * fileSimilarity;
+                dictExpertises.AddOrUpdate(
+                    weighedExpertise.Key,       // the developer name
+                    weighedValue,               // it may be the first value
+                    (key, currentValue) => currentValue + weighedValue  // Otherwise, add it to the existing value
+                );
+            }
+        }
     }
 }
