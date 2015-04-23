@@ -29,7 +29,7 @@ namespace AlgorithmRunner
 
         public override bool isValid()
         {
-            return true;
+            return Filenames.Any(str => !String.IsNullOrWhiteSpace(str));
         }
 
         public override string ToString()
