@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Algorithms.FPS
 {
-    abstract class VCSObject
+    public abstract class VCSObject
     {
         public string RelativeName { get; private set; }
 

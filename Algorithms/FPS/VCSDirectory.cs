@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Algorithms.FPS
 {
-    class VCSDirectory : VCSObject
+    public class VCSDirectory : VCSObject
     {
         /// <summary>
         /// All subdirectories and the files directly in this directory
@@ -26,7 +26,7 @@ namespace Algorithms.FPS
             IEnumerable<string> remainingComponents = filenameComponents.Skip(1);
 
             if (!Children.ContainsKey(nextComponent))
-                if (remainingComponents.Count() > 1)        // it's a directory
+                if (remainingComponents.Count() > 0)        // it's a directory
                     Children.Add(nextComponent, new VCSDirectory(nextComponent));
                 else        // it's a file
                     Children.Add(nextComponent, new VCSFile(nextComponent));
@@ -43,8 +43,8 @@ namespace Algorithms.FPS
                 numberOfStillMatchingComponents = numberOfMatchingComponents;
 
             Parallel.ForEach(
-                Children,
-                kvp => CalculateDeveloperExpertises(dictExpertises, filenameComponents, currentDepth + 1, numberOfStillMatchingComponents)
+                Children.Values,
+                childVCSObject => childVCSObject.CalculateDeveloperExpertises(dictExpertises, filenameComponents, currentDepth + 1, numberOfStillMatchingComponents)
             );
         }
     }

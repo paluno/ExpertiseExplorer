@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Algorithms.FPS
 {
-    class RootDirectory : VCSDirectory
+    public class RootDirectory : VCSDirectory
     {
         public RootDirectory()
             : base("/")
