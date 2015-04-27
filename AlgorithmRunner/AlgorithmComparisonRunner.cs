@@ -53,8 +53,14 @@
 
         protected void InitAlgorithms(string sourceUrl)
         {
-            // Load Ids from DB for first algorithm, gets set for all other later
+            // Load Ids from DB for first algorithm
             Algorithms[0].InitIdsFromDbForSourceUrl(sourceUrl, false);
+
+            foreach (AlgorithmBase algo in Algorithms.Skip(1))
+            {
+                algo.SourceRepositoryId = Algorithms[0].SourceRepositoryId;
+                algo.RepositoryId = Algorithms[0].RepositoryId;
+            }
         }
 
         public void StartComparisonFromFile(ReviewInfoFactory factory, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)

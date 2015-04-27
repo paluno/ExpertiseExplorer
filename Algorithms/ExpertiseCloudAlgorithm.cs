@@ -42,7 +42,7 @@
             {
                 using (var repository = new ExpertiseDBEntities())
                 {
-                    developersForPath = repository.GetDeveloperWithoutPath();
+                    developersForPath = repository.GetDeveloperWithoutPath(RepositoryId);
                 }
             }
             else
@@ -52,7 +52,7 @@
 
                 using (var repository = new ExpertiseDBEntities())
                 {
-                    developersForPath = repository.GetDeveloperForPath(path);
+                    developersForPath = repository.GetDeveloperForPath(RepositoryId,path);
                 }
             }
 

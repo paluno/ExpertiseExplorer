@@ -169,16 +169,18 @@
             return cleanNames.ToList();
         }
 
-        public List<DeveloperForPath> GetDeveloperForPath(string path)
+        public List<DeveloperForPath> GetDeveloperForPath(int repositoryId, string path)
         {
-            var sql = string.Format("CALL GetDevelopersForPath('{0}')", path + "%");
+            string sql = string.Format("CALL GetDevelopersForPath({0},'{1}')", repositoryId, path + "%");
 
             return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
 
-        public List<DeveloperForPath> GetDeveloperWithoutPath()
+        public List<DeveloperForPath> GetDeveloperWithoutPath(int repositoryId)
         {
-            return Database.SqlQuery<DeveloperForPath>("CALL GetDevelopersWOPath()").ToList();
+            string sql = string.Format("CALL GetDevelopersWOPath({0})", repositoryId);
+
+            return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
 
         public List<ActualReviewersGrouped> GetActualReviewersGrouped()
@@ -186,13 +188,19 @@
             return Database.SqlQuery<ActualReviewersGrouped>("CALL GetActualReviewersGrouped()").ToList();
         }
 
-        private IEnumerable<DeveloperExpertiseSum> GetDeveloperExpertiseSumForRepository(int repoditoryId, int numberOfHits = 0)
+        private IEnumerable<DeveloperExpertiseSum> GetDeveloperExpertiseSumForRepository(int repositoryId, int numberOfHits = 0)
         {
-            var sql = string.Format("CALL GetDeveloperExpertiseSum({0})", repoditoryId);
+            var sql = string.Format("CALL GetDeveloperExpertiseSum({0})", repositoryId);
 
             var result = numberOfHits > 0 ? Database.SqlQuery<DeveloperExpertiseSum>(sql).Take(numberOfHits).ToList() : Database.SqlQuery<DeveloperExpertiseSum>(sql).ToList();
 
             return result;
+        }
+
+        public void StoreDeveloperExpertiseValue(string developerName, double expertiseValue, int artifactId, int repositoryId, int algorithmId)
+        {
+            string sql = string.Format("CALL StoreDeveloperExpertiseValue({0},{1},{2},{3},{4})", developerName, expertiseValue, artifactId, repositoryId, algorithmId);
+            Database.ExecuteSqlCommand(sql);
         }
     }
 }

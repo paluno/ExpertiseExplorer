@@ -32,11 +32,12 @@ COMMIT;
 START TRANSACTION;
 USE `expertisedb`;
 
-CREATE PROCEDURE `GetDevelopersForPath`(IN path VARCHAR(255))
+CREATE PROCEDURE `GetDevelopersForPath`(IN repId INT, IN path VARCHAR(255))
 SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM DeveloperExpertises
 JOIN Artifacts
 ON Artifacts.artifactId = DeveloperExpertises.artifactId
 WHERE Artifacts.Name LIKE path
+AND Artifacts.RepositoryId=repId
 GROUP BY DeveloperId;
 
 COMMIT;
@@ -48,11 +49,12 @@ COMMIT;
 START TRANSACTION;
 USE `expertisedb`;
 
-CREATE PROCEDURE `GetDevelopersWOPath`()
+CREATE PROCEDURE `GetDevelopersWOPath`(IN repId INT)
 SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM DeveloperExpertises
 JOIN Artifacts
 ON Artifacts.artifactId = DeveloperExpertises.artifactId
 WHERE Artifacts.Name NOT LIKE '%/%'
+AND Artifacts.RepositoryId=repId
 GROUP BY DeveloperId;
 
 COMMIT;
@@ -106,6 +108,33 @@ FROM ActualReviewers
 GROUP BY ChangeId;
 
 COMMIT;
+
+-- -----------------------------------------------------
+-- stored procedure StoreDeveloperExpertiseValue()
+-- -----------------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE StoreDeveloperExpertiseValue (IN DeveloperName VARCHAR(255), IN ExpertiseValue double, IN ArtId INT, IN RepId INT, IN AlgId INT)
+BEGIN
+DECLARE developerId int;
+DECLARE DevExpId int;
+
+SET developerId = (SELECT Developers.DeveloperId FROM Developers WHERE Developers.name=DeveloperName AND Developers.RepositoryId=RepId);
+IF developerId IS NULL THEN
+	INSERT INTO Developers(name,RepositoryId) VALUES (DeveloperName,RepId);
+	SET developerId = LAST_INSERT_ID();
+END IF;
+
+SET DevExpId = (SELECT d.DeveloperExpertiseId FROM DeveloperExpertises d where d.DeveloperId = developerId and d.ArtifactId = ArtId);
+IF DevExpId IS NULL THEN
+	INSERT INTO DeveloperExpertises(DeveloperId,ArtifactId,DeliveriesCount,IsFirstAuthor,Inferred) values (developerId,ArtId,0,false,true);
+	SET DevExpId = LAST_INSERT_ID();
+END IF;
+
+REPLACE INTO DeveloperExpertiseValues(Value,DeveloperExpertiseId,AlgorithmId) VALUES (ExpertiseValue,DevExpId,AlgId);
+
+END$$
 
 -- -----------------------------------------------------
 -- constraint for DeveloperExpertiseValues
