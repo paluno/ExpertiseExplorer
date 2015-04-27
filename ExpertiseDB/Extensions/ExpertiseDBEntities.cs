@@ -7,6 +7,7 @@
     using System.Linq;
 
     using ExpertiseDB.Extensions;
+    using System.Globalization;
 
     public partial class ExpertiseDBEntities
     {
@@ -127,7 +128,7 @@
         public string GetUserForLastRevisionOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
-            var sql = string.Format("CALL GetUserForLastRevisionOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
+            var sql = string.Format(CultureInfo.InvariantCulture, "CALL GetUserForLastRevisionOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
             string name = Database.SqlQuery<string>(sql).SingleOrDefault();
 
             if (string.IsNullOrEmpty(name))
@@ -144,7 +145,7 @@
         public List<string> GetUsersOfRevisionsOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
-            var sql = string.Format("CALL GetUsersOfRevisionsOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
+            var sql = string.Format(CultureInfo.InvariantCulture, "CALL GetUsersOfRevisionsOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
 
             // TODO: place this in a custom filter
             var rawNames = Database.SqlQuery<string>(sql).ToList();
@@ -171,14 +172,14 @@
 
         public List<DeveloperForPath> GetDeveloperForPath(int repositoryId, string path)
         {
-            string sql = string.Format("CALL GetDevelopersForPath({0},'{1}')", repositoryId, path + "%");
+            string sql = string.Format(CultureInfo.InvariantCulture, "CALL GetDevelopersForPath({0},'{1}')", repositoryId, path.Replace("'", "''") + "%");
 
             return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
 
         public List<DeveloperForPath> GetDeveloperWithoutPath(int repositoryId)
         {
-            string sql = string.Format("CALL GetDevelopersWOPath({0})", repositoryId);
+            string sql = string.Format(CultureInfo.InvariantCulture, "CALL GetDevelopersWOPath({0})", repositoryId);
 
             return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
@@ -190,7 +191,7 @@
 
         private IEnumerable<DeveloperExpertiseSum> GetDeveloperExpertiseSumForRepository(int repositoryId, int numberOfHits = 0)
         {
-            var sql = string.Format("CALL GetDeveloperExpertiseSum({0})", repositoryId);
+            var sql = string.Format(CultureInfo.InvariantCulture,"CALL GetDeveloperExpertiseSum({0})", repositoryId);
 
             var result = numberOfHits > 0 ? Database.SqlQuery<DeveloperExpertiseSum>(sql).Take(numberOfHits).ToList() : Database.SqlQuery<DeveloperExpertiseSum>(sql).ToList();
 
@@ -199,7 +200,7 @@
 
         public void StoreDeveloperExpertiseValue(string developerName, double expertiseValue, int artifactId, int repositoryId, int algorithmId)
         {
-            string sql = string.Format("CALL StoreDeveloperExpertiseValue({0},{1},{2},{3},{4})", developerName, expertiseValue, artifactId, repositoryId, algorithmId);
+            string sql = string.Format(CultureInfo.InvariantCulture,"CALL StoreDeveloperExpertiseValue('{0}',{1},{2},{3},{4})", developerName.Replace("'","''"), expertiseValue, artifactId, repositoryId, algorithmId);
             Database.ExecuteSqlCommand(sql);
         }
     }
