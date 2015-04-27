@@ -21,7 +21,7 @@
 
         public bool CheckForMissingFiles(List<string> filenames)
         {
-            var sometingIsWrong = false;
+            var somethingIsWrong = false;
             foreach (var filename in filenames)
             {
                 if (filename == string.Empty)
@@ -33,14 +33,14 @@
                 if (missingFiles.ContainsKey(filename))
                 {
                     missingFiles[filename] += 1;
-                    sometingIsWrong = true;
+                    somethingIsWrong = true;
                     continue;
                 }
 
                 if (ambiguousFiles.ContainsKey(filename))
                 {
                     ambiguousFiles[filename] += 1;
-                    sometingIsWrong = true;
+                    somethingIsWrong = true;
                     continue;
                 }
 
@@ -49,12 +49,12 @@
                 {
                     case -1:
                         missingFiles.Add(filename, 1);
-                        sometingIsWrong = true;
+                        somethingIsWrong = true;
                         break;
 
                     case -2:
                         ambiguousFiles.Add(filename, 1);
-                        sometingIsWrong = true;
+                        somethingIsWrong = true;
                         break;
 
                     default:
@@ -63,7 +63,7 @@
                 }
             }
 
-            return sometingIsWrong;
+            return somethingIsWrong;
         }
 
         public void OutputMissingFilesTo(string filename)
