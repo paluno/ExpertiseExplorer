@@ -32,17 +32,17 @@ namespace Algorithms
 
             using (var repository = new ExpertiseDBEntities())
             {
-                int artifactId = FindOrCreateArtifact(repository,filename, ArtifactTypeEnum.File).ArtifactId;
+                //int artifactId = FindOrCreateArtifact(repository,filename, ArtifactTypeEnum.File).ArtifactId;
 
                 foreach (KeyValuePair<String, Double> pair in dictExpertiseValues)
                 {
-                    repository.StoreDeveloperExpertiseValue(pair.Key, pair.Value, artifactId, RepositoryId, AlgorithmId);
-                    //Developer developer = repository.Developers.SingleOrDefault(dev => dev.Name == pair.Key && dev.RepositoryId == RepositoryId);
-                    //DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, developer.DeveloperId, filename, ArtifactTypeEnum.File);
-                    //DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
-                    //devExpertiseValue.Value = pair.Value;
-                    //repository.SaveChanges();
+                    //repository.StoreDeveloperExpertiseValue(pair.Key, pair.Value, artifactId, RepositoryId, AlgorithmId);
+                    Developer developer = repository.Developers.SingleOrDefault(dev => dev.Name == pair.Key && dev.RepositoryId == RepositoryId);
+                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, developer.DeveloperId, filename, ArtifactTypeEnum.File);
+                    DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
+                    devExpertiseValue.Value = pair.Value;
                 }
+                repository.SaveChanges();
             }
         }
     }
