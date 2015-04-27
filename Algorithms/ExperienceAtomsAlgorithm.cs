@@ -18,7 +18,7 @@
 
         public override void CalculateExpertiseForFile(string filename)
         {
-            var artifactId = FindOrCreateFileArtifactIdFromArtifactnameApproximation(filename);
+            int artifactId = FindOrCreateFileArtifactId(filename);
 
             using (var repository = new ExpertiseDBEntities())
             {

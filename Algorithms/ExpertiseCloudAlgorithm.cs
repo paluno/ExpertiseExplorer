@@ -31,7 +31,7 @@
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
 
-            var artifactId = FindOrCreateFileArtifactIdFromArtifactnameApproximation(filename);
+            int artifactId = FindOrCreateFileArtifactId(filename);
 
             var path = Path.GetDirectoryName(filename);
             if (path == null)

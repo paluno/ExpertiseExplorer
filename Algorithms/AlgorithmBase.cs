@@ -146,41 +146,18 @@
             {
                 var file = repository.Filenames.SingleOrDefault(f => f.Name == filename && f.SourceRepositoryId == SourceRepositoryId);
                 if (file == null)
-                {
-                    var files = repository.Filenames.Where(f => f.Name.EndsWith(filename) && f.SourceRepositoryId == SourceRepositoryId).ToList();
-                    switch (files.Count)
-                    {
-                        case 0:
-                            return -1;
-
-                        case 1:
-                            return files.First().FilenameId;
-
-                        default:
-                            return -2;
-                    }
-                }
+                    throw new ArgumentException("The file \"" + filename + "\" does not exist in the repository.", "filename");
 
                 return file.FilenameId;
             }
         }
 
-        public int FindOrCreateFileArtifactIdFromArtifactnameApproximation(string artifactname)
+        public int FindOrCreateFileArtifactId(string artifactname)
         {
             Debug.Assert(RepositoryId > -1, "Initialize RepositoryId first");
 
-            using (var repository = new ExpertiseDBEntities())
-            {
-                var artifact = repository.Artifacts.SingleOrDefault(a => a.Name == artifactname && a.RepositoryId == RepositoryId);
-                if (artifact == null)
-                {
-                    artifact = repository.Artifacts.SingleOrDefault(a => a.Name.EndsWith(artifactname) && a.RepositoryId == RepositoryId);
-                    if (null == artifact)
-                        artifact = FindOrCreateArtifact(repository, artifactname, ArtifactTypeEnum.File);
-                }
-
-                return artifact.ArtifactId;
-            }
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+                return FindOrCreateArtifact(repository, artifactname, ArtifactTypeEnum.File).ArtifactId;
         }
 
         public void InitIdsFromDbForSourceUrl(string sourceUrl, bool failIfAlreadyExists)

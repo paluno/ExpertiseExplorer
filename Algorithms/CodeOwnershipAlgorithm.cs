@@ -32,10 +32,16 @@
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
             var stopwatch = new Stopwatch();
 
-            var filenameId = GetFilenameIdFromFilenameApproximation(filename);
-            if (filenameId < 0)
+            int filenameId;
+            try
             {
-                ClearExpertiseForAllDevelopers(filename);
+                filenameId = GetFilenameIdFromFilenameApproximation(filename);
+            }
+            catch(ArgumentException ae)
+            {
+                if (ae.ParamName != "filename")
+                    throw;
+                ClearExpertiseForAllDevelopers(filename);   // the file does not exist in the repository, so nobody has experience
                 return;
             }
 
@@ -73,7 +79,7 @@
             computedsize = Math.Abs(minsize);
 
             // second pass to compute the actual ownership
-            var artifactId = FindOrCreateFileArtifactIdFromArtifactnameApproximation(filename);
+            int artifactId = FindOrCreateFileArtifactId(filename);
 
             var developerLookup = new Dictionary<string, DeveloperExpertiseValue>();
             stopwatch.Start();

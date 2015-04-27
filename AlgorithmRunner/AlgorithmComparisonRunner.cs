@@ -142,7 +142,7 @@
 
                     foreach (var involvedFile in involvedFiles)
                     {
-                        int artifactId = Algorithms[0].FindOrCreateFileArtifactIdFromArtifactnameApproximation(involvedFile);
+                        int artifactId = Algorithms[0].FindOrCreateFileArtifactId(involvedFile);
 
                         ActualReviewer actualReviewer = new ActualReviewer
                         {

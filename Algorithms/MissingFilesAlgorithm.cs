@@ -1,5 +1,6 @@
 ﻿namespace Algorithms
 {
+    using System;
     using System.Collections.Generic;
     using System.IO;
 
@@ -21,8 +22,8 @@
 
         public bool CheckForMissingFiles(List<string> filenames)
         {
-            var somethingIsWrong = false;
-            foreach (var filename in filenames)
+            bool somethingIsWrong = false;
+            foreach (string filename in filenames)
             {
                 if (filename == string.Empty)
                     continue;
@@ -44,22 +45,23 @@
                     continue;
                 }
 
-                var fileId = GetFilenameIdFromFilenameApproximation(filename);
-                switch (fileId)
+                int fileId;
+                try
                 {
-                    case -1:
-                        missingFiles.Add(filename, 1);
-                        somethingIsWrong = true;
-                        break;
-
-                    case -2:
-                        ambiguousFiles.Add(filename, 1);
-                        somethingIsWrong = true;
-                        break;
-
-                    default:
-                        foundFiles.Add(filename, 1);
-                        break;
+                    fileId = GetFilenameIdFromFilenameApproximation(filename);
+                    foundFiles.Add(filename, 1);
+                }
+                catch (ArgumentException ae)
+                {
+                    if (ae.ParamName != "filename")
+                        throw;
+                    missingFiles.Add(filename, 1);
+                    somethingIsWrong = true;
+                }
+                catch (InvalidOperationException)   // more than one file found
+                {
+                    ambiguousFiles.Add(filename, 1);
+                    somethingIsWrong = true;
                 }
             }
 

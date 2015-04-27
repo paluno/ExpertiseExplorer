@@ -31,14 +31,20 @@
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
             var stopwatch = new Stopwatch();
 
-            var filenameId = GetFilenameIdFromFilenameApproximation(filename);
-            if (filenameId < 0)
+            int filenameId;
+            try
             {
-                ClearExpertiseForAllDevelopers(filename);
+                filenameId = GetFilenameIdFromFilenameApproximation(filename);
+            }
+            catch (ArgumentException ae)
+            {
+                if (ae.ParamName != "filename")
+                    throw;
+                ClearExpertiseForAllDevelopers(filename);   // the file does not exist in the repository, so nobody has experience
                 return;
             }
 
-            var artifactId = FindOrCreateFileArtifactIdFromArtifactnameApproximation(filename);
+            int artifactId = FindOrCreateFileArtifactId(filename);
 
             var orderedAuthorIds = new List<int>();
             stopwatch.Start();
