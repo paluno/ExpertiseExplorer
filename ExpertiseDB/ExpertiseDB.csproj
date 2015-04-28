@@ -138,6 +138,7 @@
   <ItemGroup>
     <Content Include="AdditionalInserts.sql" />
     <Content Include="ExpertiseDB.edmx.sql" />
+    <Content Include="HelperScripts.sql" />
     <Content Include="Readme.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

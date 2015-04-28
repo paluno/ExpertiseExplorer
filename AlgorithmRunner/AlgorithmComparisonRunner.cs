@@ -144,26 +144,19 @@
                     {
                         int artifactId = Algorithms[0].FindOrCreateFileArtifactId(involvedFile);
 
-                        ActualReviewer actualReviewer = new ActualReviewer
+                        using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
                         {
-                            ActivityId = info.ActivityId,
-                            ArtifactId = artifactId,
-                            ChangeId = info.ChangeId,
-                            Reviewer = info.Reviewer,
-                            Time = info.When
-                        };
+                            ActualReviewer actualReviewer = FindOrCreateActualReviewer(entities, info, artifactId);
 
-                        // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
-                        IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
+                            // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
+                            IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
 
-                        Task.WaitAll(tasks.ToArray());
-                        foreach (Task<ComputedReviewer> task in tasks)
-                        {
-                            actualReviewer.ComputedReviewers.Add(task.Result);
-                        }
+                            Task.WaitAll(tasks.ToArray());
+                            foreach (Task<ComputedReviewer> task in tasks)
+                            {
+                                actualReviewer.ComputedReviewers.Add(task.Result);
+                            }
 
-                        using (var entities = new ExpertiseDBEntities())
-                        {
                             entities.ActualReviewers.Add(actualReviewer);
                             entities.SaveChanges();
                         }
@@ -173,6 +166,23 @@
                     Log.Info("-- " + stopwatch.Elapsed);
                 }
             }
+        }
+
+        private static ActualReviewer FindOrCreateActualReviewer(ExpertiseDBEntities entities, ReviewInfo info, int artifactId)
+        {
+            return entities.ActualReviewers.SingleOrDefault(
+                        reviewer => reviewer.ArtifactId == artifactId && 
+                        reviewer.ChangeId == info.ChangeId && 
+                        reviewer.ActivityId == info.ActivityId)
+                ??
+                    new ActualReviewer
+                    {
+                        ActivityId = info.ActivityId,
+                        ArtifactId = artifactId,
+                        ChangeId = info.ChangeId,
+                        Reviewer = info.Reviewer,
+                        Time = info.When
+                    };
         }
 
         protected virtual void ProcessReviewInfo(ReviewInfo info, IList<string> involvedFiles, StreamWriter found, Stopwatch stopwatch)
