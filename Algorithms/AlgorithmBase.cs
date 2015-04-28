@@ -169,24 +169,24 @@
 
         public void InitIdsFromDbForSourceUrl(string sourceUrl, bool failIfAlreadyExists)
         {
-            using (var entites = new ExpertiseDBEntities())
+            using (var entities = new ExpertiseDBEntities())
             {
-                var sourceRepository = entites.SourceRepositorys.SingleOrDefault(sr => sr.URL == sourceUrl);
+                var sourceRepository = entities.SourceRepositorys.SingleOrDefault(sr => sr.URL == sourceUrl);
                 if (sourceRepository == null)
                     throw new FileNotFoundException("Source repository not found.");
 
-                var repository = entites.Repositorys.SingleOrDefault(r => r.SourceURL == sourceUrl);
+                var repository = entities.Repositorys.SingleOrDefault(r => r.SourceURL == sourceUrl);
                 if (repository == null)
                 {
                     repository =
-                        entites.Repositorys.Add(
+                        entities.Repositorys.Add(
                             new Repository
                             {
                                 Name = sourceRepository.Name,
                                 SourceURL = sourceUrl
                             });
 
-                    entites.SaveChanges();
+                    entities.SaveChanges();
                 }
                 else
                     if (failIfAlreadyExists) throw new Exception("Already exists!");
