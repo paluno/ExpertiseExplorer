@@ -31,7 +31,7 @@
                 { 
                     new Line10RuleAlgorithm(),
                     new ExpertiseCloudAlgorithm(),
-                    new DegreeOfAuthorshipAlgorithm(),
+                    new DegreeOfAuthorshipAlgorithm(DegreeOfAuthorshipAlgorithm.WeightingType.UniversalTOSEM),
                     new ExperienceAtomsAlgorithm(),
                     new CodeOwnershipAlgorithm(),
                     new ExpertiseIntersectionAlgorithm()

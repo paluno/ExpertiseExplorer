@@ -1,5 +1,6 @@
 ﻿namespace AlgorithmRunner
 {
+    using Algorithms;
     using System;
 
     public class Program
@@ -32,6 +33,8 @@
                 case "a":
                 case "algorithm":
                 case "review":
+                case "t":
+                case "tosem":
                     var forceOverwrite = false;
                     var noComp = false;
                     int timeOfLastComparison = 0;
@@ -45,8 +48,19 @@
                         comparisonRunner = new ReviewerAlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
                         ((ReviewerAlgorithmComparisonRunner)comparisonRunner).InitFromDB();
                     }
-                    else
+                    else if ("t" == mode || "tosem" == mode)
+                    {
+                        comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath, new AlgorithmBase[] { 
+                            new DegreeOfAuthorshipAlgorithm(DegreeOfAuthorshipAlgorithm.WeightingType.UniversalTOSEM)
+                        });
+                    }
+                    else if ("a" == mode || "algorithm" == mode)
                         comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
+                    else
+                    {
+                        Console.WriteLine("Invalid mode \"" + mode + "\""); // cannot happen if the switch is okay
+                        return;
+                    }
 
                     if (args.Length > 4)
                     {
@@ -143,6 +157,7 @@
             Console.WriteLine("\t additional argument: none\n");
             Console.WriteLine("\t a or algorithm for algorithm comparison");
             Console.WriteLine("\t review is also algorithm comparision, but using the review algorithm set instead of the usual algorithms");
+            Console.WriteLine("\t t or tosem is again an algorithm comparision. It only uses the degree-of-knowledge algorithm with the weightings from the ACM TOSEM paper.");
             Console.WriteLine("\t additional argument: f or force for forcing an existing prepared input to be overwritten (optional)");
             Console.WriteLine("\t additional argument: n or nocomp for only creating expertise values from revision, skipping the comparison (optional)");
             Console.WriteLine("\t additional argument: r or resume arg for resuming the computation from arg datetime, arg has to be in unix time (optional)");

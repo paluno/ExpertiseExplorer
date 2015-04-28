@@ -53,7 +53,7 @@
             }
 
             stopwatch.Stop();
-            Log.Info(GetType() + " - fileRevisions - " + stopwatch.Elapsed);
+            Log.Info(Name + " - fileRevisions - " + stopwatch.Elapsed);
 
             if (fileRevisions.Count == 0)
             {
@@ -126,7 +126,7 @@
             }
 
             stopwatch.Stop();
-            Log.Info(GetType() + " - SaveChanges() - " + stopwatch.Elapsed);
+            Log.Info(Name + " - SaveChanges() - " + stopwatch.Elapsed);
         }
     }
 }

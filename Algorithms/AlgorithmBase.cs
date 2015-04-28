@@ -18,6 +18,8 @@
     {
         protected static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        public string Name { get; protected set; }
+
         private const int NumberOfTasks = 5;
 
         protected TaskFactory TaskFactory { get; private set; }
@@ -32,6 +34,11 @@
 
         public int SourceRepositoryId { get; set; }
 
+        protected AlgorithmBase()
+        {
+            this.Name = GetType().Name;
+        }
+        
         public abstract void CalculateExpertiseForFile(string filename);
 
         public virtual void CalculateExpertise()
@@ -64,7 +71,7 @@
 
             Task.WaitAll(tasks.ToArray());
             stopwatch.Stop();
-            Log.Info(GetType() + " - " + stopwatch.Elapsed);
+            Log.Info(Name + " - " + stopwatch.Elapsed);
         }
 
         protected void ClearExpertiseForAllDevelopers(string filename)
@@ -196,7 +203,7 @@
                 var algorithm = repository.Algorithms.SingleOrDefault(a => a.GUID == Guid);
                 if (algorithm == null)
                 {
-                    algorithm = repository.Algorithms.Add(new Algorithm { Name = GetType().Name, GUID = Guid });
+                    algorithm = repository.Algorithms.Add(new Algorithm { Name = this.Name, GUID = Guid });
                     repository.SaveChanges();
                 }
 

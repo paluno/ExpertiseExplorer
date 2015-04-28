@@ -8,11 +8,52 @@
 
     using ExpertiseDB;
 
+    /// <summary>
+    /// Based on Fritz et al.'s Degree-of-Knowledge model published 2010 at ICSE and 2014 in TOSEM
+    /// </summary>
     public class DegreeOfAuthorshipAlgorithm : AlgorithmBase
     {
-        public DegreeOfAuthorshipAlgorithm()
+        /// <summary>
+        /// Which weightings should be used for the formula?
+        /// </summary>
+        public enum WeightingType { 
+            /// <summary>
+            /// This selects the weightings from the original ICSE'10 paper "A Degree-of-Knowledge Model to Capture Source Code Familiarity"
+            /// </summary>
+            Original, 
+            /// <summary>
+            /// This value represents the weightings from the 2014 TOSEM article "Degree-of-knowledge: Modeling a Developer's Knowledge of Code", Sec. 8.2
+            /// </summary>
+            UniversalTOSEM 
+        }
+
+        private readonly double firstAuthorWeighting;
+        private readonly double delivieresWeighting;
+        private readonly double acceptanceWeighting;
+        private readonly double constantSummand;
+
+        public DegreeOfAuthorshipAlgorithm(WeightingType sourceOfWeightings)
         {
-            Guid = new Guid("59a9d58a-8382-43b1-a438-ddb9a154dda9");
+            Name += "-" + sourceOfWeightings.ToString();
+            switch(sourceOfWeightings)
+            {
+                case WeightingType.Original:
+                    Guid = new Guid("59a9d58a-8382-43b1-a438-ddb9a154dda9");
+                    firstAuthorWeighting = 1.098d;
+                    delivieresWeighting = 0.164d;
+                    acceptanceWeighting = -0.321d;
+                    constantSummand = 3.293d;
+                    break;
+                case WeightingType.UniversalTOSEM:
+                    Guid = new Guid("5C11F944-B959-45D2-80DB-EAB141437631");
+                    firstAuthorWeighting = 0.962d;
+                    delivieresWeighting = 0.213d;
+                    acceptanceWeighting = -0.273d;
+                    constantSummand = 3.223d;
+                    break;
+                default:
+                    throw new ArgumentException("Unknown type of weighting " + sourceOfWeightings);
+            }
             Init();
         }
 
@@ -32,13 +73,13 @@
 
                     var firstAuthorship = developerExpertise.IsFirstAuthor ? 1 : 0;
 
-                    var fistAuthorshipValue = 1.098d * firstAuthorship;
+                    var fistAuthorshipValue = firstAuthorWeighting * firstAuthorship;
 
-                    var deliveriesValue = 0.164d * developerExpertise.DeliveriesCount;
+                    var deliveriesValue = delivieresWeighting * developerExpertise.DeliveriesCount;
 
-                    var acceptancesValue = 0.321 * Math.Log(1 + developerExpertise.Artifact.ModificationCount - (developerExpertise.DeliveriesCount + firstAuthorship));
+                    var acceptancesValue = acceptanceWeighting * Math.Log(1 + developerExpertise.Artifact.ModificationCount - (developerExpertise.DeliveriesCount + firstAuthorship));
 
-                    var expertise = 3.293d + fistAuthorshipValue + deliveriesValue - acceptancesValue;
+                    var expertise = constantSummand + fistAuthorshipValue + deliveriesValue + acceptancesValue;
 
                     var expertiseValue =
                         developerExpertise.DeveloperExpertiseValues.SingleOrDefault(

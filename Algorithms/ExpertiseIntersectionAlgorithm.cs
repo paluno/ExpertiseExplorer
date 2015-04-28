@@ -72,7 +72,7 @@
             }
 
             stopwatch.Stop();
-            Log.Info(GetType() + " - GetUsersOfRevisionsOfBefore() - " + stopwatch.Elapsed);
+            Log.Info(Name + " - GetUsersOfRevisionsOfBefore() - " + stopwatch.Elapsed);
 
             // HACK: to implement the ordering via only the Expertise Value
             var authorRankLookup = new Dictionary<int, int>();
@@ -98,7 +98,7 @@
             }
 
             stopwatch.Stop();
-            Log.Info(GetType() + " - SaveChanges() - " + stopwatch.Elapsed);
+            Log.Info(Name + " - SaveChanges() - " + stopwatch.Elapsed);
         }
     }
 }
