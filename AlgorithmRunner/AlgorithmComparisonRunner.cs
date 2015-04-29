@@ -157,7 +157,6 @@
                                 actualReviewer.ComputedReviewers.Add(task.Result);
                             }
 
-                            entities.ActualReviewers.Add(actualReviewer);
                             entities.SaveChanges();
                         }
                     }
@@ -170,12 +169,14 @@
 
         private static ActualReviewer FindOrCreateActualReviewer(ExpertiseDBEntities entities, ReviewInfo info, int artifactId)
         {
-            return entities.ActualReviewers.SingleOrDefault(
+            ActualReviewer actualReviewer = entities.ActualReviewers.SingleOrDefault(
                         reviewer => reviewer.ArtifactId == artifactId && 
                         reviewer.ChangeId == info.ChangeId && 
-                        reviewer.ActivityId == info.ActivityId)
-                ??
-                    new ActualReviewer
+                        reviewer.ActivityId == info.ActivityId);
+
+            if (null == actualReviewer)
+            {
+                actualReviewer = new ActualReviewer
                     {
                         ActivityId = info.ActivityId,
                         ArtifactId = artifactId,
@@ -183,6 +184,10 @@
                         Reviewer = info.Reviewer,
                         Time = info.When
                     };
+                entities.ActualReviewers.Add(actualReviewer);
+            }
+
+            return actualReviewer;
         }
 
         protected virtual void ProcessReviewInfo(ReviewInfo info, IList<string> involvedFiles, StreamWriter found, Stopwatch stopwatch)
