@@ -44,3 +44,28 @@ WHERE ActualReviewers.ActualReviewerId NOT IN
 (SELECT DISTINCT ComputedReviewers.ActualReviewerId
 FROM ComputedReviewers);
 
+/* If part of AlgorithmRunner was executed twice, the ComputedReviewer entries
+   that were first assigned to different, but identical ActualReviewers
+   might match each other and therefore one of them can be deleted */
+
+DELETE Doppelgangers
+FROM ComputedReviewers OriginalReviewers
+INNER JOIN ComputedReviewers Doppelgangers ON 
+	OriginalReviewers.ActualReviewerId=Doppelgangers.ActualReviewerId AND
+	OriginalReviewers.AlgorithmId=Doppelgangers.AlgorithmId AND
+	OriginalReviewers.ComputedReviewerId<Doppelgangers.ComputedReviewerId
+WHERE
+	OriginalReviewers.Expert1=Doppelgangers.Expert1 AND
+	OriginalReviewers.Expert1Value=Doppelgangers.Expert1Value AND
+
+	OriginalReviewers.Expert2=Doppelgangers.Expert2 AND
+	OriginalReviewers.Expert2Value=Doppelgangers.Expert2Value AND
+
+	OriginalReviewers.Expert3=Doppelgangers.Expert3 AND
+	OriginalReviewers.Expert3Value=Doppelgangers.Expert3Value AND
+
+	OriginalReviewers.Expert4=Doppelgangers.Expert4 AND
+	OriginalReviewers.Expert4Value=Doppelgangers.Expert4Value AND
+
+	OriginalReviewers.Expert5=Doppelgangers.Expert5 AND
+	OriginalReviewers.Expert5Value=Doppelgangers.Expert5Value;
