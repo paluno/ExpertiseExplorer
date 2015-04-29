@@ -24,7 +24,7 @@ COMMIT;
 
 
 /*
-Earlier versions of Algorithm runner created multiple ActualReviewers entries for one actual review.
+Earlier versions of AlgorithmRunner created multiple ActualReviewers entries for one actual review.
 This script integrates these duplicate entries. It has to be run multiple times to find all duplicates.
 */
 
@@ -43,3 +43,4 @@ DELETE FROM ActualReviewers
 WHERE ActualReviewers.ActualReviewerId NOT IN
 (SELECT DISTINCT ComputedReviewers.ActualReviewerId
 FROM ComputedReviewers);
+
