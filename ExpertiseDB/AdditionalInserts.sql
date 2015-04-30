@@ -102,9 +102,10 @@ COMMIT;
 START TRANSACTION;
 USE `expertisedb`;
 
-CREATE PROCEDURE `GetActualReviewersGrouped`()
-SELECT ChangeId, count(changeid) as Count-- Shouldn't it count on artifactid?
+CREATE PROCEDURE `GetActualReviewersGrouped`(IN RepID INT)
+SELECT ChangeId, count(DISTINCT ArtifactId) as Count
 FROM ActualReviewers
+WHERE ActualReviewers.RepositoryId=RepID
 GROUP BY ChangeId;
 
 COMMIT;

@@ -3,10 +3,9 @@
     internal enum StatisticsOperation
     {
         FindMissingReviewers = 0,
-        AnalyzeActualReviews,
-        ComputeStatisticsForAllAlgorithmsAndActualReviews,
-        FindIntersectingEntriesForAllAlgorithms,
-        FindIntersectingEntriesForAllAlgorithmsPairwise,
-        InvalidOperation
+        AnalyzeActualReviews = 1,
+        ComputeStatisticsForAllAlgorithmsAndActualReviews = 2,
+        FindIntersectingEntriesForAllAlgorithms = 3,
+        FindIntersectingEntriesForAllAlgorithmsPairwise = 4
     }
 }

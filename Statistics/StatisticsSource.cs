@@ -3,8 +3,7 @@
     internal enum StatisticsSource
     {
         All = 0,
-        WithoutHg,
-        OnlyOneArtifact,
-        None,
+        WithoutHg = 1,
+        OnlyOneArtifact = 2
     }
 }

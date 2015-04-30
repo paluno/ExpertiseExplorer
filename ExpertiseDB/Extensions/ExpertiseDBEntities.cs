@@ -184,9 +184,11 @@
             return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
 
-        public List<ActualReviewersGrouped> GetActualReviewersGrouped()
+        public List<ActualReviewersGrouped> GetActualReviewersGrouped(int repositoryId)
         {
-            return Database.SqlQuery<ActualReviewersGrouped>("CALL GetActualReviewersGrouped()").ToList();
+            string sql = string.Format(CultureInfo.InvariantCulture, "CALL GetActualReviewersGrouped({0})", repositoryId);
+
+            return Database.SqlQuery<ActualReviewersGrouped>(sql).ToList();
         }
 
         private IEnumerable<DeveloperExpertiseSum> GetDeveloperExpertiseSumForRepository(int repositoryId, int numberOfHits = 0)
