@@ -48,7 +48,7 @@ FROM ComputedReviewers);
    that were first assigned to different, but identical ActualReviewers
    might match each other and therefore one of them can be deleted */
 
-DELETE Doppelgangers
+DELETE OriginalReviewers
 FROM ComputedReviewers OriginalReviewers
 INNER JOIN ComputedReviewers Doppelgangers ON 
 	OriginalReviewers.ActualReviewerId=Doppelgangers.ActualReviewerId AND
@@ -69,3 +69,16 @@ WHERE
 
 	OriginalReviewers.Expert5=Doppelgangers.Expert5 AND
 	OriginalReviewers.Expert5Value=Doppelgangers.Expert5Value;
+
+
+/* The ComputedReviewers might also be different, though. For example,
+   if a debug run first produced erroneous results and a patch
+   corrected the fault, so the later results are not erroneous.
+   In this case, the earlier results have to be deleted. */
+
+DELETE OriginalReviewers
+FROM ComputedReviewers OriginalReviewers
+INNER JOIN ComputedReviewers Doppelgangers ON 
+	OriginalReviewers.ActualReviewerId=Doppelgangers.ActualReviewerId AND
+	OriginalReviewers.ComputedReviewerId<Doppelgangers.ComputedReviewerId AND
+	OriginalReviewers.AlgorithmId=Doppelgangers.AlgorithmId;
