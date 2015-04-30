@@ -146,7 +146,7 @@
 
                         using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
                         {
-                            ActualReviewer actualReviewer = FindOrCreateActualReviewer(entities, info, artifactId);
+                            ActualReviewer actualReviewer = FindOrCreateActualReviewer(entities, info, artifactId, Algorithms[0].RepositoryId);
 
                             // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
                             IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
@@ -167,7 +167,7 @@
             }
         }
 
-        private static ActualReviewer FindOrCreateActualReviewer(ExpertiseDBEntities entities, ReviewInfo info, int artifactId)
+        private static ActualReviewer FindOrCreateActualReviewer(ExpertiseDBEntities entities, ReviewInfo info, int artifactId, int repositoryId)
         {
             ActualReviewer actualReviewer = entities.ActualReviewers.SingleOrDefault(
                         reviewer => reviewer.ArtifactId == artifactId && 
@@ -182,7 +182,8 @@
                         ArtifactId = artifactId,
                         ChangeId = info.ChangeId,
                         Reviewer = info.Reviewer,
-                        Time = info.When
+                        Time = info.When,
+                        RepositoryId = repositoryId
                     };
                 entities.ActualReviewers.Add(actualReviewer);
             }
