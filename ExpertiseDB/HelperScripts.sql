@@ -87,13 +87,13 @@ INNER JOIN ComputedReviewers Doppelgangers ON
 /* ActualReviewers shall have an additional RepositoryId column.
    This speed up statistics for individual repositories. */
 
-ALTER TABLE `asereviewer`.`ActualReviewers` 
+ALTER TABLE `ActualReviewers` 
 ADD COLUMN `RepositoryId` INT NULL AFTER `ArtifactId`,
 ADD INDEX `FK_RepositoryActualReviewer_idx` (`RepositoryId` ASC);
-ALTER TABLE `asereviewer`.`ActualReviewers` 
+ALTER TABLE `ActualReviewers` 
 ADD CONSTRAINT `FK_RepositoryActualReviewer`
   FOREIGN KEY (`RepositoryId`)
-  REFERENCES `asereviewer`.`Repositorys` (`RepositoryId`)
+  REFERENCES `Repositorys` (`RepositoryId`)
   ON DELETE CASCADE
   ON UPDATE NO ACTION;
 
@@ -103,4 +103,22 @@ ADD CONSTRAINT `FK_RepositoryActualReviewer`
 
 UPDATE ActualReviewers
 INNER JOIN Artifacts art ON ActualReviewers.ArtifactId = art.ArtifactId
-SET RepositoryId=Artifacts.RepositoryId
+SET ActualReviewers.RepositoryId=art.RepositoryId;
+
+/* Now that all AlgorithmRunners write the RepositoryId to ActualReviewers and
+   all old NULL values are updated to the correct value, we can make RepositoryId a non-null column */
+
+LOCK TABLES ActualReviewers WRITE;
+
+ALTER TABLE `ActualReviewers` 
+    DROP FOREIGN KEY FK_RepositoryActualReviewer;
+ALTER TABLE ActualReviewers
+	MODIFY COLUMN `RepositoryId` INT NOT NULL;
+ALTER TABLE `ActualReviewers` 
+	ADD CONSTRAINT `FK_RepositoryActualReviewer`
+	  FOREIGN KEY (`RepositoryId`)
+	  REFERENCES `Repositorys` (`RepositoryId`)
+	  ON DELETE CASCADE
+	  ON UPDATE NO ACTION;
+
+UNLOCK TABLES;
