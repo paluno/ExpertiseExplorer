@@ -63,6 +63,10 @@
       <End Role="Artifact" EntitySet="Artifacts" />
       <End Role="ActualReviewer" EntitySet="ActualReviewers" />
     </AssociationSet>
+    <AssociationSet Name="Repository" Association="ExpertiseDB.Store.RepositoryActualReviewer">
+      <End Role="Repository" EntitySet="Repositorys" />
+      <End Role="ActualReviewer" EntitySet="ActualReviewers" />
+    </AssociationSet>
     <AssociationSet Name="ActualReviewerComputedReviewer" Association="ExpertiseDB.Store.ActualReviewerComputedReviewer">
       <End Role="ActualReviewer" EntitySet="ActualReviewers" />
       <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
@@ -187,6 +191,7 @@
     <Property Name="ActivityId" Type="int" Nullable="false" />
     <Property Name="Reviewer" Type="varchar" Nullable="false" />
     <Property Name="ArtifactId" Type="int" Nullable="false" />
+    <Property Name="RepositoryId" Type="int" Nullable="false" />
   </EntityType>
   <EntityType Name="ComputedReviewers">
     <Key>
@@ -366,6 +371,20 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="RepositoryActualReviewer">
+    <End Role="Repository" Type="ExpertiseDB.Store.Repositorys" Multiplicity="1">
+      <OnDelete Action="Cascade" />
+    </End>
+    <End Role="ActualReviewer" Type="ExpertiseDB.Store.ActualReviewers" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Repository">
+        <PropertyRef Name="RepositoryId" />
+      </Principal>
+      <Dependent Role="ActualReviewer">
+        <PropertyRef Name="RepositoryId" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>  
   <Association Name="ActualReviewerComputedReviewer">
     <End Role="ActualReviewer" Type="ExpertiseDB.Store.ActualReviewers" Multiplicity="1">
       <OnDelete Action="Cascade" />
@@ -482,6 +501,10 @@
             <End Role="Artifact" EntitySet="Artifacts" />
             <End Role="ActualReviewer" EntitySet="ActualReviewers" />
           </AssociationSet>
+          <AssociationSet Name="RepositoryActualReviewer" Association="ExpertiseDB.RepositoryActualReviewer">
+            <End Role="Repository" EntitySet="Repositorys" />
+            <End Role="ActualReviewer" EntitySet="ActualReviewers" />
+          </AssociationSet>		  
           <EntitySet Name="ComputedReviewers" EntityType="ExpertiseDB.ComputedReviewer" />
           <AssociationSet Name="ActualReviewerComputedReviewer" Association="ExpertiseDB.ActualReviewerComputedReviewer">
             <End Role="ActualReviewer" EntitySet="ActualReviewers" />
@@ -580,6 +603,7 @@
           <Property Type="String" Name="SourceURL" Nullable="false" />
           <NavigationProperty Name="Developers" Relationship="ExpertiseDB.RepositoryDeveloper" FromRole="Repository" ToRole="Developer" />
           <NavigationProperty Name="Artifacts" Relationship="ExpertiseDB.RepositoryArtifact" FromRole="Repository" ToRole="Artifact" />
+          <NavigationProperty Name="ActualReviewers" Relationship="ExpertiseDB.RepositoryActualReviewer" FromRole="Repository" ToRole="ActualReviewer" />		  
           <Property Type="DateTime" Name="LastUpdate" Nullable="true" />
         </EntityType>
         <EntityType Name="Developer">
@@ -772,6 +796,8 @@
           <Property Type="String" Name="Reviewer" Nullable="false" />
           <NavigationProperty Name="Artifact" Relationship="ExpertiseDB.ArtifactActualReviewer" FromRole="ActualReviewer" ToRole="Artifact" />
           <Property Type="Int32" Name="ArtifactId" Nullable="false" />
+          <NavigationProperty Name="Repository" Relationship="ExpertiseDB.RepositoryActualReviewer" FromRole="ActualReviewer" ToRole="Repository" />
+          <Property Type="Int32" Name="RepositoryId" Nullable="false" />
           <NavigationProperty Name="ComputedReviewers" Relationship="ExpertiseDB.ActualReviewerComputedReviewer" FromRole="ActualReviewer" ToRole="ComputedReviewer" />
         </EntityType>
         <Association Name="ArtifactActualReviewer">
@@ -788,6 +814,20 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="RepositoryActualReviewer">
+          <End Type="ExpertiseDB.Repository" Role="Repository" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Type="ExpertiseDB.ActualReviewer" Role="ActualReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Repository">
+              <PropertyRef Name="RepositoryId" />
+            </Principal>
+            <Dependent Role="ActualReviewer">
+              <PropertyRef Name="RepositoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>		
         <EntityType Name="ComputedReviewer">
           <Key>
             <PropertyRef Name="ComputedReviewerId" />
@@ -997,6 +1037,7 @@
           <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
           <ScalarProperty Name="Reviewer" ColumnName="Reviewer" />
           <ScalarProperty Name="ArtifactId" ColumnName="ArtifactId" />
+          <ScalarProperty Name="RepositoryId" ColumnName="RepositoryId" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

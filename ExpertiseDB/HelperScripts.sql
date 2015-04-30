@@ -82,3 +82,25 @@ INNER JOIN ComputedReviewers Doppelgangers ON
 	OriginalReviewers.ActualReviewerId=Doppelgangers.ActualReviewerId AND
 	OriginalReviewers.ComputedReviewerId<Doppelgangers.ComputedReviewerId AND
 	OriginalReviewers.AlgorithmId=Doppelgangers.AlgorithmId;
+
+
+/* ActualReviewers shall have an additional RepositoryId column.
+   This speed up statistics for individual repositories. */
+
+ALTER TABLE `asereviewer`.`ActualReviewers` 
+ADD COLUMN `RepositoryId` INT NULL AFTER `ArtifactId`,
+ADD INDEX `FK_RepositoryActualReviewer_idx` (`RepositoryId` ASC);
+ALTER TABLE `asereviewer`.`ActualReviewers` 
+ADD CONSTRAINT `FK_RepositoryActualReviewer`
+  FOREIGN KEY (`RepositoryId`)
+  REFERENCES `asereviewer`.`Repositorys` (`RepositoryId`)
+  ON DELETE CASCADE
+  ON UPDATE NO ACTION;
+
+
+/* Now the new column RepositoryId contains all NULLs. Time to update AlgorithmRunner to write the RepositoryId. 
+   Afterwards: Add RepositoryIds to the old NULL entries */
+
+UPDATE ActualReviewers
+INNER JOIN Artifacts art ON ActualReviewers.ArtifactId = art.ArtifactId
+SET RepositoryId=Artifacts.RepositoryId
