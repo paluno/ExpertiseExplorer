@@ -35,7 +35,8 @@ with codecs.open(sys.argv[1], "r", "utf-8") as jsonFile:
             text = message["message"]
             if "Code-Review+" not in text:
                 if "Code-Review-" not in text:
-                    continue
+                    if "Looks good to me, approved" not in text:
+                        continue
         
             date = message["date"]
             messageRevisionNumber = message["_revision_number"]
@@ -52,6 +53,9 @@ with codecs.open(sys.argv[1], "r", "utf-8") as jsonFile:
                 if revisionNumber != messageRevisionNumber: continue
                 
                 revisionId = "" + revisionName
+                
+                if not revision.has_key("files"): continue
+                
                 files = revision["files"]
                 filenames = ""
                 concatChar = ""
@@ -61,6 +65,7 @@ with codecs.open(sys.argv[1], "r", "utf-8") as jsonFile:
 				
                 for file in files:
                     filename = "" + file
+                    filename = filename.replace(":", "_")
                     linesInserted = 0
                     if files[file].has_key("lines_inserted"): linesInserted = files[file]["lines_inserted"]
 					
