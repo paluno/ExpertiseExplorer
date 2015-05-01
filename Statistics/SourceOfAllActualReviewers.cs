@@ -9,7 +9,7 @@ namespace Statistics
 {
     class SourceOfAllActualReviewers : SourceOfActualReviewers
     {
-        public override IEnumerable<int> findReviews()
+        protected override IEnumerable<int> findReviewsInDatabase()
         {
             using (var context = new ExpertiseDBEntities())
                 return context.ActualReviewers.Where(ar => ar.RepositoryId == RepositoryId).Select(ar => ar.ActualReviewerId).ToList();
@@ -17,7 +17,8 @@ namespace Statistics
 
         public override IDictionary<int, string> findReviewsWithReviewers()
         {
-            throw new NotImplementedException();
+            using (var context = new ExpertiseDBEntities())
+                return context.ActualReviewers.Where(ar => ar.RepositoryId == RepositoryId).ToDictionary(ar => ar.ActualReviewerId, ar => ar.Reviewer);
         }
 
         public SourceOfAllActualReviewers(int repositoryId)

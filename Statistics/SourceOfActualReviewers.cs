@@ -47,7 +47,20 @@ namespace Statistics
             get;
         }
 
-        public abstract IEnumerable<int> findReviews();
+        private IEnumerable<int> reviewCache;
+        private object lock4Reviewcache = new object();
+
+        public IEnumerable<int> findReviews()
+        {
+            if (null == reviewCache)
+                lock (lock4Reviewcache)
+                    if (null == reviewCache)
+                        reviewCache = findReviewsInDatabase();
+
+            return reviewCache;
+        }
+
+        protected abstract IEnumerable<int> findReviewsInDatabase();
         public abstract IDictionary<int, string> findReviewsWithReviewers();
     }
 }

@@ -192,15 +192,15 @@
 
             var output = algorithmIds.ToDictionary(algorithmId => algorithmId, algorithmId => new List<StatisticsResult>());
 
-            IEnumerable<int> actualReviewerIds = sourceOfActualReviewers.findReviews();
+            IDictionary<int,string> actualReviewers = sourceOfActualReviewers.findReviewsWithReviewers();
             int count = 0;
             double elapsed = 0d;
-            int maxCount = actualReviewerIds.Count();
+            int maxCount = actualReviewers.Count();
             Stopwatch sw = new Stopwatch();
             sw.Start();
             int errorCount = 0;
 
-            foreach (int actualReviewerId in actualReviewerIds)
+            foreach (int actualReviewerId in actualReviewers.Keys)
             {
                 try
                 {
@@ -216,11 +216,7 @@
 
                     count++;
 
-                    string actualReviewerName;
-                    using (var context = new ExpertiseDBEntities())
-                    {
-                        actualReviewerName = context.ActualReviewers.Find(actualReviewerId).Reviewer.ToLowerInvariant();
-                    }
+                    string actualReviewerName = actualReviewers[actualReviewerId];
 
                     IEnumerable<ComputedReviewer> computedReviewers = GetComputedReviewersForActualReviewerId(actualReviewerId);
 
@@ -305,15 +301,15 @@
             using (var context = new ExpertiseDBEntities())
                 algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
 
-            Parallel.ForEach(algorithmIds, algorithmId => ComputeStatisticsForAlgorithmAndActualReviews(algorithmId, source.findReviews(), source.Postfix));
+            Parallel.ForEach(algorithmIds, algorithmId => ComputeStatisticsForAlgorithmAndActualReviews(algorithmId, source));
         }
 
-        private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithmId, IEnumerable<int> actualReviewerIds, string postfix)
+        private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithmId, SourceOfActualReviewers source)
         {
             string[] originalData = File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId));
-            List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine).Where(tmp => actualReviewerIds.Contains(tmp.ActualReviewerId)).ToList();
+            List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine).Where(tmp => source.findReviews().Contains(tmp.ActualReviewerId)).ToList();
 
-            int count = actualReviewerIds.Count();
+            int count = source.findReviews().Count();
             int foundNo = workingSet.Count(sr => sr.AuthorWasFound);
             int[] expertPlacements = new int[5];
 
@@ -327,7 +323,7 @@
             for (int i = 0; i < 5; i++)
                 sb.AppendLine(string.Format("Expert was No {0}:  {1} / {2} ({3:P})", i + 1, expertPlacements[i], count, (double)expertPlacements[i] / (double)count));
 
-            File.WriteAllText(string.Format(basepath + "stats_{0}_analyzed{1}.txt", algorithmId, postfix), sb.ToString());
+            File.WriteAllText(string.Format(basepath + "stats_{0}_analyzed{1}.txt", algorithmId, source.Postfix), sb.ToString());
         }
 
         /// <summary>

@@ -15,7 +15,7 @@ namespace Statistics
             get { return "_only_one"; }
         }
 
-        public override IEnumerable<int> findReviews()
+        protected override IEnumerable<int> findReviewsInDatabase()
         {
             var result = new List<int>();
 
@@ -32,7 +32,13 @@ namespace Statistics
 
         public override IDictionary<int, string> findReviewsWithReviewers()
         {
-            throw new NotImplementedException();
+            using (var context = new ExpertiseDBEntities())
+            {
+                return context.GetActualReviewersGrouped(RepositoryId)
+                                .Where(arg => arg.Count == 1)
+                                .Select(reviewersGrouped => context.ActualReviewers.First(ar => ar.ChangeId == reviewersGrouped.ChangeId))
+                                .ToDictionary(ar => ar.ActualReviewerId, ar => ar.Reviewer);
+            }
         }
 
         public SourceOfActualReviewsWithOnlyOneArtifact(int repositoryId)

@@ -43,17 +43,8 @@
                     break;
 
                 case 4:
-                    SourceOfActualReviewers sourceOfActualReviews;
-                    try
-                    {
-                        SourceOfActualReviewers.StatisticsSource statisticsSource = (SourceOfActualReviewers.StatisticsSource)Enum.Parse(typeof(SourceOfActualReviewers.StatisticsSource), args[3]);
-                        sourceOfActualReviews = SourceOfActualReviewers.createSourceFromParameter(statisticsSource, statistics.RepositoryId);
-                    }
-                    catch(Exception)
-                    {
-                        Console.WriteLine("Error: source needs to be an integer in the range from 0 to 2");
-                        return;
-                    }
+                    SourceOfActualReviewers.StatisticsSource statisticsSource = (SourceOfActualReviewers.StatisticsSource)Enum.Parse(typeof(SourceOfActualReviewers.StatisticsSource), args[3]);
+                    SourceOfActualReviewers sourceOfActualReviews = SourceOfActualReviewers.createSourceFromParameter(statisticsSource, statistics.RepositoryId);
 
                     switch(statisticsOperation)
                     {
