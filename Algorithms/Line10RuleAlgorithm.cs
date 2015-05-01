@@ -16,14 +16,6 @@
             Init();
         }
 
-        public override void CalculateExpertise()
-        {
-            Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
-            Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
-
-            base.CalculateExpertise();
-        }
-
         public override void CalculateExpertiseForFile(string filename)
         {
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");

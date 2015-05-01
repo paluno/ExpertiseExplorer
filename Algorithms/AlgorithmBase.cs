@@ -41,17 +41,6 @@
         
         public abstract void CalculateExpertiseForFile(string filename);
 
-        public virtual void CalculateExpertise()
-        {
-            List<string> filenames;
-            using (var repository = new ExpertiseDBEntities())
-            {
-                filenames = repository.Artifacts.Select(a => a.Name).ToList();
-            }
-
-            CalculateExpertiseForFiles(filenames);
-        }
-
         public void CalculateExpertiseForFiles(IEnumerable<string> filenames)
         {
             var tasks = new List<Task>();

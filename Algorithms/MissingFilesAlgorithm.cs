@@ -15,11 +15,6 @@
             throw new System.NotImplementedException();
         }
 
-        public override void CalculateExpertise()
-        {
-            throw new System.NotImplementedException();
-        }
-
         public bool CheckForMissingFiles(List<string> filenames)
         {
             bool somethingIsWrong = false;
