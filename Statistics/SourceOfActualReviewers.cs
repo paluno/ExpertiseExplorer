@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Statistics
+{
+    abstract class SourceOfActualReviewers
+    {
+        internal enum StatisticsSource
+        {
+            All = 0,
+            WithoutHg = 1,
+            OnlyOneArtifact = 2
+        }
+
+        public int RepositoryId { get; private set; }
+
+        #region construction
+        public SourceOfActualReviewers(int repositoryId)
+        {
+            this.RepositoryId = repositoryId;
+        }
+
+        /// <summary>
+        /// Factory Method for Sources
+        /// </summary>
+       public static SourceOfActualReviewers createSourceFromParameter(StatisticsSource typeOfSource, int repositoryId)
+        {
+            switch(typeOfSource)
+            {
+                case StatisticsSource.All:
+                    return new SourceOfAllActualReviewers(repositoryId);
+                case StatisticsSource.WithoutHg:
+                    return new SourceOfActualReviewersWithoutHg(repositoryId);
+                case StatisticsSource.OnlyOneArtifact:
+                    return new SourceOfActualReviewsWithOnlyOneArtifact(repositoryId);
+                default:
+                    throw new NotImplementedException("The type \"" + typeOfSource + "\" is unknown");
+            }
+        }
+        #endregion construction
+
+        public abstract string Postfix
+        {
+            get;
+        }
+
+        public abstract IEnumerable<int> findReviews();
+        public abstract IDictionary<int, string> findReviewsWithReviewers();
+    }
+}

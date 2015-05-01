@@ -6,6 +6,8 @@
     {
         public static void Main(string[] args)
         {
+            log4net.Config.XmlConfigurator.Configure();
+
             if (args.Length < 3)
             {
                 ShowHelp();
@@ -41,10 +43,11 @@
                     break;
 
                 case 4:
-                    StatisticsSource statisticsSource;
+                    SourceOfActualReviewers sourceOfActualReviews;
                     try
                     {
-                        statisticsSource = (StatisticsSource)Enum.Parse(typeof(StatisticsSource), args[3]);
+                        SourceOfActualReviewers.StatisticsSource statisticsSource = (SourceOfActualReviewers.StatisticsSource)Enum.Parse(typeof(SourceOfActualReviewers.StatisticsSource), args[3]);
+                        sourceOfActualReviews = SourceOfActualReviewers.createSourceFromParameter(statisticsSource, statistics.RepositoryId);
                     }
                     catch(Exception)
                     {
@@ -52,7 +55,23 @@
                         return;
                     }
 
-                    statistics.Run(statisticsOperation, statisticsSource);
+                    switch(statisticsOperation)
+                    {
+                        case StatisticsOperation.AnalyzeActualReviews:
+                            statistics.AnalyzeActualReviews(sourceOfActualReviews);
+                            break;
+                        case StatisticsOperation.ComputeStatisticsForAllAlgorithmsAndActualReviews:
+                            statistics.ComputeStatisticsForAllAlgorithmsAndActualReviews(sourceOfActualReviews);
+                            break;
+                        case StatisticsOperation.FindIntersectingEntriesForAllAlgorithms:
+                            statistics.FindIntersectingEntriesForActualReviewerIds(sourceOfActualReviews);
+                            break;
+                        case StatisticsOperation.FindIntersectingEntriesForAllAlgorithmsPairwise:
+                            statistics.FindIntersectingEntriesPairwiseForActualReviewerIds(sourceOfActualReviews);
+                            break;
+                        default:
+                            throw new NotImplementedException("The operation \"" + statisticsOperation + "\" has not been implemented");
+                    }
 
                     break;
 

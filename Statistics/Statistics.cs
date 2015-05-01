@@ -9,15 +9,17 @@
     using System.Threading.Tasks;
 
     using ExpertiseDB;
-    using ExpertiseDB.Extensions;
+    using log4net;
 
     internal class Statistics
     {
+        private readonly ILog log = LogManager.GetLogger("Statistics");
+
         private readonly string repositoryURL;
         private readonly string basepath;
 
         private int _RepositoryId = int.MinValue;
-        private int RepositoryId
+        public int RepositoryId
         {
             get
             {
@@ -37,58 +39,6 @@
         {
             this.basepath = basepath;
             this.repositoryURL = sourceURL;
-        }
-
-        public void Run(StatisticsOperation statisticsOperation, StatisticsSource statisticsSource)
-        {
-            // sources: all, w/o hg, only one artifact
-            IEnumerable<int> ids = new List<int>();
-            var postfix = string.Empty;
-
-            switch (statisticsSource)
-            {
-                case StatisticsSource.All:
-                    using (var context = new ExpertiseDBEntities())
-                    {
-                        ids = context.ActualReviewers.Where(ar => ar.RepositoryId == RepositoryId).Select(ar => ar.ActualReviewerId).ToList();
-                    }
-
-                    break;
-
-                case StatisticsSource.WithoutHg:
-                    ids = GetReviewsWithoutHg();
-                    postfix = "_wo_hg";
-                    break;
-
-                case StatisticsSource.OnlyOneArtifact:
-                    ids = GetReviewsWithOnlyOneArtifact();
-                    postfix = "_only_one";
-                    break;
-            }
-
-            switch (statisticsOperation)
-            {
-                case StatisticsOperation.AnalyzeActualReviews:
-                    ReadUniqueActualReviewers();
-                    ReadUniqueComputedReviewers();
-                    AnalyzeActualReviews(ids);
-                    break;
-
-                case StatisticsOperation.ComputeStatisticsForAllAlgorithmsAndActualReviews:
-                    ComputeStatisticsForAllAlgorithmsAndActualReviews(ids, postfix);
-                    break;
-
-                case StatisticsOperation.FindIntersectingEntriesForAllAlgorithms:
-                    FindIntersectingEntriesForActualReviewerIds(ids, postfix);
-                    break;
-
-                case StatisticsOperation.FindIntersectingEntriesForAllAlgorithmsPairwise:
-                    FindIntersectingEntriesPairwiseForActualReviewerIds(ids, postfix);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException("statisticsOperation");
-            }
         }
 
         public void FindMissingReviewers()
@@ -228,8 +178,11 @@
             return sb.ToString();
         }
 
-        private void AnalyzeActualReviews(IEnumerable<int> actualReviewerIds)
+        public void AnalyzeActualReviews(SourceOfActualReviewers sourceOfActualReviewers)
         {
+            ReadUniqueActualReviewers();
+            ReadUniqueComputedReviewers();
+
             List<Author> actualReviewersAndAlternatives = GetAuthorsFromFile(basepath + "reviewers_actual.txt");
             List<Author> computedReviewersAndAlternatives = GetAuthorsFromFile(basepath + "reviewers_computed.txt");
 
@@ -239,40 +192,45 @@
 
             var output = algorithmIds.ToDictionary(algorithmId => algorithmId, algorithmId => new List<StatisticsResult>());
 
+            IEnumerable<int> actualReviewerIds = sourceOfActualReviewers.findReviews();
             int count = 0;
             double elapsed = 0d;
             int maxCount = actualReviewerIds.Count();
             Stopwatch sw = new Stopwatch();
             sw.Start();
+            int errorCount = 0;
+
             foreach (int actualReviewerId in actualReviewerIds)
             {
-                if (count % 1000 == 0 && count > 0)
+                try
                 {
-                    sw.Stop();
-                    elapsed += sw.Elapsed.TotalSeconds;
-                    double avg = elapsed / count;
-                    TimeSpan remaining = TimeSpan.FromSeconds(avg * (maxCount - count));
-                    Console.WriteLine("Now at: {0} - (act: {1} | avg: {2:N}s | remaining: {3})", count, sw.Elapsed, avg, remaining);
-                    sw.Restart();
-                }
+                    if (count % 1000 == 0 && count > 0)
+                    {
+                        sw.Stop();
+                        elapsed += sw.Elapsed.TotalSeconds;
+                        double avg = elapsed / count;
+                        TimeSpan remaining = TimeSpan.FromSeconds(avg * (maxCount - count));
+                        log.DebugFormat("Now at: {0} - (act: {1} | avg: {2:N}s | remaining: {3})", count, sw.Elapsed, avg, remaining);
+                        sw.Restart();
+                    }
 
-                count++;
+                    count++;
 
-                ActualReviewer actualReviewer;
-                using (var context = new ExpertiseDBEntities())
-                {
-                    actualReviewer = context.ActualReviewers.Find(actualReviewerId);
-                }
+                    string actualReviewerName;
+                    using (var context = new ExpertiseDBEntities())
+                    {
+                        actualReviewerName = context.ActualReviewers.Find(actualReviewerId).Reviewer.ToLowerInvariant();
+                    }
 
-                IEnumerable<ComputedReviewer> computedReviewers = GetComputedReviewersForActualReviewerId(actualReviewerId);
+                    IEnumerable<ComputedReviewer> computedReviewers = GetComputedReviewersForActualReviewerId(actualReviewerId);
 
-                Author alternativesForActualReviewer =
-                    actualReviewersAndAlternatives.Single(
-                        ar => ar.Name.ToLowerInvariant() == actualReviewer.Reviewer.ToLowerInvariant());
+                    Author alternativesForActualReviewer =
+                        actualReviewersAndAlternatives.Single(
+                            ar => ar.Name.ToLowerInvariant() == actualReviewerName);
 
-                foreach (ComputedReviewer computedReviewer in computedReviewers)
-                {
-                    var computedReviewerNamesAndValues = new List<KeyValuePair<string, double>>
+                    foreach (ComputedReviewer computedReviewer in computedReviewers)
+                    {
+                        var computedReviewerNamesAndValues = new List<KeyValuePair<string, double>>
                         {
                             new KeyValuePair<string, double>(computedReviewer.Expert1, computedReviewer.Expert1Value),
                             new KeyValuePair<string, double>(computedReviewer.Expert2, computedReviewer.Expert2Value),
@@ -281,32 +239,43 @@
                             new KeyValuePair<string, double>(computedReviewer.Expert5, computedReviewer.Expert5Value)
                         };
 
-                    bool found = false;
-                    for (int i = 0; i < 5; i++)
-                    {
-                        if (computedReviewerNamesAndValues[i].Key == string.Empty)
+                        bool found = false;
+                        for (int i = 0; i < 5; i++)
+                        {
+                            if (computedReviewerNamesAndValues[i].Key == string.Empty)
+                                break;
+
+                            Author alternativesForComputedReviewer =
+                            computedReviewersAndAlternatives.Single(
+                                cr => cr.Name.ToLowerInvariant() == computedReviewerNamesAndValues[i].Key.ToLowerInvariant());
+
+                            if (!alternativesForActualReviewer.IsMatching(alternativesForComputedReviewer))
+                                continue;
+
+                            output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId)
+                                {
+                                    AuthorWasExpertNo = i + 1,
+                                    ExpertiseValue = computedReviewerNamesAndValues[i].Value
+                                });
+
+                            found = true;
+
                             break;
+                        }
 
-                        Author alternativesForComputedReviewer =
-                        computedReviewersAndAlternatives.Single(
-                            cr => cr.Name.ToLowerInvariant() == computedReviewerNamesAndValues[i].Key.ToLowerInvariant());
-
-                        if (!alternativesForActualReviewer.IsMatching(alternativesForComputedReviewer))
-                            continue;
-
-                        output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId)
-                            {
-                                AuthorWasExpertNo = i + 1,
-                                ExpertiseValue = computedReviewerNamesAndValues[i].Value
-                            });
-                        
-                        found = true;
-
-                        break;
+                        if (!found)
+                            output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (++errorCount > 10)
+                    {
+                        log.Fatal("10 errors while computing statistics, ActualReviewerId=" + actualReviewerId + ", giving up.", ex);
+                        throw new Exception("10 errors while computing statistics, giving up.", ex);
                     }
 
-                    if (!found)
-                        output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId));
+                    log.Error("Error #" + errorCount + " on ActualReviewerId " + actualReviewerId, ex);
                 }
             }
 
@@ -330,48 +299,13 @@
             }
         }
 
-        /// <summary>
-        /// filters Mozilla's original import "author" hg@mozilla.com
-        /// </summary>
-        /// <returns>Ids of ComputedReviewers that do not contain any reference to hg@mozilla.com</returns>
-        private IEnumerable<int> GetReviewsWithoutHg()
-        {
-            using (var context = new ExpertiseDBEntities())
-            {
-                return context.ComputedReviewers
-                        // Find ComputedReviewer IDs of all computed reviewers that have no recommendation for hg@mozilla.com
-                    .Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId && cr.Expert1 != "hg@mozilla.com" && cr.Expert2 != "hg@mozilla.com" && cr.Expert3 != "hg@mozilla.com" && cr.Expert4 != "hg@mozilla.com" && cr.Expert5 != "hg@mozilla.com")
-                    .Select(cr => cr.ActualReviewerId).Distinct().ToList()
-                        // Other ComputedReviewers for the same ActualReview shall also not recommend hg@mozilla.com
-                    .Where(id => !context.ComputedReviewers
-                        .Where(cr => cr.ActualReviewerId == id)
-                        .Any(cr => cr.Expert1 == "hg@mozilla.com" || cr.Expert2 == "hg@mozilla.com" || cr.Expert3 == "hg@mozilla.com" || cr.Expert4 == "hg@mozilla.com" || cr.Expert5 == "hg@mozilla.com"))
-                    .ToList();
-            }
-        }
-
-        private IEnumerable<int> GetReviewsWithOnlyOneArtifact()
-        {
-            var result = new List<int>();
-
-            using (var context = new ExpertiseDBEntities())
-            {
-                List<ActualReviewersGrouped> actualReviewersGrouped = context.GetActualReviewersGrouped(RepositoryId)
-                                                                        .Where(arg => arg.Count == 1).ToList();
-
-                result.AddRange(from reviewersGrouped in actualReviewersGrouped where reviewersGrouped.Count == 1 select context.ActualReviewers.First(ar => ar.ChangeId == reviewersGrouped.ChangeId).ActualReviewerId);
-            }
-
-            return result;
-        }
-
-        private void ComputeStatisticsForAllAlgorithmsAndActualReviews(IEnumerable<int> actualReviewerIds, string postfix = "")
+        public void ComputeStatisticsForAllAlgorithmsAndActualReviews(SourceOfActualReviewers source)
         {
             List<int> algorithmIds;
             using (var context = new ExpertiseDBEntities())
                 algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
 
-            Parallel.ForEach(algorithmIds, algorithmId => ComputeStatisticsForAlgorithmAndActualReviews(algorithmId, actualReviewerIds, postfix));
+            Parallel.ForEach(algorithmIds, algorithmId => ComputeStatisticsForAlgorithmAndActualReviews(algorithmId, source.findReviews(), source.Postfix));
         }
 
         private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithmId, IEnumerable<int> actualReviewerIds, string postfix)
@@ -399,13 +333,15 @@
         /// <summary>
         /// computes the size of the set of entries that have the actual reviewer within the top 5 computed reviewers and is shared between all algorithms
         /// </summary>
-        private void FindIntersectingEntriesForActualReviewerIds(IEnumerable<int> actualReviewerIds, string postfix = "")
+        public void FindIntersectingEntriesForActualReviewerIds(SourceOfActualReviewers source)
         {
+            IEnumerable<int> actualReviewerIds = source.findReviews();
+
             List<int> algorithmIds;
             using (var context = new ExpertiseDBEntities())
                 algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
 
-            Console.WriteLine("Setting up");
+            log.Debug("Setting up");
             List<List<StatisticsResult>> allStatistics = algorithmIds
                     // read statistics for every algorithm
                 .Select(algorithmId => File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId)))
@@ -415,50 +351,55 @@
             List<StatisticsResult> workingSet = allStatistics[1]    // Why 1??? Maybe skip Line 10 rule, because it has at most one entry?
                 .Where(statResult => actualReviewerIds.Contains(statResult.ActualReviewerId) && statResult.AuthorWasFound).ToList();
             int count = workingSet.Count;
-            Console.WriteLine("Setup complete");
+            log.Info("Setup complete");
 
             for (int i = 2; i < algorithmIds.Count; i++)
             {
-                Console.WriteLine("Now testing against {0} , working set count: {1}", i, workingSet.Count);
+                log.InfoFormat("Now testing against {0}, working set count: {1}", i, workingSet.Count);
                 workingSet = workingSet.Where(s => allStatistics[i].Any(stats => stats.ActualReviewerId == s.ActualReviewerId && stats.AuthorWasFound)).ToList();
             }
 
             string sb = string.Format("{0} / {1} intersecting entries", workingSet.Count, count);
-            File.WriteAllText(string.Format(basepath + "stats{0}.txt", postfix), sb);
+            File.WriteAllText(string.Format(basepath + "stats{0}.txt", source.Postfix), sb);
         }
 
         /// <summary>
         /// computes the size of the set of entries that have the actual reviewer within the top 5 computed reviewers and is shared between two algorithms by pairwise comparison
         /// </summary>
-        private void FindIntersectingEntriesPairwiseForActualReviewerIds(IEnumerable<int> actualReviewerIds, string postfix)
+        public void FindIntersectingEntriesPairwiseForActualReviewerIds(SourceOfActualReviewers source)
         {
+            IEnumerable<int> actualReviewerIds = source.findReviews();
             List<int> algorithmIds;
             using (var context = new ExpertiseDBEntities())
                 algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
 
-            Console.WriteLine("Setting up");
+            log.Debug("Setting up");
             var sb = new StringBuilder();
-            var allStatistics = algorithmIds.Select(algorithmId => File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId))).Select(originalData => originalData.Select(StatisticsResult.FromCSVLine).ToList()).ToList();
+            List<List<StatisticsResult>> allStatistics = algorithmIds
+                .Select(algorithmId => File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId)))
+                    .Select(originalData => originalData.Select(StatisticsResult.FromCSVLine)
+                    .ToList())
+                .ToList();
             allStatistics[0] = allStatistics[0].Where(stat => stat.AuthorWasExpertNo == 1).ToList();
-            Console.WriteLine("Setup complete");
+            log.Info("Setup complete");
 
-            for (var i = 0; i < algorithmIds.Count; i++)
+            for (int i = 0; i < algorithmIds.Count; i++)
             {
-                var workingSet = allStatistics[i].Where(tmp => actualReviewerIds.Contains(tmp.ActualReviewerId) && tmp.AuthorWasFound).ToList();
+                List<StatisticsResult> workingSet = allStatistics[i].Where(tmp => actualReviewerIds.Contains(tmp.ActualReviewerId) && tmp.AuthorWasFound).ToList();
                 
-                var count = workingSet.Count;
-                for (var j = 0; j < algorithmIds.Count; j++)
+                int count = workingSet.Count;
+                for (int j = 0; j < algorithmIds.Count; j++)
                 {
                     if (j == i)
                         continue;
 
-                    var result = workingSet.Where(s => allStatistics[j].Any(stats => stats.ActualReviewerId == s.ActualReviewerId && stats.AuthorWasFound)).ToList();
+                    List<StatisticsResult> result = workingSet.Where(s => allStatistics[j].Any(stats => stats.ActualReviewerId == s.ActualReviewerId && stats.AuthorWasFound)).ToList();
 
                     sb.AppendLine(string.Format("{0} / {1} ({2:P}) intersecting entries for A{3} and A{4}", result.Count, count, (double)result.Count / (double)count, i + 1, j + 1));
                 }
             }
 
-            File.WriteAllText(string.Format(basepath + "stats_intersect_pairwise{0}.txt", postfix), sb.ToString());
+            File.WriteAllText(string.Format(basepath + "stats_intersect_pairwise{0}.txt", source.Postfix), sb.ToString());
         }
     }
 }
