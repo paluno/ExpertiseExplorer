@@ -236,7 +236,7 @@
                         };
 
                         bool found = false;
-                        for (int i = 0; i < 5; i++)
+                        for (int i = 0; i < 5; i++) // 5 is the number of reviewers that may be recommended in ComputedReviewers
                         {
                             if (computedReviewerNamesAndValues[i].Key == string.Empty)
                                 break;
@@ -307,7 +307,8 @@
         private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithmId, SourceOfActualReviewers source)
         {
             string[] originalData = File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId));
-            List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine).Where(tmp => source.findReviews().Contains(tmp.ActualReviewerId)).ToList();
+            List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine)
+                .Where(tmp => source.findReviews().Contains(tmp.ActualReviewerId)).ToList();
 
             int count = source.findReviews().Count();
             int foundNo = workingSet.Count(sr => sr.AuthorWasFound);

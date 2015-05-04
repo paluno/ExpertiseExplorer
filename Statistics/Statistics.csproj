@@ -60,7 +60,6 @@
     <Compile Include="Statistics.cs" />
     <Compile Include="StatisticsOperation.cs" />
     <Compile Include="StatisticsResult.cs" />
-    <Compile Include="StatisticsSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
