@@ -145,6 +145,13 @@ ALTER TABLE DeveloperExpertiseValues
 ADD CONSTRAINT uc_identity UNIQUE (DeveloperExpertiseId,AlgorithmId);
 
 -- -----------------------------------------------------
+-- constraint for DeveloperExpertises
+-- -----------------------------------------------------
+
+ALTER TABLE DeveloperExpertises
+ADD CONSTRAINT uc_identityArtifactsDevelopers UNIQUE (ArtifactId,DeveloperId);
+
+-- -----------------------------------------------------
 -- Index for faster LIKE searches on artifact names (e.g. for FPS algorithm)
 -- -----------------------------------------------------
 ALTER TABLE Artifacts
