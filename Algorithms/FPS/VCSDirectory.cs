@@ -52,7 +52,9 @@ namespace Algorithms.FPS
         internal override void CalculateDeveloperExpertises(ConcurrentDictionary<string, double> dictExpertises, string[] filenameComponents, int currentDepth, int numberOfMatchingComponents)
         {
             int numberOfStillMatchingComponents;
-            if (currentDepth - 1 == numberOfMatchingComponents && RelativeName == filenameComponents[currentDepth - 1]) // still matching
+            if (currentDepth - 1 == numberOfMatchingComponents && 
+                filenameComponents.Length >= currentDepth &&      // this is only possible for directories that are now patched as files
+                RelativeName == filenameComponents[currentDepth - 1]) // still matching
                 numberOfStillMatchingComponents = numberOfMatchingComponents + 1;
             else
                 numberOfStillMatchingComponents = numberOfMatchingComponents;
