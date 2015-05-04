@@ -12,7 +12,13 @@ namespace Algorithms.FPS
         /// <summary>
         /// All subdirectories and the files directly in this directory
         /// </summary>
-        public IDictionary<string, VCSObject> Children { get; private set; }
+        internal IDictionary<string, VCSObject> Children { get; private set; }
+
+        /// <summary>
+        /// In rare cases, a path first referes to a directory and afterwards to a file. If this happens, DirectEdits
+        /// is the file alias for this directory
+        /// </summary>
+        internal VCSFile DirectEdits { get; private set; }
 
         public VCSDirectory(string relativeName)
             : base(relativeName)
@@ -22,11 +28,20 @@ namespace Algorithms.FPS
 
         public override void AddReview(string reviewer, IEnumerable<string> filenameComponents, double reviewWeight)
         {
+            if (!filenameComponents.Any())  // this happens if the parent object created this object as Directory and it is afterwards used as a file
+            {
+                if (null == DirectEdits)
+                    DirectEdits = new VCSFile(string.Empty);
+
+                DirectEdits.AddReview(reviewer, filenameComponents, reviewWeight);
+                return;
+            }
+            
             string nextComponent = filenameComponents.First();
             IEnumerable<string> remainingComponents = filenameComponents.Skip(1);
 
             if (!Children.ContainsKey(nextComponent))
-                if (remainingComponents.Count() > 0)        // it's a directory
+                if (remainingComponents.Any())        // it's a directory
                     Children.Add(nextComponent, new VCSDirectory(nextComponent));
                 else        // it's a file
                     Children.Add(nextComponent, new VCSFile(nextComponent));
@@ -46,6 +61,9 @@ namespace Algorithms.FPS
                 Children.Values,
                 childVCSObject => childVCSObject.CalculateDeveloperExpertises(dictExpertises, filenameComponents, currentDepth + 1, numberOfStillMatchingComponents)
             );
+
+            if (null != DirectEdits)
+                DirectEdits.CalculateDeveloperExpertises(dictExpertises, filenameComponents, currentDepth, numberOfMatchingComponents);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Algorithms.FPS
 {
-    class VCSFile : VCSObject
+    internal class VCSFile : VCSObject
     {
         /// <summary>
         /// Result of the WeighedReviewCountAlgorithm: Which developers have reviewed this file already? And how often, according to FPS?
