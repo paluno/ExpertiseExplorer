@@ -28,6 +28,10 @@
 
         public Guid Guid { get; protected set; }
 
+        /// <summary>
+        /// When calculating expertise, the algorithm shall consider only events that happened before MaxDateTime.
+        /// This means that the algorithm calculated the expertise that could be known at MaxDateTime.
+        /// </summary>
         public DateTime MaxDateTime { get; set; }
 
         public int RepositoryId { get; set; }
@@ -117,6 +121,11 @@
                 }
                 else
                     revisions = entities.GetRevisionsFromSourceRepositoryBetween(SourceRepositoryId, start, end);
+                    if (revisions.Count == 0)
+                    {
+                        MaxDateTime = end;
+                        return;
+                    }
             }
 
             BuildConnectionsFromRevisions(revisions);

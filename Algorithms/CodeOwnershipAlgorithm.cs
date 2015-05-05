@@ -53,7 +53,7 @@
                 return;
             }
 
-            // first author is handles seperately
+            // first author is handled seperately
             var added = fileRevisions[0].LinesAdded;
             fileRevisions.RemoveAt(0);
 
