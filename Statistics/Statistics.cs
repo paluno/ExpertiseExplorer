@@ -216,7 +216,7 @@
 
                     count++;
 
-                    string actualReviewerName = actualReviewers[actualReviewerId];
+                    string actualReviewerName = actualReviewers[actualReviewerId].ToLowerInvariant();
 
                     IEnumerable<ComputedReviewer> computedReviewers = GetComputedReviewersForActualReviewerId(actualReviewerId);
 
