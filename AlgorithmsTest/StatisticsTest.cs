@@ -71,7 +71,7 @@ namespace AlgorithmsTest
                  .OrderBy(x => x)                                           // sort the resulting reviewers
                  .ToArray();
 
-            Assert.AreEqual(4, names.Length);
+            Assert.AreEqual(3, names.Length);
             Assert.IsTrue(names[0].Contains("Completely different [cdma]"));
             Assert.IsTrue(names[0].Contains("Completely different van mail address [:cdma] <unmapped@address>"));
             Assert.AreEqual(2, names[0].Split(',').Length);
@@ -160,6 +160,35 @@ namespace AlgorithmsTest
                  .ToArray();
 
             Assert.AreEqual(1, names.Length);
+        }
+
+        [TestMethod]
+        public void TestAuthorParsing()
+        {
+            Author a = new Author("Chinese (Joe) Name <oneguy@address.com>");
+            Assert.AreEqual("oneguy@address.com", a.MailPart);
+//            Assert.IsNull(a.NamePart);      // this cannot really be parsed
+            Assert.IsNull(a.LoginNamePart);
+
+            a = new Author("Binde-Strich im Namen <mail@address.example.ende"); // note the missing > character
+            Assert.AreEqual("Binde-Strich im Namen", a.NamePart);
+            Assert.IsNull(a.LoginNamePart);
+            Assert.AreEqual("mail@address.example.ende", a.MailPart);
+
+            a = new Author("only.mail.address@domain.name");
+            Assert.IsNull(a.NamePart);
+            Assert.IsNull(a.LoginNamePart);
+            Assert.AreEqual("only.mail.address@domain.name", a.MailPart);
+
+            a = new Author("Guys Name (:LoginPartName) <mail@address>");
+            Assert.AreEqual("Guys Name", a.NamePart);
+            Assert.AreEqual("LoginPartName", a.LoginNamePart);
+            Assert.AreEqual("mail@address", a.MailPart);
+
+            a = new Author("Scott O'Connor <mail@address>");
+            Assert.AreEqual("Scott O'Connor", a.NamePart);
+            Assert.IsNull(a.LoginNamePart);
+            Assert.AreEqual("mail@address", a.MailPart);
         }
     }
 }

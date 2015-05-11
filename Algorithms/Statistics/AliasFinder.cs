@@ -216,13 +216,17 @@ namespace Algorithms.Statistics
             return listOfAuthorAliases.Values.Distinct();
         }
 
+        private static readonly string[] commonNames = new string[] { "chris", //"adam", "ben", "ian", "jan", "jeff", "matt", "paul", "neil",
+            //"me", 
+            "bugzilla", "mozilla", "bugmail" };
+
         /// <summary>
         /// Checks whether a name is sufficiently unique to identify someone. If it is too common,
         /// it may belong to multiple people.
         /// </summary>
         private static bool IsNameVeryCommon(string usernamepart)
         {
-            return usernamepart == "chris";
+            return usernamepart.Length < 5 || commonNames.Contains(usernamepart);
         }
 
         /// <summary>

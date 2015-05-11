@@ -5,7 +5,7 @@ namespace Algorithms.Statistics
     using System.Linq;
     using System.Text.RegularExpressions;
 
-    internal class Author
+    public class Author
     {
         public Author(string name)
         {
@@ -47,9 +47,10 @@ namespace Algorithms.Statistics
             }
         }
 
-        private static readonly Regex rxFindParts = new Regex(@"^(?<NamePart>[\w -]+)" +
-            @"(?: (?:\[|\():?(?<LoginNamePart>\w+)(?:\)|\]))?" +
-            @"(?: <(?<MailPart>[^>]+)>)?$", RegexOptions.Compiled);
+        private static readonly Regex rxFindName = new Regex(@"^(?<NamePart>[\w \-?.'\uFFFD]+[\w?])(?:[ <]|$)");   // character 0xFFFD is an encoding substitution
+        private static readonly Regex rxFindLoginName = new Regex(@"^(?<NamePart>[\w -?.]+)" +
+                @" (?:\[|\():?(?<LoginNamePart>\w+)(?:\)|\])( <|$)", RegexOptions.Compiled);
+        private static readonly Regex rxFindMail = new Regex(@"<(?<MailPart>[^>]+)>?$", RegexOptions.Compiled);
         
         /// <summary>
         /// Idempotent method to parse the three parts NamePart, LoginNamePart, and MailPart in a CompleteName
@@ -60,20 +61,23 @@ namespace Algorithms.Statistics
                 return;
             fPartParsed = true;
 
-            Match mtParts = rxFindParts.Match(completeName);
-            if (mtParts.Success)
-            {
-                if (mtParts.Groups["NamePart"].Success)
-                    _namePart = mtParts.Groups["NamePart"].Value;
-                if (mtParts.Groups["MailPart"].Success)
-                    _mailPart = mtParts.Groups["MailPart"].Value;
-                if (mtParts.Groups["LoginNamePart"].Success)
-                    _loginNamePart = mtParts.Groups["LoginNamePart"].Value;
-            }
-            else if (completeName.Contains("@") && !completeName.Contains(" "))
-                _mailPart = completeName.Trim('<', '>');
-            else
-                _namePart = completeName;
+            Match mtName = rxFindName.Match(completeName);
+            if (mtName.Success)
+                _namePart = mtName.Groups["NamePart"].Value;
+            
+            Match mtLogin = rxFindLoginName.Match(completeName);
+            if (mtLogin.Success)
+                _loginNamePart = mtLogin.Groups["LoginNamePart"].Value;
+
+            Match mtMail = rxFindMail.Match(completeName);
+            if (mtMail.Success)
+                _mailPart = mtMail.Groups["MailPart"].Value;
+
+            if (!(mtName.Success || mtLogin.Success || mtMail.Success))    // nothing found?
+                if (completeName.Contains("@") && !completeName.Contains(" "))
+                    _mailPart = completeName.Trim('<', '>');
+                else
+                    _namePart = completeName;
         }
 
         public List<Author> Alternatives { get; set; }
