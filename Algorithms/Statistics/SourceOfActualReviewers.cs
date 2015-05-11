@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Statistics
+namespace Algorithms.Statistics
 {
-    abstract class SourceOfActualReviewers
+    public abstract class SourceOfActualReviewers
     {
-        internal enum StatisticsSource
+        public enum StatisticsSource
         {
             All = 0,
             WithoutHg = 1,

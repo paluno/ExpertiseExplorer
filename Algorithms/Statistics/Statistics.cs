@@ -1,4 +1,4 @@
-﻿namespace Statistics
+﻿namespace Algorithms.Statistics
 {
     using System;
     using System.Collections.Generic;
@@ -11,12 +11,16 @@
     using ExpertiseDB;
     using log4net;
 
-    internal class Statistics
+    public class Statistics
     {
         private readonly ILog log = LogManager.GetLogger("Statistics");
 
         private readonly string repositoryURL;
         private readonly string basepath;
+
+        private string Path4ActualReviewers { get { return basepath + "reviewers_actual.txt"; } }
+        private string Path4ComputedReviewers { get { return basepath + "reviewers_computed.txt"; } }
+        private string Path4MissingReviewers { get { return basepath + "reviewers_missing.txt"; } }
 
         private int _RepositoryId = int.MinValue;
         public int RepositoryId
@@ -41,110 +45,45 @@
             this.repositoryURL = sourceURL;
         }
 
-        public void FindMissingReviewers()
-        {
-            ReadUniqueActualReviewers();
-            ReadUniqueComputedReviewers();
-            ReadMissingReviewers();
-            List<Author> missing = GetAuthorsFromFile(basepath + "reviewers_missing.txt");
-            string missingReviewers = GetAuthorsWhoAreNotInDb(missing);
-            File.WriteAllText(basepath + "reviewers_missing_in_db.txt", missingReviewers);
-        }
-
+        #region Common helper methods
         public void ReadUniqueActualReviewers()
         {
-            using (var context = new ExpertiseDBEntities())
-            {
-                var uniqueReviewers = context.ActualReviewers.Where(ar => ar.RepositoryId == RepositoryId).Select(ar => ar.Reviewer).Distinct().OrderBy(ar => ar).ToList();
-
-                var sb = new StringBuilder();
-                foreach (var uniqueReviewer in uniqueReviewers)
+            if (!File.Exists(Path4ActualReviewers))
+                using (var context = new ExpertiseDBEntities())
                 {
-                    sb.AppendLine(uniqueReviewer);
-                }
+                    var uniqueReviewers = context.ActualReviewers.Where(ar => ar.RepositoryId == RepositoryId).Select(ar => ar.Reviewer).Distinct().OrderBy(ar => ar).ToList();
 
-                File.WriteAllText(basepath + "reviewers_actual.txt", sb.ToString());
-            }
+                    var sb = new StringBuilder();
+                    foreach (var uniqueReviewer in uniqueReviewers)
+                    {
+                        sb.AppendLine(uniqueReviewer);
+                    }
+
+                    File.WriteAllText(Path4ActualReviewers, sb.ToString());
+                }
         }
 
         public void ReadUniqueComputedReviewers()
         {
-            using (var context = new ExpertiseDBEntities())
-            {
-                List<string> uniqueReviewers = context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert1).Distinct().ToList();
-                uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert2).Distinct());
-                uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert3).Distinct());
-                uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert4).Distinct());
-                uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert5).Distinct());
-
-                uniqueReviewers = uniqueReviewers.Distinct().OrderBy(cr => cr).ToList();
-
-                var sb = new StringBuilder();
-                foreach (var uniqueReviewer in uniqueReviewers)
+            if (!File.Exists(Path4ComputedReviewers))
+                using (var context = new ExpertiseDBEntities())
                 {
-                    sb.AppendLine(uniqueReviewer);
+                    List<string> uniqueReviewers = context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert1).Distinct().ToList();
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert2).Distinct());
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert3).Distinct());
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert4).Distinct());
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert5).Distinct());
+
+                    uniqueReviewers = uniqueReviewers.Distinct().OrderBy(cr => cr).ToList();
+
+                    var sb = new StringBuilder();
+                    foreach (var uniqueReviewer in uniqueReviewers)
+                    {
+                        sb.AppendLine(uniqueReviewer);
+                    }
+
+                    File.WriteAllText(Path4ComputedReviewers, sb.ToString());
                 }
-
-                File.WriteAllText(basepath + "reviewers_computed.txt", sb.ToString());
-            }
-        }
-
-        public void ReadMissingReviewers()
-        {
-            List<Author> actualReviewers = GetAuthorsFromFile(basepath + "reviewers_actual.txt");
-            List<Author> computedReviewers = GetAuthorsFromFile(basepath + "reviewers_computed.txt");
-
-            List<Author> missingReviewers = new List<Author>();
-            foreach (Author actualReviewer in actualReviewers)
-            {
-                // first the reviewer
-                if (computedReviewers.Any(cr => cr.Name.ToLowerInvariant().Contains(actualReviewer.Name.ToLowerInvariant())))
-                    continue;
-
-                // second the alternatives
-                bool found = actualReviewer.Alternatives.Any(alternative => computedReviewers.Any(cr => cr.Name.ToLowerInvariant().Contains(alternative.Name.ToLowerInvariant())));
-
-                if (found)
-                    continue;
-
-                // only add if no alternative was already added
-                bool isIn = actualReviewer.Alternatives.Any(alternative => missingReviewers.Any(mr => mr.Name == alternative.Name));
-
-                if (!isIn)
-                    missingReviewers.Add(actualReviewer);
-            }
-
-            StringBuilder sb = new StringBuilder();
-            foreach (Author missingReviewer in missingReviewers)
-                sb.AppendLine(
-                    missingReviewer.Name + ";" + string.Join(";", missingReviewer.Alternatives.Select(a => a.Name)));
-
-            File.WriteAllText(basepath + "reviewers_missing.txt", sb.ToString());
-        }
-
-        public List<Author> GetAuthorsFromFile(string file)
-        {
-            string[] authorLines = File.ReadAllLines(file);
-
-            List<Author> result = new List<Author>();
-
-            foreach (string authorLine in authorLines)
-                result.AddRange(GetAuthorsFromLine(authorLine));
-
-            return result;
-        }
-
-        private IEnumerable<Author> GetAuthorsFromLine(string line)
-        {
-            string[] names = line.Split(';');
-            List<Author> result = names.Select(name => new Author { Name = name }).ToList();
-
-            for (int i = 0; i < names.Length; i++)
-                for (int j = 0; j < names.Length; j++)
-                    if (i != j)
-                        result[i].Alternatives.Add(result[j]);
-
-            return result;
         }
 
         private string GetAuthorsWhoAreNotInDb(IEnumerable<Author> input)
@@ -158,13 +97,13 @@
 
             foreach (Author author in input)
             {
-                string toFind = author.Name.ToLowerInvariant();
+                string toFind = author.completeName.ToLowerInvariant();
                 bool found = developernames.Any(d => d.ToLowerInvariant().Contains(toFind));
 
                 if (found)
                     continue;
 
-                bool isFound = author.Alternatives.Any(alternative => developernames.Any(d => d.ToLowerInvariant().Contains(alternative.Name.ToLowerInvariant())));
+                bool isFound = author.Alternatives.Any(alternative => developernames.Any(d => d.ToLowerInvariant().Contains(alternative.completeName.ToLowerInvariant())));
 
                 if (!isFound)
                     result.Add(author);
@@ -173,18 +112,64 @@
             StringBuilder sb = new StringBuilder();
             foreach (var missingReviewer in result)
                 sb.AppendLine(
-                    missingReviewer.Name + ";" + string.Join(";", missingReviewer.Alternatives.Select(a => a.Name)));
+                    missingReviewer.completeName + ";" + string.Join(";", missingReviewer.Alternatives.Select(a => a.completeName)));
 
             return sb.ToString();
         }
+        #endregion Common helper methods
+
+        #region Find Missing Reviewers
+        public void FindMissingReviewers()
+        {
+            ReadUniqueActualReviewers();
+            ReadUniqueComputedReviewers();
+            ReadMissingReviewers();
+            List<Author> missing = Author.GetAuthorsFromFile(Path4MissingReviewers);
+            string missingReviewers = GetAuthorsWhoAreNotInDb(missing);
+            File.WriteAllText(basepath + "reviewers_missing_in_db.txt", missingReviewers);
+        }
+
+        public void ReadMissingReviewers()
+        {
+            List<Author> actualReviewers = Author.GetAuthorsFromFile(Path4ActualReviewers);
+            List<Author> computedReviewers = Author.GetAuthorsFromFile(Path4ComputedReviewers);
+
+            List<Author> missingReviewers = new List<Author>();
+            foreach (Author actualReviewer in actualReviewers)
+            {
+                // first the reviewer
+                if (computedReviewers.Any(cr => cr.completeName.ToLowerInvariant().Contains(actualReviewer.completeName.ToLowerInvariant())))
+                    continue;
+
+                // second the alternatives
+                bool found = actualReviewer.Alternatives.Any(alternative => computedReviewers.Any(cr => cr.completeName.ToLowerInvariant().Contains(alternative.completeName.ToLowerInvariant())));
+
+                if (found)
+                    continue;
+
+                // only add if no alternative was already added
+                bool isIn = actualReviewer.Alternatives.Any(alternative => missingReviewers.Any(mr => mr.completeName == alternative.completeName));
+
+                if (!isIn)
+                    missingReviewers.Add(actualReviewer);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (Author missingReviewer in missingReviewers)
+                sb.AppendLine(
+                    missingReviewer.completeName + ";" + string.Join(";", missingReviewer.Alternatives.Select(a => a.completeName)));
+
+            File.WriteAllText(Path4MissingReviewers, sb.ToString());
+        }
+#endregion Find Missing Reviewers
 
         public void AnalyzeActualReviews(SourceOfActualReviewers sourceOfActualReviewers)
         {
             ReadUniqueActualReviewers();
             ReadUniqueComputedReviewers();
 
-            List<Author> actualReviewersAndAlternatives = GetAuthorsFromFile(basepath + "reviewers_actual.txt");
-            List<Author> computedReviewersAndAlternatives = GetAuthorsFromFile(basepath + "reviewers_computed.txt");
+            List<Author> actualReviewersAndAlternatives = Author.GetAuthorsFromFile(Path4ActualReviewers);
+            List<Author> computedReviewersAndAlternatives = Author.GetAuthorsFromFile(Path4ComputedReviewers);
 
             List<int> algorithmIds;
             using (ExpertiseDBEntities context = new ExpertiseDBEntities())
@@ -216,13 +201,13 @@
 
                     count++;
 
-                    string actualReviewerName = actualReviewers[actualReviewerId];
+                    string actualReviewerName = actualReviewers[actualReviewerId].ToLowerInvariant();
 
                     IEnumerable<ComputedReviewer> computedReviewers = GetComputedReviewersForActualReviewerId(actualReviewerId);
 
                     Author alternativesForActualReviewer =
                         actualReviewersAndAlternatives.Single(
-                            ar => ar.Name.ToLowerInvariant() == actualReviewerName);
+                            ar => ar.completeName.ToLowerInvariant() == actualReviewerName);
 
                     foreach (ComputedReviewer computedReviewer in computedReviewers)
                     {
@@ -243,7 +228,7 @@
 
                             Author alternativesForComputedReviewer =
                             computedReviewersAndAlternatives.Single(
-                                cr => cr.Name.ToLowerInvariant() == computedReviewerNamesAndValues[i].Key.ToLowerInvariant());
+                                cr => cr.completeName.ToLowerInvariant() == computedReviewerNamesAndValues[i].Key.ToLowerInvariant());
 
                             if (!alternativesForActualReviewer.IsMatching(alternativesForComputedReviewer))
                                 continue;
@@ -397,6 +382,39 @@
             }
 
             File.WriteAllText(string.Format(basepath + "stats_intersect_pairwise{0}.txt", source.Postfix), sb.ToString());
+        }
+
+        public void FindAliases(AliasFinder af)
+        {
+            ReadUniqueActualReviewers();
+            IEnumerable<string> actualReviewers = af.Consolidate(File.ReadAllLines(Path4ActualReviewers))
+                 .Select(reviewerList => string.Join(",",reviewerList))     // put each reviewer in one string
+                 .OrderBy(x => x);                                          // sort the resulting reviewers
+            using (TextWriter writerActualReviewers = new StreamWriter(Path4ActualReviewers))
+                foreach (string oneReviewer in actualReviewers)
+                    writerActualReviewers.WriteLine(oneReviewer);
+            
+            ReadUniqueComputedReviewers();
+            IEnumerable<string> computedReviewers = af.Consolidate(File.ReadAllLines(Path4ComputedReviewers))
+                 .Select(reviewerList => string.Join(",", reviewerList))     // put each reviewer in one string
+                 .OrderBy(x => x);                                           // sort the resulting reviewers
+            using (TextWriter writerComputedReviewers = new StreamWriter(Path4ComputedReviewers))
+                foreach (string oneReviewer in computedReviewers)
+                    writerComputedReviewers.WriteLine(oneReviewer);
+        }
+
+        public void FindAliasesFromNames(string path2NamesFile)
+        {
+            AliasFinder af = new AliasFinder();
+            af.InitializeMappingFromNames(File.ReadAllLines(path2NamesFile));
+            FindAliases(af);
+        }
+
+        public void FindAliasesFromAuthors(string path2AuthorFile)
+        {
+            AliasFinder af = new AliasFinder();
+            af.InitializeMappingFromAuthorList(File.ReadAllLines(path2AuthorFile));
+            FindAliases(af);
         }
     }
 }

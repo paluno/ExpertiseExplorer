@@ -57,6 +57,14 @@
     <Compile Include="FPS\VCSFile.cs" />
     <Compile Include="FPS\VCSObject.cs" />
     <Compile Include="NameLockFactory.cs" />
+    <Compile Include="Statistics\AliasFinder.cs" />
+    <Compile Include="Statistics\Author.cs" />
+    <Compile Include="Statistics\SourceOfActualReviewers.cs" />
+    <Compile Include="Statistics\SourceOfActualReviewersWithoutHg.cs" />
+    <Compile Include="Statistics\SourceOfActualReviewsWithOnlyOneArtifact.cs" />
+    <Compile Include="Statistics\SourceOfAllActualReviewers.cs" />
+    <Compile Include="Statistics\Statistics.cs" />
+    <Compile Include="Statistics\StatisticsResult.cs" />
     <Compile Include="WeighedReviewCountAlgorithm.cs" />
     <Compile Include="LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Line10RuleAlgorithm.cs" />
@@ -78,6 +86,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
