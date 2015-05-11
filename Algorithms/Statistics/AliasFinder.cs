@@ -187,7 +187,8 @@ namespace Algorithms.Statistics
 
                     if (null != currentAuthor.NamePart)
                     {
-                        foundAliases.Add(currentAuthor.NamePart);
+                        if (!IsNameVeryCommon(currentAuthor.NamePart))
+                            foundAliases.Add(currentAuthor.NamePart);
 
                         if (name2name.ContainsKey(currentAuthor.NamePart))
                             foreach (string alternativeName in name2name[currentAuthor.NamePart])
@@ -225,7 +226,8 @@ namespace Algorithms.Statistics
             return listOfAuthorAliases.Values.Distinct();
         }
 
-        private static readonly string[] commonNames = new string[] { "chris", "philipp", "raymond", "robert", "stephen", "thomas", //"adam", "ben", "ian", "jan", "jeff", "matt", "paul", "neil",
+        private static readonly string[] commonNames = new string[] { "chris", "philipp", "raymond", "robert", "stephen", "thomas", "anton", "bernd",
+            //"adam", "ben", "ian", "jan", "jeff", "matt", "paul", "neil",
             //"me", 
             "bugzilla", "mozilla", "bugmail" };
 
@@ -235,7 +237,7 @@ namespace Algorithms.Statistics
         /// </summary>
         private static bool IsNameVeryCommon(string usernamepart)
         {
-            return usernamepart.Length < 5 || commonNames.Contains(usernamepart);
+            return usernamepart.Length < 5 || commonNames.Contains(usernamepart, StringComparer.InvariantCultureIgnoreCase);
         }
 
         /// <summary>
