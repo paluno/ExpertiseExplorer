@@ -88,7 +88,7 @@ namespace Algorithms.Statistics
             }
         }
 
-        private Dictionary<string, ISet<string>> AuthorMapping = new Dictionary<string, ISet<string>>();
+        private Dictionary<string, ISet<string>> AuthorMapping = new Dictionary<string, ISet<string>>(StringComparer.InvariantCultureIgnoreCase);
 
         public void InitializeMappingFromAuthorList(IEnumerable<string> linesWithAuthors)
         {
@@ -142,7 +142,7 @@ namespace Algorithms.Statistics
         public IEnumerable<IEnumerable<string>> Consolidate(string[] authorNames)
         {
                 // maps each name to its list of all alternatives, including itself. The lists contain only valid, used author names, however
-            IDictionary<string, ISet<string>> listOfAuthorAliases = new Dictionary<string, ISet<string>>();
+            IDictionary<string, ISet<string>> listOfAuthorAliases = new Dictionary<string, ISet<string>>(StringComparer.InvariantCultureIgnoreCase);
                 // maps each alias to all corresponding alias, whether or not they are author names
             IDictionary<string, ISet<string>> listOfAllAliases = AuthorMapping;
 
@@ -152,7 +152,10 @@ namespace Algorithms.Statistics
 
             foreach (string authorNameLine in authorNames)
             {
-                ISet<string> foundAliases = new HashSet<string>();
+                if (string.IsNullOrWhiteSpace(authorNameLine))
+                    continue;
+
+                ISet<string> foundAliases = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
                 foreach (string authorName in authorNameLine.Split(','))
                 {
@@ -165,6 +168,12 @@ namespace Algorithms.Statistics
                         string usernamepart = currentAuthor.MailPart.Split('@')[0];
                         if (!IsNameVeryCommon(usernamepart))
                             foundAliases.Add(usernamepart);
+                        if (usernamepart.Contains('+'))
+                        {
+                            string realUserNamePart = usernamepart.Split('+')[0];
+                            if (!IsNameVeryCommon(realUserNamePart))
+                                foundAliases.Add(realUserNamePart);
+                        }
 
                         if (mailaddress2name.ContainsKey(currentAuthor.MailPart))
                             foreach (string alternativeName in mailaddress2name[currentAuthor.MailPart])
@@ -216,7 +225,7 @@ namespace Algorithms.Statistics
             return listOfAuthorAliases.Values.Distinct();
         }
 
-        private static readonly string[] commonNames = new string[] { "chris", //"adam", "ben", "ian", "jan", "jeff", "matt", "paul", "neil",
+        private static readonly string[] commonNames = new string[] { "chris", "philipp", "raymond", "robert", "stephen", "thomas", //"adam", "ben", "ian", "jan", "jeff", "matt", "paul", "neil",
             //"me", 
             "bugzilla", "mozilla", "bugmail" };
 

@@ -44,6 +44,10 @@ namespace AlgorithmsTest
             "Glenn Randers-Pehrson <glennrp@gmail.com>\n" +
             "Glenn Randers-Pehrson <glennrp+bmo@gmail.com>";
 
+        const string caseSensitiveSet =
+            "One Name\n" +
+            "one name";
+
         [TestMethod]
         public void TestSimpleAliasingWithNames()
         {
@@ -160,6 +164,22 @@ namespace AlgorithmsTest
                  .ToArray();
 
             Assert.AreEqual(1, names.Length);
+        }
+
+        [TestMethod]
+        public void TestCaseInsensitivity()
+        {
+            AliasFinder af = new AliasFinder();
+
+            string[] names = af.Consolidate(caseSensitiveSet.Split('\n'))
+                 .Select(reviewerList => string.Join(",", reviewerList))    // put each reviewer in one string
+                 .OrderBy(x => x)                                           // sort the resulting reviewers
+                 .ToArray();
+
+            Assert.AreEqual(1, names.Length);
+            Assert.AreEqual(2, names[0].Split(',').Length);
+            Assert.IsTrue(names[0].Contains("One Name"));
+            Assert.IsTrue(names[0].Contains("one name"));
         }
 
         [TestMethod]
