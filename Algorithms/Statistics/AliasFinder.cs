@@ -10,10 +10,41 @@ namespace Algorithms.Statistics
 {
     public class AliasFinder
     {
+        /// <summary>
+        /// Specialized mappings that map specific name parts to others. Initialized from a names csv mapping file 
+        /// </summary>
         private IDictionary<string, ISet<string>> mailaddress2name = new Dictionary<string, ISet<string>>();
         private IDictionary<string, ISet<string>> name2mailaddress = new Dictionary<string, ISet<string>>();
         private IDictionary<string, ISet<string>> mail2mail = new Dictionary<string, ISet<string>>(); // may contain an eigenreference, too
         private IDictionary<string, ISet<string>> name2name = new Dictionary<string, ISet<string>>(); // may contain an eigenreference, too
+
+        /// <summary>
+        /// General mapping from names, email addresses, and name parts to its synonyms.
+        /// </summary>
+        private Dictionary<string, ISet<string>> AuthorMapping = new Dictionary<string, ISet<string>>(StringComparer.InvariantCultureIgnoreCase);
+
+        /// <summary>
+        /// Inserts a set into a dictionary, such that all set entries are keys that point to the set. If, however, 
+        /// the dictionary contains keys already that match any of the inserted keys, then any entries in the sets these keys 
+        /// point to, will also be added to the set, and those entries will also point to the new set.
+        /// If the following conditions hold before executing the method, they will also hold afterwards:
+        ///     - every key in the dictionary will point to a set that contains itself and possible other keys,
+        ///     - every key will exist in only one of the value sets of the dictionary.
+        /// </summary>
+        /// <param name="listOfAllAliases">A dictionary of sets (every key maps to a set)</param>
+        /// <param name="foundAliases">A set that will be inserted</param>
+        private static void ModuloNewSetIntoMultiDictionary(IDictionary<string, ISet<string>> listOfAllAliases, ISet<string> foundAliases)
+        {
+            var listOfOtherAliasSets = foundAliases
+                                        .Where(alias => listOfAllAliases.ContainsKey(alias))
+                                        .Select(alias => listOfAllAliases[alias])
+                                        .Distinct()
+                                        .ToList();      // modifying foundAliases is not allowed without ToList()
+            foreach (ISet<string> otherAliasSet in listOfOtherAliasSets)
+                foundAliases.UnionWith(otherAliasSet);
+            foreach (string alias in foundAliases)
+                listOfAllAliases[alias] = foundAliases;
+        }
 
         /// <summary>
         /// Adds a new value to the dictionary that maps keys to multiple values.
@@ -30,10 +61,26 @@ namespace Algorithms.Statistics
             }
         }
         
-        public AliasFinder()
+        public void InitializeMappingFromAuthorList(IEnumerable<string> linesWithAuthors)
         {
+            foreach (string authorLine in linesWithAuthors)
+            {
+                ISet<string> authorAliasSet = new HashSet<string>();
+                foreach (Author similarAuthor in Author.GetAuthorsFromLine(authorLine))
+                {
+                    authorAliasSet.Add(similarAuthor.completeName);
+                    if (null != similarAuthor.NamePart)
+                        authorAliasSet.Add(similarAuthor.NamePart);
+                    if (null != similarAuthor.MailPart)
+                        authorAliasSet.Add(similarAuthor.MailPart);
+                    if (null != similarAuthor.LoginNamePart)
+                        authorAliasSet.Add(similarAuthor.LoginNamePart);
+                }
+                ModuloNewSetIntoMultiDictionary(AuthorMapping, authorAliasSet);
+            }
         }
 
+        #region names mapping
         public void InitializeMappingFromNames(IEnumerable<string> nameMappings)
         {
             foreach (string line in nameMappings)
@@ -88,27 +135,6 @@ namespace Algorithms.Statistics
             }
         }
 
-        private Dictionary<string, ISet<string>> AuthorMapping = new Dictionary<string, ISet<string>>(StringComparer.InvariantCultureIgnoreCase);
-
-        public void InitializeMappingFromAuthorList(IEnumerable<string> linesWithAuthors)
-        {
-            foreach (string authorLine in linesWithAuthors)
-            {
-                ISet<string> authorAliasSet = new HashSet<string>();
-                foreach (Author similarAuthor in Author.GetAuthorsFromLine(authorLine))
-                {
-                    authorAliasSet.Add(similarAuthor.completeName);
-                    if (null != similarAuthor.NamePart)
-                        authorAliasSet.Add(similarAuthor.NamePart);
-                    if (null != similarAuthor.MailPart)
-                        authorAliasSet.Add(similarAuthor.MailPart);
-                    if (null != similarAuthor.LoginNamePart)
-                        authorAliasSet.Add(similarAuthor.LoginNamePart);
-                }
-                ModuloNewSetIntoMultiDictionary(AuthorMapping, authorAliasSet);
-            }
-        }
-
         private void LinkMailAddressAndNameWithConsistency(string mailAddress, string name)
         {
             if (Add2CollectionDictionary(mailaddress2name, mailAddress, name))  // alternative email addresses are now linked to the name already, as they reference the same list
@@ -133,6 +159,7 @@ namespace Algorithms.Statistics
                 mail2mail[alternativeMail].Add(alternativeMail);
             mail2mail[mailAddress] = mail2mail[alternativeMail];
         }
+        #endregion names mapping
 
         /// <summary>
         /// Takes a list of author names and tries to merge names that belong to the same author into one list. 
@@ -143,8 +170,6 @@ namespace Algorithms.Statistics
         {
                 // maps each name to its list of all alternatives, including itself. The lists contain only valid, used author names, however
             IDictionary<string, ISet<string>> listOfAuthorAliases = new Dictionary<string, ISet<string>>(StringComparer.InvariantCultureIgnoreCase);
-                // maps each alias to all corresponding alias, whether or not they are author names
-            IDictionary<string, ISet<string>> listOfAllAliases = AuthorMapping;
 
             IEnumerable<string> flatListOfAuthorNames = authorNames
                 .Select(authorLine => authorLine.Split(','))
@@ -204,7 +229,7 @@ namespace Algorithms.Statistics
                         foundAliases.Add(currentAuthor.LoginNamePart);
 
                         // acquire all aliases for all aliases
-                    ModuloNewSetIntoMultiDictionary(listOfAllAliases, foundAliases);
+                    ModuloNewSetIntoMultiDictionary(AuthorMapping, foundAliases);
 
                     ISet<string> aliases4CurrentName;
                     if (foundAliases.Any(alias => listOfAuthorAliases.ContainsKey(alias)))
@@ -238,29 +263,6 @@ namespace Algorithms.Statistics
         private static bool IsNameVeryCommon(string usernamepart)
         {
             return usernamepart.Length < 5 || commonNames.Contains(usernamepart, StringComparer.InvariantCultureIgnoreCase);
-        }
-
-        /// <summary>
-        /// Inserts a set into a dictionary, such that all set entries are keys that point to the set. If, however, 
-        /// the dictionary contains keys already that match any of the inserted keys, then any entries in the sets these keys 
-        /// point to, will also be added to the set, and those entries will also point to the new set.
-        /// If the following conditions hold before executing the method, they will also hold afterwards:
-        ///     - every key in the dictionary will point to a set that contains itself and possible other keys,
-        ///     - every key will exist in only one of the value sets of the dictionary.
-        /// </summary>
-        /// <param name="listOfAllAliases">A dictionary of sets (every key maps to a set)</param>
-        /// <param name="foundAliases">A set that will be inserted</param>
-        private static void ModuloNewSetIntoMultiDictionary(IDictionary<string, ISet<string>> listOfAllAliases, ISet<string> foundAliases)
-        {
-            var listOfOtherAliasSets = foundAliases
-                                        .Where(alias => listOfAllAliases.ContainsKey(alias))
-                                        .Select(alias => listOfAllAliases[alias])
-                                        .Distinct()
-                                        .ToList();      // modifying foundAliases is not allowed without ToList()
-            foreach (ISet<string> otherAliasSet in listOfOtherAliasSets)
-                foundAliases.UnionWith(otherAliasSet);
-            foreach (string alias in foundAliases)
-                listOfAllAliases[alias] = foundAliases;
         }
     }
 }
