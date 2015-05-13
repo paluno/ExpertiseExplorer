@@ -1,4 +1,4 @@
-namespace Statistics
+namespace Algorithms.Statistics
 {
     internal class StatisticsResult
     {

@@ -50,22 +50,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Author.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SourceOfActualReviewers.cs" />
-    <Compile Include="SourceOfActualReviewersWithoutHg.cs" />
-    <Compile Include="SourceOfActualReviewsWithOnlyOneArtifact.cs" />
-    <Compile Include="SourceOfAllActualReviewers.cs" />
-    <Compile Include="Statistics.cs" />
     <Compile Include="StatisticsOperation.cs" />
-    <Compile Include="StatisticsResult.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Algorithms\Algorithms.csproj">
+      <Project>{85a18b33-d1cc-42da-9318-81e84bcfbd3f}</Project>
+      <Name>Algorithms</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ExpertiseDB\ExpertiseDB.csproj">
       <Project>{afa7c444-d43d-4030-8539-a2177173d706}</Project>
       <Name>ExpertiseDB</Name>

@@ -6,6 +6,8 @@
         AnalyzeActualReviews = 1,
         ComputeStatisticsForAllAlgorithmsAndActualReviews = 2,
         FindIntersectingEntriesForAllAlgorithms = 3,
-        FindIntersectingEntriesForAllAlgorithmsPairwise = 4
+        FindIntersectingEntriesForAllAlgorithmsPairwise = 4,
+        FindAliasesFromNames = 5,
+        FindAliasesFromAuthors = 6
     }
 }
