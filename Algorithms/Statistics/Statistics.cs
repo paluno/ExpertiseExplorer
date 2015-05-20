@@ -68,11 +68,11 @@
             if (!File.Exists(Path4ComputedReviewers))
                 using (var context = new ExpertiseDBEntities())
                 {
-                    List<string> uniqueReviewers = context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert1).Distinct().ToList();
-                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert2).Distinct());
-                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert3).Distinct());
-                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert4).Distinct());
-                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId).Select(cr => cr.Expert5).Distinct());
+                    List<string> uniqueReviewers = context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert1).Distinct().ToList();
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert2).Distinct());
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert3).Distinct());
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert4).Distinct());
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert5).Distinct());
 
                     uniqueReviewers = uniqueReviewers.Distinct().OrderBy(cr => cr).ToList();
 
