@@ -6,7 +6,7 @@
 -- -----------------------------------------------------------
 -- Entity Designer DDL Script for MySQL Server 4.1 and higher
 -- -----------------------------------------------------------
--- Date Created: 05/20/2015 16:55:34
+-- Date Created: 05/20/2015 17:41:30
 -- Generated from EDMX file: d:\TestProgs\ExpertiseExplorer\ExpertiseDB\ExpertiseDB.edmx
 -- Target version: 3.0.0.0
 -- --------------------------------------------------
@@ -27,12 +27,15 @@
 --    ALTER TABLE `Artifacts` DROP CONSTRAINT `FK_ArtifactArtifact`;
 --    ALTER TABLE `DeveloperExpertiseValues` DROP CONSTRAINT `FK_DeveloperExpertiseDeveloperExpertiseValue`;
 --    ALTER TABLE `DeveloperExpertiseValues` DROP CONSTRAINT `FK_DeveloperExpertiseValueAlgorithm`;
---    ALTER TABLE `ActualReviewers` DROP CONSTRAINT `FK_ArtifactActualReviewer`;
---    ALTER TABLE `ActualReviewers` DROP CONSTRAINT `FK_RepositoryActualReviewer`;
---    ALTER TABLE `ComputedReviewers` DROP CONSTRAINT `FK_ActualReviewerComputedReviewer`;
 --    ALTER TABLE `FileRevisions` DROP CONSTRAINT `FK_FilenameFileRevision`;
 --    ALTER TABLE `FileRevisions` DROP CONSTRAINT `FK_SourceRepositoryFileRevision`;
 --    ALTER TABLE `Filenames` DROP CONSTRAINT `FK_SourceRepositoryFilename`;
+--    ALTER TABLE `ArtifactBugRelation` DROP CONSTRAINT `FK_ArtifactBugRelation_Artifact`;
+--    ALTER TABLE `ArtifactBugRelation` DROP CONSTRAINT `FK_ArtifactBugRelation_Bug`;
+--    ALTER TABLE `ActualReviewers` DROP CONSTRAINT `FK_BugActualReviewerRelation`;
+--    ALTER TABLE `ComputedReviewers` DROP CONSTRAINT `FK_BugComputedReviewerRelation`;
+--    ALTER TABLE `RepositoryAlgorithmRunStatus` DROP CONSTRAINT `FK_RepositoryAlgorithmRunStatusRepository`;
+--    ALTER TABLE `RepositoryAlgorithmRunStatus` DROP CONSTRAINT `FK_RepositoryAlgorithmRunStatusAlgorithm`;
 
 -- --------------------------------------------------
 -- Dropping existing tables
@@ -51,6 +54,9 @@ SET foreign_key_checks = 0;
     DROP TABLE IF EXISTS `ActualReviewers`;
     DROP TABLE IF EXISTS `ComputedReviewers`;
     DROP TABLE IF EXISTS `Filenames`;
+    DROP TABLE IF EXISTS `Bugs`;
+    DROP TABLE IF EXISTS `RepositoryAlgorithmRunStatus`;
+    DROP TABLE IF EXISTS `ArtifactBugRelation`;
 SET foreign_key_checks = 1;
 
 -- --------------------------------------------------
@@ -178,7 +184,6 @@ CREATE TABLE `ActualReviewers`(
 	`ActualReviewerId` int NOT NULL AUTO_INCREMENT UNIQUE, 
 	`ActivityId` int NOT NULL, 
 	`Reviewer` longtext NOT NULL, 
-	`RepositoryId` int NOT NULL, 
 	`BugId` int NOT NULL);
 
 ALTER TABLE `ActualReviewers` ADD PRIMARY KEY (ActualReviewerId);
@@ -219,7 +224,8 @@ ALTER TABLE `Filenames` ADD PRIMARY KEY (FilenameId);
 
 CREATE TABLE `Bugs`(
 	`BugId` int NOT NULL AUTO_INCREMENT UNIQUE, 
-	`ChangeId` longtext NOT NULL);
+	`ChangeId` longtext NOT NULL, 
+	`RepositoryId` int NOT NULL);
 
 ALTER TABLE `Bugs` ADD PRIMARY KEY (BugId);
 
@@ -401,21 +407,6 @@ CREATE INDEX `IX_FK_DeveloperExpertiseValueAlgorithm`
     ON `DeveloperExpertiseValues`
     (`AlgorithmId`);
 
--- Creating foreign key on `RepositoryId` in table 'ActualReviewers'
-
-ALTER TABLE `ActualReviewers`
-ADD CONSTRAINT `FK_RepositoryActualReviewer`
-    FOREIGN KEY (`RepositoryId`)
-    REFERENCES `Repositorys`
-        (`RepositoryId`)
-    ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- Creating non-clustered index for FOREIGN KEY 'FK_RepositoryActualReviewer'
-
-CREATE INDEX `IX_FK_RepositoryActualReviewer` 
-    ON `ActualReviewers`
-    (`RepositoryId`);
-
 -- Creating foreign key on `FilenameId` in table 'FileRevisions'
 
 ALTER TABLE `FileRevisions`
@@ -538,6 +529,21 @@ ADD CONSTRAINT `FK_RepositoryAlgorithmRunStatusAlgorithm`
     REFERENCES `Algorithms`
         (`AlgorithmId`)
     ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating foreign key on `RepositoryId` in table 'Bugs'
+
+ALTER TABLE `Bugs`
+ADD CONSTRAINT `FK_BugRepository`
+    FOREIGN KEY (`RepositoryId`)
+    REFERENCES `Repositorys`
+        (`RepositoryId`)
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_BugRepository'
+
+CREATE INDEX `IX_FK_BugRepository` 
+    ON `Bugs`
+    (`RepositoryId`);
 
 -- --------------------------------------------------
 -- Script has ended
