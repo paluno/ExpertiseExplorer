@@ -2,17 +2,15 @@
 
 
 
+
 -- -----------------------------------------------------------
 -- Entity Designer DDL Script for MySQL Server 4.1 and higher
 -- -----------------------------------------------------------
--- Date Created: 01/22/2014 16:57:09
--- Generated from EDMX file: D:\Programmieren\Repositories\ExpertiseExplorerWorking\ExpertiseExplorer\ExpertiseDB\ExpertiseDB.edmx
+-- Date Created: 05/20/2015 16:55:34
+-- Generated from EDMX file: d:\TestProgs\ExpertiseExplorer\ExpertiseDB\ExpertiseDB.edmx
 -- Target version: 3.0.0.0
 -- --------------------------------------------------
 
-DROP DATABASE IF EXISTS `expertisedb`;
-CREATE DATABASE `expertisedb`;
-USE `expertisedb`;
 
 -- --------------------------------------------------
 -- Dropping existing FOREIGN KEY constraints
@@ -30,6 +28,7 @@ USE `expertisedb`;
 --    ALTER TABLE `DeveloperExpertiseValues` DROP CONSTRAINT `FK_DeveloperExpertiseDeveloperExpertiseValue`;
 --    ALTER TABLE `DeveloperExpertiseValues` DROP CONSTRAINT `FK_DeveloperExpertiseValueAlgorithm`;
 --    ALTER TABLE `ActualReviewers` DROP CONSTRAINT `FK_ArtifactActualReviewer`;
+--    ALTER TABLE `ActualReviewers` DROP CONSTRAINT `FK_RepositoryActualReviewer`;
 --    ALTER TABLE `ComputedReviewers` DROP CONSTRAINT `FK_ActualReviewerComputedReviewer`;
 --    ALTER TABLE `FileRevisions` DROP CONSTRAINT `FK_FilenameFileRevision`;
 --    ALTER TABLE `FileRevisions` DROP CONSTRAINT `FK_SourceRepositoryFileRevision`;
@@ -58,145 +57,193 @@ SET foreign_key_checks = 1;
 -- Creating all tables
 -- --------------------------------------------------
 
--- Creating table 'SourceRepositorys'
+CREATE TABLE `SourceRepositorys`(
+	`SourceRepositoryId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`Name` longtext NOT NULL, 
+	`URL` longtext NOT NULL);
 
-CREATE TABLE `SourceRepositorys` (
-    `SourceRepositoryId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `Name` varchar(1000)  NOT NULL,
-    `URL` varchar(1000)  NOT NULL
-);
-
--- Creating table 'Revisions'
-
-CREATE TABLE `Revisions` (
-    `RevisionId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `User` varchar(1000)  NOT NULL,
-    `Tag` varchar(1000)  NULL,
-    `Parent` varchar(1000)  NULL,
-    `ID` varchar(1000)  NOT NULL,
-    `Description` mediumtext  NULL,
-    `Time` datetime  NOT NULL,
-    `SourceRepositoryId` int  NOT NULL
-);
-
--- Creating table 'FileRevisions'
-
-CREATE TABLE `FileRevisions` (
-    `FileRevisionId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `IsNew` bool  NOT NULL,
-    `LinesAdded` int  NOT NULL,
-    `LinesDeleted` int  NOT NULL,
-    `Diff` mediumtext  NULL,
-    `RevisionId` int  NOT NULL,
-    `FilenameId` int  NOT NULL,
-    `SourceRepositoryId` int  NOT NULL
-);
-
--- Creating table 'Repositorys'
-
-CREATE TABLE `Repositorys` (
-    `RepositoryId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `Name` varchar(1000)  NOT NULL,
-    `SourceURL` varchar(1000)  NOT NULL,
-    `LastUpdate` datetime  NULL
-);
-
--- Creating table 'Developers'
-
-CREATE TABLE `Developers` (
-    `DeveloperId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `Name` varchar(1000)  NOT NULL,
-    `RepositoryId` int  NOT NULL
-);
-
--- Creating table 'Algorithms'
-
-CREATE TABLE `Algorithms` (
-    `AlgorithmId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `Name` varchar(1000)  NOT NULL,
-    `GUID` CHAR(36) BINARY  NOT NULL
-);
-
--- Creating table 'Artifacts'
-
-CREATE TABLE `Artifacts` (
-    `ArtifactId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `ArtifactTypeId` int  NOT NULL,
-    `Name` varchar(1000)  NOT NULL,
-    `RepositoryId` int  NOT NULL,
-    `ParentArtifactId` int  NULL,
-    `ModificationCount` int  NOT NULL
-);
-
--- Creating table 'ArtifactTypes'
-
-CREATE TABLE `ArtifactTypes` (
-    `ArtifactTypeId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `Name` varchar(1000)  NOT NULL
-);
-
--- Creating table 'DeveloperExpertises'
-
-CREATE TABLE `DeveloperExpertises` (
-    `DeveloperExpertiseId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `DeveloperId` int  NOT NULL,
-    `ArtifactId` int  NOT NULL,
-    `DeliveriesCount` int  NOT NULL,
-    `IsFirstAuthor` bool  NOT NULL,
-    `Inferred` bool  NOT NULL
-);
-
--- Creating table 'DeveloperExpertiseValues'
-
-CREATE TABLE `DeveloperExpertiseValues` (
-    `DeveloperExpertiseValueId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `Value` double  NOT NULL,
-    `DeveloperExpertiseId` int  NOT NULL,
-    `AlgorithmId` int  NOT NULL
-);
-
--- Creating table 'ActualReviewers'
-
-CREATE TABLE `ActualReviewers` (
-    `ActualReviewerId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `Time` datetime  NOT NULL,
-    `BugId` int  NOT NULL,
-    `ActivityId` int  NOT NULL,
-    `Reviewer` varchar(1000)  NOT NULL,
-    `ArtifactId` int  NOT NULL
-);
-
--- Creating table 'ComputedReviewers'
-
-CREATE TABLE `ComputedReviewers` (
-    `ComputedReviewerId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `Expert1` varchar(1000)  NOT NULL,
-    `Expert1Value` double  NOT NULL,
-    `Expert2` varchar(1000)  NOT NULL,
-    `Expert2Value` double  NOT NULL,
-    `Expert3` varchar(1000)  NOT NULL,
-    `Expert3Value` double  NOT NULL,
-    `Expert4` varchar(1000)  NOT NULL,
-    `Expert4Value` double  NOT NULL,
-    `Expert5` varchar(1000)  NOT NULL,
-    `Expert5Value` double  NOT NULL,
-    `ActualReviewerId` int  NOT NULL,
-    `AlgorithmId` int  NOT NULL
-);
-
--- Creating table 'Filenames'
-
-CREATE TABLE `Filenames` (
-    `FilenameId` int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-    `Name` varchar(1000)  NOT NULL,
-    `SourceRepositoryId` int  NOT NULL
-);
+ALTER TABLE `SourceRepositorys` ADD PRIMARY KEY (SourceRepositoryId);
 
 
 
--- --------------------------------------------------
--- Creating all PRIMARY KEY constraints
--- --------------------------------------------------
+
+CREATE TABLE `Revisions`(
+	`RevisionId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`User` longtext NOT NULL, 
+	`Tag` longtext, 
+	`Parent` longtext, 
+	`ID` longtext NOT NULL, 
+	`Description` longtext, 
+	`Time` datetime NOT NULL, 
+	`SourceRepositoryId` int NOT NULL);
+
+ALTER TABLE `Revisions` ADD PRIMARY KEY (RevisionId);
+
+
+
+
+CREATE TABLE `FileRevisions`(
+	`FileRevisionId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`IsNew` bool NOT NULL, 
+	`LinesAdded` int NOT NULL, 
+	`LinesDeleted` int NOT NULL, 
+	`Diff` longtext, 
+	`RevisionId` int NOT NULL, 
+	`FilenameId` int NOT NULL, 
+	`SourceRepositoryId` int NOT NULL);
+
+ALTER TABLE `FileRevisions` ADD PRIMARY KEY (FileRevisionId);
+
+
+
+
+CREATE TABLE `Repositorys`(
+	`RepositoryId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`Name` longtext NOT NULL, 
+	`SourceURL` longtext NOT NULL, 
+	`LastUpdate` datetime);
+
+ALTER TABLE `Repositorys` ADD PRIMARY KEY (RepositoryId);
+
+
+
+
+CREATE TABLE `Developers`(
+	`DeveloperId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`Name` longtext NOT NULL, 
+	`RepositoryId` int NOT NULL);
+
+ALTER TABLE `Developers` ADD PRIMARY KEY (DeveloperId);
+
+
+
+
+CREATE TABLE `Algorithms`(
+	`AlgorithmId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`Name` longtext NOT NULL, 
+	`GUID` CHAR(36) BINARY NOT NULL);
+
+ALTER TABLE `Algorithms` ADD PRIMARY KEY (AlgorithmId);
+
+
+
+
+CREATE TABLE `Artifacts`(
+	`ArtifactId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`ArtifactTypeId` int NOT NULL, 
+	`Name` longtext NOT NULL, 
+	`RepositoryId` int NOT NULL, 
+	`ParentArtifactId` int, 
+	`ModificationCount` int NOT NULL);
+
+ALTER TABLE `Artifacts` ADD PRIMARY KEY (ArtifactId);
+
+
+
+
+CREATE TABLE `ArtifactTypes`(
+	`ArtifactTypeId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`Name` longtext NOT NULL);
+
+ALTER TABLE `ArtifactTypes` ADD PRIMARY KEY (ArtifactTypeId);
+
+
+
+
+CREATE TABLE `DeveloperExpertises`(
+	`DeveloperExpertiseId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`DeveloperId` int NOT NULL, 
+	`ArtifactId` int NOT NULL, 
+	`DeliveriesCount` int NOT NULL, 
+	`IsFirstAuthor` bool NOT NULL, 
+	`Inferred` bool NOT NULL);
+
+ALTER TABLE `DeveloperExpertises` ADD PRIMARY KEY (DeveloperExpertiseId);
+
+
+
+
+CREATE TABLE `DeveloperExpertiseValues`(
+	`DeveloperExpertiseValueId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`Value` double NOT NULL, 
+	`DeveloperExpertiseId` int NOT NULL, 
+	`AlgorithmId` int NOT NULL);
+
+ALTER TABLE `DeveloperExpertiseValues` ADD PRIMARY KEY (DeveloperExpertiseValueId);
+
+
+
+
+CREATE TABLE `ActualReviewers`(
+	`ActualReviewerId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`ActivityId` int NOT NULL, 
+	`Reviewer` longtext NOT NULL, 
+	`RepositoryId` int NOT NULL, 
+	`BugId` int NOT NULL);
+
+ALTER TABLE `ActualReviewers` ADD PRIMARY KEY (ActualReviewerId);
+
+
+
+
+CREATE TABLE `ComputedReviewers`(
+	`ComputedReviewerId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`Expert1` longtext NOT NULL, 
+	`Expert1Value` double NOT NULL, 
+	`Expert2` longtext NOT NULL, 
+	`Expert2Value` double NOT NULL, 
+	`Expert3` longtext NOT NULL, 
+	`Expert3Value` double NOT NULL, 
+	`Expert4` longtext NOT NULL, 
+	`Expert4Value` double NOT NULL, 
+	`Expert5` longtext NOT NULL, 
+	`Expert5Value` double NOT NULL, 
+	`ActualReviewerId` int NOT NULL, 
+	`AlgorithmId` int NOT NULL, 
+	`BugId` int NOT NULL);
+
+ALTER TABLE `ComputedReviewers` ADD PRIMARY KEY (ComputedReviewerId);
+
+
+
+
+CREATE TABLE `Filenames`(
+	`FilenameId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`Name` longtext NOT NULL, 
+	`SourceRepositoryId` int NOT NULL);
+
+ALTER TABLE `Filenames` ADD PRIMARY KEY (FilenameId);
+
+
+
+
+CREATE TABLE `Bugs`(
+	`BugId` int NOT NULL AUTO_INCREMENT UNIQUE, 
+	`ChangeId` longtext NOT NULL);
+
+ALTER TABLE `Bugs` ADD PRIMARY KEY (BugId);
+
+
+
+
+CREATE TABLE `RepositoryAlgorithmRunStatus`(
+	`RepositoryRepositoryId` int NOT NULL, 
+	`AlgorithmAlgorithmId` int NOT NULL, 
+	`RunUntil` datetime NOT NULL);
+
+ALTER TABLE `RepositoryAlgorithmRunStatus` ADD PRIMARY KEY (AlgorithmAlgorithmId, RepositoryRepositoryId);
+
+
+
+
+CREATE TABLE `ArtifactBugRelation`(
+	`Artifacts_ArtifactId` int NOT NULL, 
+	`Bugs_BugId` int NOT NULL);
+
+ALTER TABLE `ArtifactBugRelation` ADD PRIMARY KEY (Artifacts_ArtifactId, Bugs_BugId);
+
+
+
 
 
 
@@ -354,35 +401,20 @@ CREATE INDEX `IX_FK_DeveloperExpertiseValueAlgorithm`
     ON `DeveloperExpertiseValues`
     (`AlgorithmId`);
 
--- Creating foreign key on `ArtifactId` in table 'ActualReviewers'
+-- Creating foreign key on `RepositoryId` in table 'ActualReviewers'
 
 ALTER TABLE `ActualReviewers`
-ADD CONSTRAINT `FK_ArtifactActualReviewer`
-    FOREIGN KEY (`ArtifactId`)
-    REFERENCES `Artifacts`
-        (`ArtifactId`)
+ADD CONSTRAINT `FK_RepositoryActualReviewer`
+    FOREIGN KEY (`RepositoryId`)
+    REFERENCES `Repositorys`
+        (`RepositoryId`)
     ON DELETE CASCADE ON UPDATE NO ACTION;
 
--- Creating non-clustered index for FOREIGN KEY 'FK_ArtifactActualReviewer'
+-- Creating non-clustered index for FOREIGN KEY 'FK_RepositoryActualReviewer'
 
-CREATE INDEX `IX_FK_ArtifactActualReviewer` 
+CREATE INDEX `IX_FK_RepositoryActualReviewer` 
     ON `ActualReviewers`
-    (`ArtifactId`);
-
--- Creating foreign key on `ActualReviewerId` in table 'ComputedReviewers'
-
-ALTER TABLE `ComputedReviewers`
-ADD CONSTRAINT `FK_ActualReviewerComputedReviewer`
-    FOREIGN KEY (`ActualReviewerId`)
-    REFERENCES `ActualReviewers`
-        (`ActualReviewerId`)
-    ON DELETE CASCADE ON UPDATE NO ACTION;
-
--- Creating non-clustered index for FOREIGN KEY 'FK_ActualReviewerComputedReviewer'
-
-CREATE INDEX `IX_FK_ActualReviewerComputedReviewer` 
-    ON `ComputedReviewers`
-    (`ActualReviewerId`);
+    (`RepositoryId`);
 
 -- Creating foreign key on `FilenameId` in table 'FileRevisions'
 
@@ -428,6 +460,84 @@ ADD CONSTRAINT `FK_SourceRepositoryFilename`
 CREATE INDEX `IX_FK_SourceRepositoryFilename` 
     ON `Filenames`
     (`SourceRepositoryId`);
+
+-- Creating foreign key on `Artifacts_ArtifactId` in table 'ArtifactBugRelation'
+
+ALTER TABLE `ArtifactBugRelation`
+ADD CONSTRAINT `FK_ArtifactBugRelation_Artifact`
+    FOREIGN KEY (`Artifacts_ArtifactId`)
+    REFERENCES `Artifacts`
+        (`ArtifactId`)
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating foreign key on `Bugs_BugId` in table 'ArtifactBugRelation'
+
+ALTER TABLE `ArtifactBugRelation`
+ADD CONSTRAINT `FK_ArtifactBugRelation_Bug`
+    FOREIGN KEY (`Bugs_BugId`)
+    REFERENCES `Bugs`
+        (`BugId`)
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_ArtifactBugRelation_Bug'
+
+CREATE INDEX `IX_FK_ArtifactBugRelation_Bug` 
+    ON `ArtifactBugRelation`
+    (`Bugs_BugId`);
+
+-- Creating foreign key on `BugId` in table 'ActualReviewers'
+
+ALTER TABLE `ActualReviewers`
+ADD CONSTRAINT `FK_BugActualReviewerRelation`
+    FOREIGN KEY (`BugId`)
+    REFERENCES `Bugs`
+        (`BugId`)
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_BugActualReviewerRelation'
+
+CREATE INDEX `IX_FK_BugActualReviewerRelation` 
+    ON `ActualReviewers`
+    (`BugId`);
+
+-- Creating foreign key on `BugId` in table 'ComputedReviewers'
+
+ALTER TABLE `ComputedReviewers`
+ADD CONSTRAINT `FK_BugComputedReviewerRelation`
+    FOREIGN KEY (`BugId`)
+    REFERENCES `Bugs`
+        (`BugId`)
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_BugComputedReviewerRelation'
+
+CREATE INDEX `IX_FK_BugComputedReviewerRelation` 
+    ON `ComputedReviewers`
+    (`BugId`);
+
+-- Creating foreign key on `RepositoryRepositoryId` in table 'RepositoryAlgorithmRunStatus'
+
+ALTER TABLE `RepositoryAlgorithmRunStatus`
+ADD CONSTRAINT `FK_RepositoryAlgorithmRunStatusRepository`
+    FOREIGN KEY (`RepositoryRepositoryId`)
+    REFERENCES `Repositorys`
+        (`RepositoryId`)
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Creating non-clustered index for FOREIGN KEY 'FK_RepositoryAlgorithmRunStatusRepository'
+
+CREATE INDEX `IX_FK_RepositoryAlgorithmRunStatusRepository` 
+    ON `RepositoryAlgorithmRunStatus`
+    (`RepositoryRepositoryId`);
+
+-- Creating foreign key on `AlgorithmAlgorithmId` in table 'RepositoryAlgorithmRunStatus'
+
+ALTER TABLE `RepositoryAlgorithmRunStatus`
+ADD CONSTRAINT `FK_RepositoryAlgorithmRunStatusAlgorithm`
+    FOREIGN KEY (`AlgorithmAlgorithmId`)
+    REFERENCES `Algorithms`
+        (`AlgorithmId`)
+    ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- --------------------------------------------------
 -- Script has ended
