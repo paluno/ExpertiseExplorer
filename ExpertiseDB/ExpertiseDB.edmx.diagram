@@ -11,10 +11,10 @@
         <EntityTypeShape EntityType="ExpertiseDB.FileRevision" Width="1.5" PointX="5.625" PointY="0.5" IsExpanded="true" />
         <AssociationConnector Association="ExpertiseDB.RevisionFile" />
         <EntityTypeShape EntityType="ExpertiseDB.Repository" Width="1.5" PointX="4.625" PointY="3.75" />
-        <EntityTypeShape EntityType="ExpertiseDB.Developer" Width="1.5" PointX="2.25" PointY="6.125" />
+        <EntityTypeShape EntityType="ExpertiseDB.Developer" Width="1.5" PointX="6" PointY="6.5" />
         <AssociationConnector Association="ExpertiseDB.RepositoryDeveloper" />
-        <EntityTypeShape EntityType="ExpertiseDB.Algorithm" Width="1.5" PointX="10.875" PointY="4.5" />
-        <EntityTypeShape EntityType="ExpertiseDB.Artifact" Width="1.5" PointX="7.25" PointY="6.125" />
+        <EntityTypeShape EntityType="ExpertiseDB.Algorithm" Width="1.5" PointX="1" PointY="6.875" />
+        <EntityTypeShape EntityType="ExpertiseDB.Artifact" Width="1.5" PointX="10.25" PointY="5.125" />
         <EntityTypeShape EntityType="ExpertiseDB.ArtifactType" Width="1.5" PointX="8" PointY="3.25" />
         <AssociationConnector Association="ExpertiseDB.ArtifactTypeArtifact" />
         <AssociationConnector Association="ExpertiseDB.RepositoryArtifact" />
@@ -22,17 +22,22 @@
         <AssociationConnector Association="ExpertiseDB.DeveloperDeveloperExpertise" />
         <AssociationConnector Association="ExpertiseDB.DeveloperExpertiseArtifact" />
         <AssociationConnector Association="ExpertiseDB.ArtifactArtifact" />
-        <EntityTypeShape EntityType="ExpertiseDB.DeveloperExpertiseValue" Width="1.5" PointX="11" PointY="9.625" />
+        <EntityTypeShape EntityType="ExpertiseDB.DeveloperExpertiseValue" Width="2.5" PointX="0.5" PointY="9.75" />
         <AssociationConnector Association="ExpertiseDB.DeveloperExpertiseDeveloperExpertiseValue" />
         <AssociationConnector Association="ExpertiseDB.DeveloperExpertiseValueAlgorithm" />
-        <EntityTypeShape EntityType="ExpertiseDB.ActualReviewer" Width="1.5" PointX="12.375" PointY="6.875" />
-        <AssociationConnector Association="ExpertiseDB.ArtifactActualReviewer" />
-        <EntityTypeShape EntityType="ExpertiseDB.ComputedReviewer" Width="1.5" PointX="15.625" PointY="5.75" />
-        <AssociationConnector Association="ExpertiseDB.ActualReviewerComputedReviewer" />
+        <EntityTypeShape EntityType="ExpertiseDB.ActualReviewer" Width="1.5" PointX="17.125" PointY="5.875" />
+        <EntityTypeShape EntityType="ExpertiseDB.ComputedReviewer" Width="1.5" PointX="17.125" PointY="8.5" />
         <EntityTypeShape EntityType="ExpertiseDB.Filename" Width="1.5" PointX="8.625" PointY="0.875" />
         <AssociationConnector Association="ExpertiseDB.FilenameFileRevision" />
         <AssociationConnector Association="ExpertiseDB.SourceRepositoryFileRevision" />
         <AssociationConnector Association="ExpertiseDB.SourceRepositoryFilename" />
+        <EntityTypeShape EntityType="ExpertiseDB.Bug" Width="1.5" PointX="13.875" PointY="5.875" />
+        <AssociationConnector Association="ExpertiseDB.ArtifactBugRelation" />
+        <AssociationConnector Association="ExpertiseDB.BugActualReviewerRelation" />
+        <AssociationConnector Association="ExpertiseDB.BugComputedReviewerRelation" />
+        <EntityTypeShape EntityType="ExpertiseDB.RepositoryAlgorithmRunStatus" Width="1.5" PointX="2" PointY="4" />
+        <AssociationConnector Association="ExpertiseDB.RepositoryAlgorithmRunStatusRepository" />
+        <AssociationConnector Association="ExpertiseDB.RepositoryAlgorithmRunStatusAlgorithm" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

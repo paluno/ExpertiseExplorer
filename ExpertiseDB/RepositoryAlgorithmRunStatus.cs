@@ -12,16 +12,13 @@ namespace ExpertiseDB
     using System;
     using System.Collections.Generic;
     
-    public partial class ArtifactType
+    public partial class RepositoryAlgorithmRunStatus
     {
-        public ArtifactType()
-        {
-            this.Artifact = new HashSet<Artifact>();
-        }
+        public int RepositoryRepositoryId { get; set; }
+        public int AlgorithmAlgorithmId { get; set; }
+        public System.DateTime RunUntil { get; set; }
     
-        public int ArtifactTypeId { get; set; }
-        public string Name { get; set; }
-    
-        public virtual ICollection<Artifact> Artifact { get; set; }
+        public virtual Repository Repository { get; set; }
+        public virtual Algorithm Algorithm { get; set; }
     }
 }

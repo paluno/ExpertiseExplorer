@@ -497,19 +497,11 @@
             <End Role="Algorithm" EntitySet="Algorithms" />
           </AssociationSet>
           <EntitySet Name="ActualReviewers" EntityType="ExpertiseDB.ActualReviewer" />
-          <AssociationSet Name="ArtifactActualReviewer" Association="ExpertiseDB.ArtifactActualReviewer">
-            <End Role="Artifact" EntitySet="Artifacts" />
-            <End Role="ActualReviewer" EntitySet="ActualReviewers" />
-          </AssociationSet>
           <AssociationSet Name="RepositoryActualReviewer" Association="ExpertiseDB.RepositoryActualReviewer">
             <End Role="Repository" EntitySet="Repositorys" />
             <End Role="ActualReviewer" EntitySet="ActualReviewers" />
           </AssociationSet>		  
           <EntitySet Name="ComputedReviewers" EntityType="ExpertiseDB.ComputedReviewer" />
-          <AssociationSet Name="ActualReviewerComputedReviewer" Association="ExpertiseDB.ActualReviewerComputedReviewer">
-            <End Role="ActualReviewer" EntitySet="ActualReviewers" />
-            <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
-          </AssociationSet>
           <EntitySet Name="Filenames" EntityType="ExpertiseDB.Filename" />
           <AssociationSet Name="FilenameFileRevision" Association="ExpertiseDB.FilenameFileRevision">
             <End Role="Filename" EntitySet="Filenames" />
@@ -522,6 +514,28 @@
           <AssociationSet Name="SourceRepositoryFilename" Association="ExpertiseDB.SourceRepositoryFilename">
             <End Role="SourceRepository" EntitySet="SourceRepositorys" />
             <End Role="Filename" EntitySet="Filenames" />
+          </AssociationSet>
+          <EntitySet Name="Bugs" EntityType="ExpertiseDB.Bug" />
+          <AssociationSet Name="ArtifactBugRelation" Association="ExpertiseDB.ArtifactBugRelation">
+            <End Role="Artifact" EntitySet="Artifacts" />
+            <End Role="Bug" EntitySet="Bugs" />
+          </AssociationSet>
+          <AssociationSet Name="BugActualReviewerRelation" Association="ExpertiseDB.BugActualReviewerRelation">
+            <End Role="Bug" EntitySet="Bugs" />
+            <End Role="ActualReviewer" EntitySet="ActualReviewers" />
+          </AssociationSet>
+          <AssociationSet Name="BugComputedReviewerRelation" Association="ExpertiseDB.BugComputedReviewerRelation">
+            <End Role="Bug" EntitySet="Bugs" />
+            <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+          </AssociationSet>
+          <EntitySet Name="RepositoryAlgorithmRunStatus" EntityType="ExpertiseDB.RepositoryAlgorithmRunStatus" />
+          <AssociationSet Name="RepositoryAlgorithmRunStatusRepository" Association="ExpertiseDB.RepositoryAlgorithmRunStatusRepository">
+            <End Role="RepositoryAlgorithmRunStatus" EntitySet="RepositoryAlgorithmRunStatus" />
+            <End Role="Repository" EntitySet="Repositorys" />
+          </AssociationSet>
+          <AssociationSet Name="RepositoryAlgorithmRunStatusAlgorithm" Association="ExpertiseDB.RepositoryAlgorithmRunStatusAlgorithm">
+            <End Role="RepositoryAlgorithmRunStatus" EntitySet="RepositoryAlgorithmRunStatus" />
+            <End Role="Algorithm" EntitySet="Algorithms" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="SourceRepository">
@@ -605,6 +619,7 @@
           <NavigationProperty Name="Artifacts" Relationship="ExpertiseDB.RepositoryArtifact" FromRole="Repository" ToRole="Artifact" />
           <NavigationProperty Name="ActualReviewers" Relationship="ExpertiseDB.RepositoryActualReviewer" FromRole="Repository" ToRole="ActualReviewer" />		  
           <Property Type="DateTime" Name="LastUpdate" Nullable="true" />
+          <NavigationProperty Name="RepositoryAlgorithmRunStatus" Relationship="ExpertiseDB.RepositoryAlgorithmRunStatusRepository" FromRole="Repository" ToRole="RepositoryAlgorithmRunStatus" />
         </EntityType>
         <EntityType Name="Developer">
           <Key>
@@ -638,6 +653,7 @@
           <Property Type="String" Name="Name" Nullable="false" />
           <Property Type="Guid" Name="GUID" Nullable="false" />
           <NavigationProperty Name="DeveloperExpertiseValues" Relationship="ExpertiseDB.DeveloperExpertiseValueAlgorithm" FromRole="Algorithm" ToRole="DeveloperExpertiseValue" />
+          <NavigationProperty Name="RepositoryAlgorithmRunStatus" Relationship="ExpertiseDB.RepositoryAlgorithmRunStatusAlgorithm" FromRole="Algorithm" ToRole="RepositoryAlgorithmRunStatus" />
         </EntityType>
         <EntityType Name="Artifact">
           <Key>
@@ -654,7 +670,7 @@
           <NavigationProperty Name="ParentArtifact" Relationship="ExpertiseDB.ArtifactArtifact" FromRole="Artifact1" ToRole="Artifact" />
           <Property Type="Int32" Name="ParentArtifactId" Nullable="true" />
           <Property Type="Int32" Name="ModificationCount" Nullable="false" DefaultValue="0" />
-          <NavigationProperty Name="ActualReviewers" Relationship="ExpertiseDB.ArtifactActualReviewer" FromRole="Artifact" ToRole="ActualReviewer" />
+          <NavigationProperty Name="Bugs" Relationship="ExpertiseDB.ArtifactBugRelation" FromRole="Artifact" ToRole="Bug" />
         </EntityType>
         <EntityType Name="ArtifactType">
           <Key>
@@ -790,30 +806,13 @@
             <PropertyRef Name="ActualReviewerId" />
           </Key>
           <Property Type="Int32" Name="ActualReviewerId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Type="DateTime" Name="Time" Nullable="false" />
-          <Property Type="String" Name="ChangeId" Nullable="false" />
           <Property Type="Int32" Name="ActivityId" Nullable="false" />
           <Property Type="String" Name="Reviewer" Nullable="false" />
-          <NavigationProperty Name="Artifact" Relationship="ExpertiseDB.ArtifactActualReviewer" FromRole="ActualReviewer" ToRole="Artifact" />
-          <Property Type="Int32" Name="ArtifactId" Nullable="false" />
           <NavigationProperty Name="Repository" Relationship="ExpertiseDB.RepositoryActualReviewer" FromRole="ActualReviewer" ToRole="Repository" />
           <Property Type="Int32" Name="RepositoryId" Nullable="false" />
-          <NavigationProperty Name="ComputedReviewers" Relationship="ExpertiseDB.ActualReviewerComputedReviewer" FromRole="ActualReviewer" ToRole="ComputedReviewer" />
+          <NavigationProperty Name="Bug" Relationship="ExpertiseDB.BugActualReviewerRelation" FromRole="ActualReviewer" ToRole="Bug" />
+          <Property Name="BugId" Type="Int32" Nullable="false" />
         </EntityType>
-        <Association Name="ArtifactActualReviewer">
-          <End Type="ExpertiseDB.Artifact" Role="Artifact" Multiplicity="1" >
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Type="ExpertiseDB.ActualReviewer" Role="ActualReviewer" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Artifact">
-              <PropertyRef Name="ArtifactId" />
-            </Principal>
-            <Dependent Role="ActualReviewer">
-              <PropertyRef Name="ArtifactId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="RepositoryActualReviewer">
           <End Type="ExpertiseDB.Repository" Role="Repository" Multiplicity="1" >
             <OnDelete Action="Cascade" />
@@ -843,24 +842,11 @@
           <Property Type="Double" Name="Expert4Value" Nullable="false" />
           <Property Type="String" Name="Expert5" Nullable="false" />
           <Property Type="Double" Name="Expert5Value" Nullable="false" />
-          <NavigationProperty Name="ActualReviewer" Relationship="ExpertiseDB.ActualReviewerComputedReviewer" FromRole="ComputedReviewer" ToRole="ActualReviewer" />
           <Property Type="Int32" Name="ActualReviewerId" Nullable="false" />
           <Property Type="Int32" Name="AlgorithmId" Nullable="false" />
+          <NavigationProperty Name="Bug" Relationship="ExpertiseDB.BugComputedReviewerRelation" FromRole="ComputedReviewer" ToRole="Bug" />
+          <Property Name="BugId" Type="Int32" Nullable="false" />
         </EntityType>
-        <Association Name="ActualReviewerComputedReviewer">
-          <End Type="ExpertiseDB.ActualReviewer" Role="ActualReviewer" Multiplicity="1" >
-            <OnDelete Action="Cascade" />
-          </End>
-          <End Type="ExpertiseDB.ComputedReviewer" Role="ComputedReviewer" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ActualReviewer">
-              <PropertyRef Name="ActualReviewerId" />
-            </Principal>
-            <Dependent Role="ComputedReviewer">
-              <PropertyRef Name="ActualReviewerId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="Filename">
           <Key>
             <PropertyRef Name="FilenameId" />
@@ -912,6 +898,79 @@
             </Principal>
             <Dependent Role="Filename">
               <PropertyRef Name="SourceRepositoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Bug">
+          <Key>
+            <PropertyRef Name="BugId" />
+          </Key>
+          <Property Name="BugId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <NavigationProperty Name="Artifacts" Relationship="ExpertiseDB.ArtifactBugRelation" FromRole="Bug" ToRole="Artifact" />
+          <Property Name="ChangeId" Type="String" Nullable="false" />
+          <NavigationProperty Name="ActualReviewers" Relationship="ExpertiseDB.BugActualReviewerRelation" FromRole="Bug" ToRole="ActualReviewer" />
+          <NavigationProperty Name="ComputedReviewers" Relationship="ExpertiseDB.BugComputedReviewerRelation" FromRole="Bug" ToRole="ComputedReviewer" />
+        </EntityType>
+        <Association Name="ArtifactBugRelation">
+          <End Type="ExpertiseDB.Artifact" Role="Artifact" Multiplicity="*" />
+          <End Type="ExpertiseDB.Bug" Role="Bug" Multiplicity="*" />
+        </Association>
+        <Association Name="BugActualReviewerRelation">
+          <End Type="ExpertiseDB.Bug" Role="Bug" Multiplicity="1" />
+          <End Type="ExpertiseDB.ActualReviewer" Role="ActualReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Bug">
+              <PropertyRef Name="BugId" />
+            </Principal>
+            <Dependent Role="ActualReviewer">
+              <PropertyRef Name="BugId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="BugComputedReviewerRelation">
+          <End Type="ExpertiseDB.Bug" Role="Bug" Multiplicity="1" />
+          <End Type="ExpertiseDB.ComputedReviewer" Role="ComputedReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Bug">
+              <PropertyRef Name="BugId" />
+            </Principal>
+            <Dependent Role="ComputedReviewer">
+              <PropertyRef Name="BugId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="RepositoryAlgorithmRunStatus" >
+          <Key>
+            <PropertyRef Name="AlgorithmAlgorithmId" />
+            <PropertyRef Name="RepositoryRepositoryId" />
+          </Key>
+          <NavigationProperty Name="Repository" Relationship="ExpertiseDB.RepositoryAlgorithmRunStatusRepository" FromRole="RepositoryAlgorithmRunStatus" ToRole="Repository" />
+          <Property Name="RepositoryRepositoryId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Algorithm" Relationship="ExpertiseDB.RepositoryAlgorithmRunStatusAlgorithm" FromRole="RepositoryAlgorithmRunStatus" ToRole="Algorithm" />
+          <Property Name="AlgorithmAlgorithmId" Type="Int32" Nullable="false" />
+          <Property Name="RunUntil" Type="DateTime" Nullable="false" />
+        </EntityType>
+        <Association Name="RepositoryAlgorithmRunStatusRepository">
+          <End Type="ExpertiseDB.RepositoryAlgorithmRunStatus" Role="RepositoryAlgorithmRunStatus" Multiplicity="*" />
+          <End Type="ExpertiseDB.Repository" Role="Repository" Multiplicity="1" />
+          <ReferentialConstraint>
+            <Principal Role="Repository">
+              <PropertyRef Name="RepositoryId" />
+            </Principal>
+            <Dependent Role="RepositoryAlgorithmRunStatus">
+              <PropertyRef Name="RepositoryRepositoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="RepositoryAlgorithmRunStatusAlgorithm">
+          <End Type="ExpertiseDB.RepositoryAlgorithmRunStatus" Role="RepositoryAlgorithmRunStatus" Multiplicity="*" />
+          <End Type="ExpertiseDB.Algorithm" Role="Algorithm" Multiplicity="1" />
+          <ReferentialConstraint>
+            <Principal Role="Algorithm">
+              <PropertyRef Name="AlgorithmId" />
+            </Principal>
+            <Dependent Role="RepositoryAlgorithmRunStatus">
+              <PropertyRef Name="AlgorithmAlgorithmId" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1032,11 +1091,8 @@
       <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.ActualReviewer)">
         <MappingFragment StoreEntitySet="ActualReviewers">
           <ScalarProperty Name="ActualReviewerId" ColumnName="ActualReviewerId" />
-          <ScalarProperty Name="Time" ColumnName="Time" />
-          <ScalarProperty Name="ChangeId" ColumnName="ChangeId" />
           <ScalarProperty Name="ActivityId" ColumnName="ActivityId" />
           <ScalarProperty Name="Reviewer" ColumnName="Reviewer" />
-          <ScalarProperty Name="ArtifactId" ColumnName="ArtifactId" />
           <ScalarProperty Name="RepositoryId" ColumnName="RepositoryId" />
         </MappingFragment>
       </EntityTypeMapping>

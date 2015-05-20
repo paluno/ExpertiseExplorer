@@ -12,16 +12,20 @@ namespace ExpertiseDB
     using System;
     using System.Collections.Generic;
     
-    public partial class ArtifactType
+    public partial class Bug
     {
-        public ArtifactType()
+        public Bug()
         {
-            this.Artifact = new HashSet<Artifact>();
+            this.Artifacts = new HashSet<Artifact>();
+            this.ActualReviewers = new HashSet<ActualReviewer>();
+            this.ComputedReviewers = new HashSet<ComputedReviewer>();
         }
     
-        public int ArtifactTypeId { get; set; }
-        public string Name { get; set; }
+        public int BugId { get; set; }
+        public string ChangeId { get; set; }
     
-        public virtual ICollection<Artifact> Artifact { get; set; }
+        public virtual ICollection<Artifact> Artifacts { get; set; }
+        public virtual ICollection<ActualReviewer> ActualReviewers { get; set; }
+        public virtual ICollection<ComputedReviewer> ComputedReviewers { get; set; }
     }
 }

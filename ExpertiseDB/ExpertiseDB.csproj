@@ -59,6 +59,9 @@
     <Compile Include="ArtifactType.cs">
       <DependentUpon>ExpertiseDB.tt</DependentUpon>
     </Compile>
+    <Compile Include="Bug.cs">
+      <DependentUpon>ExpertiseDB.tt</DependentUpon>
+    </Compile>
     <Compile Include="ComputedReviewer.cs">
       <DependentUpon>ExpertiseDB.tt</DependentUpon>
     </Compile>
@@ -100,6 +103,9 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository.cs">
+      <DependentUpon>ExpertiseDB.tt</DependentUpon>
+    </Compile>
+    <Compile Include="RepositoryAlgorithmRunStatus.cs">
       <DependentUpon>ExpertiseDB.tt</DependentUpon>
     </Compile>
     <Compile Include="Revision.cs">
