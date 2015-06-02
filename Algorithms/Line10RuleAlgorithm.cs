@@ -52,10 +52,7 @@
                 }
 
                 lastDeveloperId = entities.Developers.Where(d => d.Name == lastUser.User && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId).First();
-            }
 
-            using (var entities = new ExpertiseDBEntities())
-            {
                 DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(entities, lastDeveloperId, filename, ExpertiseExplorerCommon.ArtifactTypeEnum.File);
 
                 var expertiseValue = FindOrCreateDeveloperExpertiseValue(entities, developerExpertise);

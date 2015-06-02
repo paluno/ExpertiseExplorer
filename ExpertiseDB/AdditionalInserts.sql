@@ -85,7 +85,7 @@ START TRANSACTION;
 USE `expertisedb`;
 
 CREATE PROCEDURE `GetUsersOfRevisionsOfBefore`(IN filenameid int, IN beforeDatetime DATETIME)
-SELECT User FROM FileRevisions
+SELECT User,time FROM FileRevisions
 JOIN Revisions
 ON Revisions.revisionid = FileRevisions.revisionid
 WHERE FileRevisions.filenameid = filenameid and time < beforeDatetime

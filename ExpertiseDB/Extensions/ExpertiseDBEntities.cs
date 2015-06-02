@@ -138,7 +138,13 @@
             if (null == dev || string.IsNullOrEmpty(dev.User))
                 return null;
 
-            // TODO: place this in a custom filter
+            filterTransformSourceUserNames(dev);
+
+            return dev;
+        }
+
+        private static void filterTransformSourceUserNames(DeveloperWithEditTime dev)
+        {
             dev.User = dev.User.Replace("plus ", string.Empty);
             dev.User = dev.User.Replace("and the rest of the Xiph.Org Foundation", string.Empty);
             dev.User = dev.User.Replace(" and ", ",");
@@ -146,36 +152,26 @@
                 dev.User = dev.User.Split(',')[0].Trim();
             else
                 dev.User = dev.User.Trim();
-
-            return dev;
         }
 
-        public List<string> GetUsersOfRevisionsOfBefore(int filenameId, DateTime before)
+        public List<DeveloperWithEditTime> GetUsersOfRevisionsOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
             var sql = string.Format(CultureInfo.InvariantCulture, "CALL GetUsersOfRevisionsOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
 
-            // TODO: place this in a custom filter
-            var rawNames = Database.SqlQuery<string>(sql).ToList();
-            var cleanNames = new HashSet<string>();
+            List<DeveloperWithEditTime> lastDevs = Database.SqlQuery<DeveloperWithEditTime>(sql).ToList();
 
-            foreach (var name in rawNames)
+            IDictionary<string, DeveloperWithEditTime> dictCleanDevelopers = new Dictionary<string,DeveloperWithEditTime>(lastDevs.Count);
+            foreach (DeveloperWithEditTime dev in lastDevs)
             {
-                var cleanName = name.Replace("plus ", string.Empty);
-                cleanName = cleanName.Replace("and the rest of the Xiph.Org Foundation", string.Empty);
-                cleanName = cleanName.Replace(" and ", ",");
-                if (cleanName.Contains(","))
-                {
-                    foreach (var cn in cleanName.Split(','))
-                    {
-                        cleanNames.Add(cn.Trim());
-                    }
-                }
-                else
-                    cleanNames.Add(cleanName.Trim());
+                filterTransformSourceUserNames(dev);
+                if (dictCleanDevelopers.ContainsKey(dev.User))
+                    continue;
+
+                dictCleanDevelopers[dev.User] = dev;
             }
 
-            return cleanNames.ToList();
+            return dictCleanDevelopers.Values.OrderByDescending(devTime => devTime.Time).ToList();
         }
 
         public List<DeveloperForPath> GetDeveloperForPath(int repositoryId, string path)
