@@ -82,8 +82,8 @@
             SetDateTimeFromUnixTime(long.Parse(fields[3]));
         }
 
-        private readonly DateTime mercurialTransferDate = new DateTime(2007, 3, 22, 18, 29, 0); // date of Mozilla's move to hg
-        private readonly DateTime endOfHgDump = new DateTime(2013, 3, 8, 16, 15, 44); // last date of the hg dump
+        internal static readonly DateTime mercurialTransferDate = new DateTime(2007, 3, 22, 18, 29, 0); // date of Mozilla's move to hg
+        internal static readonly DateTime endOfHgDump = new DateTime(2013, 3, 8, 16, 15, 44); // last date of the hg dump
 
         public override bool isValid()
         {

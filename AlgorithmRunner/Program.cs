@@ -148,7 +148,7 @@
                     switch (reviewSourceType)
                     {
                         case ReviewSourceType.Bugzilla:
-                            factory = new BugzillaReviewFactory(basepath + "input_final.txt", basepath + @"CrawlerOutput\attachments.txt");
+                            factory = new BugzillaReviewFactory(basepath + "input_final.txt", basepath + @"attachments.txt");
                             break;
                         case ReviewSourceType.Gerrit:
                             factory = new GerritReviewFactory(basepath + "input_final.csv");
