@@ -108,10 +108,10 @@
                         {
                             case ConsoleKey.X:
                                 Console.WriteLine("Now at: " + count);
-                                Console.WriteLine("Time of next item (use with resume): " + ActivityInfo.PDTDateTime2unixTime(info.When));
+                                Console.WriteLine("Time of next item (use with resume): " + BugzillaReview.PDTDateTime2unixTime(info.When));
                                 Console.WriteLine("Stopping due to user request.");
 
-                                Log.Info("Stopping due to user request. Time of next item (use with resume): " + ActivityInfo.PDTDateTime2unixTime(info.When));
+                                Log.Info("Stopping due to user request. Time of next item (use with resume): " + BugzillaReview.PDTDateTime2unixTime(info.When));
                                 return;
                             case ConsoleKey.S:
                                 Console.WriteLine("Now at: " + count);
@@ -236,7 +236,7 @@
                     else
                     {
                         Log.Fatal(ae);
-                        Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + ActivityInfo.PDTDateTime2unixTime(info.When));
+                        Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + BugzillaReview.PDTDateTime2unixTime(info.When));
                         throw;
                     }
 

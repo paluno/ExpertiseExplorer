@@ -115,8 +115,8 @@
                             }
                         }
 
-                        resumeTime = ActivityInfo.UnixTime2PDTDateTime(timeOfLastComparison) - new TimeSpan(0, 0, 0, 1);
-                        maxTime = ActivityInfo.UnixTime2PDTDateTime(timeOfMaxComparison);
+                        resumeTime = BugzillaReview.UnixTime2PDTDateTime(timeOfLastComparison) - new TimeSpan(0, 0, 0, 1);
+                        maxTime = BugzillaReview.UnixTime2PDTDateTime(timeOfMaxComparison);
                     }
 
                     ReviewInfoFactory factory;
@@ -124,7 +124,7 @@
                     switch (reviewSourceType)
                     {
                         case ReviewSourceType.Bugzilla:
-                            factory = new ActivityInfoFactory(basepath + "input_final.txt", basepath + @"CrawlerOutput\attachments.txt");
+                            factory = new BugzillaReviewFactory(basepath + "input_final.txt", basepath + @"CrawlerOutput\attachments.txt");
                             break;
                         case ReviewSourceType.Gerrit:
                             factory = new GerritReviewFactory(basepath + "input_final.csv");

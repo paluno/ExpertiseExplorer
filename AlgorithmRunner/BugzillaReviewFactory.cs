@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace AlgorithmRunner
 {
-    class ActivityInfoFactory : ReviewInfoFactory
+    class BugzillaReviewFactory : ReviewInfoFactory
     {
 
         public string AttachmentPath { get; private set; }
 
-        public ActivityInfoFactory(string pathToActivityLog, string pathToAttachments)
+        public BugzillaReviewFactory(string pathToActivityLog, string pathToAttachments)
             : base(pathToActivityLog)
         {
             AttachmentPath = pathToAttachments;
@@ -24,7 +24,7 @@ namespace AlgorithmRunner
             return GetActivityInfoFromFile(InputFilePath, AttachmentPath);
         }
 
-        private static IEnumerable<ActivityInfo> GetActivityInfoFromFile(string pathToInputFile, string pathToAttachments)
+        private static IEnumerable<BugzillaReview> GetActivityInfoFromFile(string pathToInputFile, string pathToAttachments)
         {
             Dictionary<int, List<string>> attachments = new Dictionary<int, List<string>>();
             var attachmentLines = File.ReadAllLines(pathToAttachments);
@@ -36,14 +36,14 @@ namespace AlgorithmRunner
 
 
             var input = new StreamReader(pathToInputFile);
-            var result = new List<ActivityInfo>();
+            var result = new List<BugzillaReview>();
             Debug.WriteLine("Starting ActivityInfo parsing at: " + DateTime.Now);
             try
             {
                 string line;
                 while ((line = input.ReadLine()) != null)
                 {
-                    ActivityInfo activityInfo = new ActivityInfo(line);
+                    BugzillaReview activityInfo = new BugzillaReview(line);
                     int? attachmentId = activityInfo.GetAttachmentId();
 
                     if (attachmentId != null)
@@ -72,7 +72,7 @@ namespace AlgorithmRunner
             Debug.WriteLine("Starting parsing at: " + DateTime.Now);
             try
             {
-                filteredInput = ActivityInfo.ParseAndFilterInput(input);
+                filteredInput = BugzillaReview.ParseAndFilterInput(input);
             }
             finally
             {

@@ -7,7 +7,7 @@
     using System.Text;
     using System.Linq;
 
-    internal class ActivityInfo : ReviewInfo
+    internal class BugzillaReview : ReviewInfo
     {
         #region Constant Strings from Bugzilla Logs
 
@@ -65,7 +65,7 @@
                 );
         }
 
-        internal ActivityInfo(string inputLine)
+        internal BugzillaReview(string inputLine)
         {
             string line = inputLine.ToLower();
             var fields = line.Split(';');
