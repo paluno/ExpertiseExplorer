@@ -53,8 +53,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActivityInfo.cs" />
-    <Compile Include="ActivityInfoFactory.cs" />
+    <Compile Include="BugzillaReview.cs" />
+    <Compile Include="BugzillaReviewFactory.cs" />
     <Compile Include="AlgorithmComparisonRunner.cs" />
     <Compile Include="FilenameCleanup.cs" />
     <Compile Include="GerritReview.cs" />
