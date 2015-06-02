@@ -109,7 +109,6 @@ namespace Statistics
             Console.WriteLine("\t Possible options:");
             Console.WriteLine("\t 0 - All data (unfiltered)");
             Console.WriteLine("\t 1 - Use only reviews where 'hg@mozilla.com' is not identified as an expert");
-            Console.WriteLine("\t 2 - Use only reviews with only one associated artifact");
             Console.WriteLine("\t path - Only for FindAliasesFromX: Path to names/authors file");
         }
     }

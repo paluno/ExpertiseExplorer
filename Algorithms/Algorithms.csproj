@@ -65,7 +65,6 @@
     <Compile Include="Statistics\Author.cs" />
     <Compile Include="Statistics\SourceOfActualReviewers.cs" />
     <Compile Include="Statistics\SourceOfActualReviewersWithoutHg.cs" />
-    <Compile Include="Statistics\SourceOfActualReviewsWithOnlyOneArtifact.cs" />
     <Compile Include="Statistics\SourceOfAllActualReviewers.cs" />
     <Compile Include="Statistics\Statistics.cs" />
     <Compile Include="Statistics\StatisticsResult.cs" />

@@ -11,8 +11,7 @@ namespace Algorithms.Statistics
         public enum StatisticsSource
         {
             All = 0,
-            WithoutHg = 1,
-            OnlyOneArtifact = 2
+            WithoutHg = 1
         }
 
         public int RepositoryId { get; private set; }
@@ -34,8 +33,6 @@ namespace Algorithms.Statistics
                     return new SourceOfAllActualReviewers(repositoryId);
                 case StatisticsSource.WithoutHg:
                     return new SourceOfActualReviewersWithoutHg(repositoryId);
-                case StatisticsSource.OnlyOneArtifact:
-                    return new SourceOfActualReviewsWithOnlyOneArtifact(repositoryId);
                 default:
                     throw new NotImplementedException("The type \"" + typeOfSource + "\" is unknown");
             }

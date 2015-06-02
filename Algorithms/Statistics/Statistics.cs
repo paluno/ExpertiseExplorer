@@ -51,7 +51,7 @@
             if (!File.Exists(Path4ActualReviewers))
                 using (var context = new ExpertiseDBEntities())
                 {
-                    var uniqueReviewers = context.ActualReviewers.Where(ar => ar.RepositoryId == RepositoryId).Select(ar => ar.Reviewer).Distinct().OrderBy(ar => ar).ToList();
+                    var uniqueReviewers = context.ActualReviewers.Where(ar => ar.Bug.RepositoryId == RepositoryId).Select(ar => ar.Reviewer).Distinct().OrderBy(ar => ar).ToList();
 
                     var sb = new StringBuilder();
                     foreach (var uniqueReviewer in uniqueReviewers)

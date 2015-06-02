@@ -24,7 +24,7 @@ namespace Algorithms.Statistics
             {
                 return context.ComputedReviewers
                         // Find all computed reviewers that have no recommendation for hg@mozilla.com
-                    .Where(cr => cr.ActualReviewer.RepositoryId == RepositoryId && cr.Expert1 != "hg@mozilla.com" && cr.Expert2 != "hg@mozilla.com" && cr.Expert3 != "hg@mozilla.com" && cr.Expert4 != "hg@mozilla.com" && cr.Expert5 != "hg@mozilla.com")
+                    .Where(cr => cr.Bug.RepositoryId == RepositoryId && cr.Expert1 != "hg@mozilla.com" && cr.Expert2 != "hg@mozilla.com" && cr.Expert3 != "hg@mozilla.com" && cr.Expert4 != "hg@mozilla.com" && cr.Expert5 != "hg@mozilla.com")
                         // We are interested in ActualReviewerIds, though
                     .Select(cr => cr.ActualReviewerId).Distinct().ToList()
                         // Other ComputedReviewers for the same ActualReview shall also not recommend hg@mozilla.com
