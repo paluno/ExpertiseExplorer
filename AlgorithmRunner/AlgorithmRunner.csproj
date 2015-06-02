@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="AbstractIssueTracker\IssueTrackerEvent.cs" />
     <Compile Include="AbstractIssueTracker\PatchUpload.cs" />
+    <Compile Include="Bugzilla\BugzillaAttachmentFactory.cs" />
     <Compile Include="Bugzilla\BugzillaReview.cs" />
     <Compile Include="Bugzilla\BugzillaReviewFactory.cs" />
     <Compile Include="AlgorithmComparisonRunner.cs" />

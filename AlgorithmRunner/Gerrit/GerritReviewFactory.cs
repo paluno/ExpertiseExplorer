@@ -10,17 +10,14 @@ namespace AlgorithmRunner.Gerrit
 {
     class GerritReviewFactory : IssueTrackerEventFactory
     {
-        public string GerritCSVPath { get; protected set; }
-
         public GerritReviewFactory(string GerritCSVPath)
             : base(GerritCSVPath)
         {
-            this.GerritCSVPath = GerritCSVPath;
         }
 
         public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
         {
-            return File.ReadAllLines(GerritCSVPath)
+            return File.ReadAllLines(InputFilePath)
                 .Select(reviewCSVLine => new GerritReview(reviewCSVLine));
         }
 
