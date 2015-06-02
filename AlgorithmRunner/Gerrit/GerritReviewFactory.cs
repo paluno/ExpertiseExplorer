@@ -8,7 +8,7 @@ using AlgorithmRunner.AbstractIssueTracker;
 
 namespace AlgorithmRunner.Gerrit
 {
-    class GerritReviewFactory : ReviewInfoFactory
+    class GerritReviewFactory : IssueTrackerEventFactory
     {
         public string GerritCSVPath { get; protected set; }
 
@@ -18,7 +18,7 @@ namespace AlgorithmRunner.Gerrit
             this.GerritCSVPath = GerritCSVPath;
         }
 
-        public override IEnumerable<ReviewInfo> parseReviewInfos()
+        public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
         {
             return File.ReadAllLines(GerritCSVPath)
                 .Select(reviewCSVLine => new GerritReview(reviewCSVLine));

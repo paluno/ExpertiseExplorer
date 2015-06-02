@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AlgorithmRunner.Bugzilla
 {
-    class BugzillaReviewFactory : ReviewInfoFactory
+    class BugzillaReviewFactory : IssueTrackerEventFactory
     {
 
         public string AttachmentPath { get; private set; }
@@ -20,7 +20,7 @@ namespace AlgorithmRunner.Bugzilla
             AttachmentPath = pathToAttachments;
         }
 
-        public override IEnumerable<ReviewInfo> parseReviewInfos()
+        public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
         {
             return GetActivityInfoFromFile(InputFilePath, AttachmentPath);
         }

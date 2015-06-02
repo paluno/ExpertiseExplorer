@@ -65,11 +65,11 @@
             }
         }
 
-        public void StartComparisonFromFile(ReviewInfoFactory factory, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
+        public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
         {
             DateTime starttime = DateTime.Now;
             Debug.WriteLine("Starting comparison at: " + starttime);
-            IEnumerable<ReviewInfo> list = factory.parseReviewInfos();
+            IEnumerable<ReviewInfo> list = factory.parseIssueTrackerEvents();
             HandleReviewInfoList(list, resumeFrom, continueUntil, noComparison);
             Debug.WriteLine("Ending comparison at: " + DateTime.Now);
             Debug.WriteLine("Time: " + (DateTime.Now - starttime));

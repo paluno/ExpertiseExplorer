@@ -1,5 +1,6 @@
 ﻿namespace AlgorithmRunner
 {
+    using AlgorithmRunner.AbstractIssueTracker;
     using AlgorithmRunner.Bugzilla;
     using AlgorithmRunner.Gerrit;
     using Algorithms;
@@ -121,7 +122,7 @@
                         maxTime = BugzillaReview.UnixTime2PDTDateTime(timeOfMaxComparison);
                     }
 
-                    ReviewInfoFactory factory;
+                    IssueTrackerEventFactory factory;
 
                     switch (reviewSourceType)
                     {
