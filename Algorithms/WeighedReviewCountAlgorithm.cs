@@ -63,10 +63,5 @@ namespace Algorithms
                 }
             }
         }
-
-        public override ExpertiseDB.ComputedReviewer GetDevelopersForArtifact(int artifactId)
-        {
-            return base.GetDevelopersForArtifact(artifactId);
-        }
     }
 }

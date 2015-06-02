@@ -7,6 +7,7 @@
     using System.Linq;
 
     using ExpertiseDB;
+    using ExpertiseExplorerCommon;
 
     public class Line10RuleAlgorithm : AlgorithmBase
     {
@@ -35,11 +36,11 @@
                 return;
             }
 
-            int artifactId = FindOrCreateFileArtifactId(filename);
-            if (artifactId < 0)
-                throw new FileNotFoundException(string.Format("Artifact {0} not found", filename));
+            //int artifactId = FindOrCreateFileArtifactId(filename);
+            //if (artifactId < 0)
+            //    throw new FileNotFoundException(string.Format("Artifact {0} not found", filename));
 
-            string lastUser;
+            DeveloperWithEditTime lastUser;
             using (var entities = new ExpertiseDBEntities())
             {
                 lastUser = entities.GetUserForLastRevisionOfBefore(filenameId, MaxDateTime);
@@ -50,29 +51,42 @@
                     return;
                 }
 
-                lastDeveloperId = entities.Developers.Where(d => d.Name == lastUser && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId).First();
+                lastDeveloperId = entities.Developers.Where(d => d.Name == lastUser.User && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId).First();
             }
 
             using (var entities = new ExpertiseDBEntities())
             {
+                DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(entities, lastDeveloperId, filename, ExpertiseExplorerCommon.ArtifactTypeEnum.File);
 
-                var developerIds = entities.DeveloperExpertises.Where(de => de.ArtifactId == artifactId && de.Inferred == false).Select(de => de.DeveloperId).Distinct().ToList();
-                foreach (var developerId in developerIds)
-                {
-                    var fixMyClosure = developerId;
-                    var developerExpertise = entities.DeveloperExpertises.Where(de => de.DeveloperId == fixMyClosure && de.ArtifactId == artifactId).First();
-
-                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(entities, developerExpertise);
-
-                    // reset all connected developer's expertise to 0
-                    expertiseValue.Value = 0f;
-
-                    // except of the last one's who did a modification to the artifact
-                    if (developerId == lastDeveloperId)
-                        expertiseValue.Value = 1f;
-                }
-
+                var expertiseValue = FindOrCreateDeveloperExpertiseValue(entities, developerExpertise);
+                expertiseValue.Value = lastUser.Time.PDTDateTime2unixTime();
                 entities.SaveChanges();
+            }
+        }
+
+        public override ComputedReviewer GetDevelopersForArtifacts(IEnumerable<int> artifactIds)
+        {
+            using (var entities = new ExpertiseDBEntities())
+            {
+                DeveloperExpertiseValue deValue = entities.DeveloperExpertiseValues
+                    .Where(dev => dev.AlgorithmId == AlgorithmId && artifactIds.Contains(dev.DeveloperExpertise.ArtifactId))
+                    .OrderByDescending(dev => dev.Value)
+                    .FirstOrDefault();
+
+                return new ComputedReviewer()
+                {
+                    Expert1 = deValue.DeveloperExpertise.Developer.Name,
+                    Expert1Value = deValue.Value,
+                    Expert2 = string.Empty,
+                    Expert2Value = 0d,
+                    Expert3 = string.Empty,
+                    Expert3Value = 0d,
+                    Expert4 = string.Empty,
+                    Expert4Value = 0d,
+                    Expert5 = string.Empty,
+                    Expert5Value = 0d,
+                    AlgorithmId = this.AlgorithmId
+                };
             }
         }
     }

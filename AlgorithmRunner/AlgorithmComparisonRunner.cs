@@ -15,6 +15,8 @@
     using AlgorithmRunner.AbstractIssueTracker;
     using AlgorithmRunner.Bugzilla;
 
+    using ExpertiseExplorerCommon;
+
     internal class AlgorithmComparisonRunner
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -22,6 +24,14 @@
         private readonly string _foundFilesOnlyPath;
 
         private readonly string _performancePath;
+
+        public int RepositoryId
+        {
+            get
+            {
+                return Algorithms[0].RepositoryId;
+            }
+        }
 
         public IList<AlgorithmBase> Algorithms { get; set; }
 
@@ -78,8 +88,8 @@
         #region Private Methods
 
         /// <summary>
-        /// Go through a list of review activities. For each review, calculate expertises at the time of review and store five
-        /// computed reviewers
+        /// Go through a list of issue tracker activities. For each first patch upload of a bug, calculate expertises at the time of review and store five
+        /// computed reviewers. For reviews, remember the actual reviewers for later comparison and grant experience for review-based algorithms.
         /// </summary>
         private void HandleIssueTrackerEventList(IEnumerable<IssueTrackerEvent> issueTrackerEventList, DateTime resumeFrom, DateTime continueUntil, bool noComparison)
         {
@@ -108,10 +118,10 @@
                         {
                             case ConsoleKey.X:
                                 Console.WriteLine("Now at: " + count);
-                                Console.WriteLine("Time of next item (use with resume): " + BugzillaReview.PDTDateTime2unixTime(info.When));
+                                Console.WriteLine("Time of next item (use with resume): " + info.When.PDTDateTime2unixTime());
                                 Console.WriteLine("Stopping due to user request.");
 
-                                Log.Info("Stopping due to user request. Time of next item (use with resume): " + BugzillaReview.PDTDateTime2unixTime(info.When));
+                                Log.Info("Stopping due to user request. Time of next item (use with resume): " + info.When.PDTDateTime2unixTime());
                                 return;
                             case ConsoleKey.S:
                                 Console.WriteLine("Now at: " + count);
@@ -149,7 +159,13 @@
         {
             // 1. Check whether this is the first upload for this bug (maybe not necessary)
 
-            // TODO: Do this
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+            {
+                Bug currentBug = repository.Bugs.SingleOrDefault(bug => bug.ChangeId == info.ChangeId);
+                if (null != currentBug)
+                    // Revisit: maybe the bug exists, but not the ComputedReviewers for the given algorithms.
+                    return;
+            }
             
             // 2. Calculate algorithm values for the files in the bug
 
@@ -199,7 +215,7 @@
                     else
                     {
                         Log.Fatal(ae);
-                        Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + BugzillaReview.PDTDateTime2unixTime(info.When));
+                        Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + info.When.PDTDateTime2unixTime());
                         throw;
                     }
 
@@ -218,6 +234,20 @@
                 return;
 
             // 3. Calculate reviewers for the bug
+
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+            {
+                Bug currentBug = new Bug()
+                {
+                    ChangeId = info.ChangeId,
+                    RepositoryId = this.RepositoryId
+                };
+                repository.Bugs.Add(currentBug);
+                repository.SaveChanges();
+            }
+
+            IEnumerable<int> artifactIds = involvedFiles
+                .Select(fileName => Algorithms[0].FindOrCreateFileArtifactId(fileName));
 
             // TODO: Implement this
 

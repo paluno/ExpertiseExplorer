@@ -7,6 +7,8 @@
     using Algorithms.FPS;
     using System;
 
+    using ExpertiseExplorerCommon;
+
     public class Program
     {
         public enum ReviewSourceType { Bugzilla, Gerrit };
@@ -41,8 +43,8 @@
                 case "tosem":
                     var forceOverwrite = false;
                     var noComp = false;
-                    int timeOfLastComparison = 0;
-                    int timeOfMaxComparison = int.MaxValue;
+                    long timeOfLastComparison = 0;
+                    long timeOfMaxComparison = int.MaxValue;
                     DateTime resumeTime = DateTime.MinValue;
                     DateTime maxTime = DateTime.MaxValue;
 
@@ -109,7 +111,7 @@
                                         return;
                                     }
 
-                                    if (!int.TryParse(args[i], out timeOfLastComparison))
+                                    if (!long.TryParse(args[i], out timeOfLastComparison))
                                     {
                                         Console.WriteLine("Error: Unable to parse {0} as int.", args[i]);
                                         return;
@@ -124,7 +126,7 @@
                                         return;
                                     }
 
-                                    if (!int.TryParse(args[i], out timeOfMaxComparison))
+                                    if (!long.TryParse(args[i], out timeOfMaxComparison))
                                     {
                                         Console.WriteLine("Error: Unable to parse {0} as int.", args[i]);
                                         return;
@@ -137,8 +139,8 @@
                             }
                         }
 
-                        resumeTime = BugzillaReview.UnixTime2PDTDateTime(timeOfLastComparison) - new TimeSpan(0, 0, 0, 1);
-                        maxTime = BugzillaReview.UnixTime2PDTDateTime(timeOfMaxComparison);
+                        resumeTime = timeOfLastComparison.UnixTime2PDTDateTime() - new TimeSpan(0, 0, 0, 1);
+                        maxTime = timeOfMaxComparison.UnixTime2PDTDateTime();
                     }
 
                     IssueTrackerEventFactory factory;

@@ -62,16 +62,20 @@
             return result;
         }
 
-        public List<SimplifiedDeveloperExpertise> GetDevelopersForArtifactAndAlgorithm(int artifactId, int algorithmId)
+        public IQueryable<SimplifiedDeveloperExpertise> GetDevelopersForArtifactsAndAlgorithm(IEnumerable<int> artifactIds, int algorithmId)
         {
-            var developerExpertises = DeveloperExpertises.Include(de => de.Developer).Include(de => de.DeveloperExpertiseValues).Where(de => de.ArtifactId == artifactId).AsNoTracking();
-            var result = new List<SimplifiedDeveloperExpertise>();
-            foreach (var developerExpertise in developerExpertises)
-            {
-                result.AddRange(from expertise in developerExpertise.DeveloperExpertiseValues where expertise.AlgorithmId == algorithmId select new SimplifiedDeveloperExpertise { DeveloperName = developerExpertise.Developer.Name, DeveloperId = developerExpertise.DeveloperId, Expertise = expertise.Value });
-            }
-
-            return result;
+            return DeveloperExpertiseValues
+                .Include(dev => dev.DeveloperExpertise.Developer).Include(de => de.DeveloperExpertise)
+                .Where(dev => artifactIds.Contains(dev.DeveloperExpertise.ArtifactId) && dev.AlgorithmId == algorithmId)
+                .AsNoTracking()
+                .GroupBy(
+                    dev => dev.DeveloperExpertise.DeveloperId,
+                    (devId, expertiseValues) => new SimplifiedDeveloperExpertise()
+                        {
+                            DeveloperId = devId,
+                            DeveloperName = expertiseValues.First().DeveloperExpertise.Developer.Name,
+                            Expertise = expertiseValues.Select(exValue => exValue.Value).Sum()
+                        });
         }
 
         public List<Tuple<string, int, double>> GetArtifactsForDeveloper(int developerId)
@@ -125,21 +129,25 @@
             return Revisions.Where(r => r.SourceRepositoryId == sourceRepositoryId && r.Time >= start && r.Time < end).ToList();
         }
 
-        public string GetUserForLastRevisionOfBefore(int filenameId, DateTime before)
+        public DeveloperWithEditTime GetUserForLastRevisionOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
             var sql = string.Format(CultureInfo.InvariantCulture, "CALL GetUserForLastRevisionOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
-            string name = Database.SqlQuery<string>(sql).SingleOrDefault();
+            DeveloperWithEditTime dev = Database.SqlQuery<DeveloperWithEditTime>(sql).SingleOrDefault();
 
-            if (string.IsNullOrEmpty(name))
+            if (null == dev || string.IsNullOrEmpty(dev.User))
                 return null;
 
             // TODO: place this in a custom filter
-            name = name.Replace("plus ", string.Empty);
-            name = name.Replace("and the rest of the Xiph.Org Foundation", string.Empty);
-            name = name.Replace(" and ", ",");
+            dev.User = dev.User.Replace("plus ", string.Empty);
+            dev.User = dev.User.Replace("and the rest of the Xiph.Org Foundation", string.Empty);
+            dev.User = dev.User.Replace(" and ", ",");
+            if (dev.User.Contains(','))
+                dev.User = dev.User.Split(',')[0].Trim();
+            else
+                dev.User = dev.User.Trim();
 
-            return name.Contains(',') ? name.Split(',')[0].Trim() : name.Trim();
+            return dev;
         }
 
         public List<string> GetUsersOfRevisionsOfBefore(int filenameId, DateTime before)

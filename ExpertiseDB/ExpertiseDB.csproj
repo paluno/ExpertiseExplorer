@@ -92,6 +92,7 @@
     </Compile>
     <Compile Include="Extensions\ActualReviewersGrouped.cs" />
     <Compile Include="Extensions\DeveloperForPath.cs" />
+    <Compile Include="Extensions\DeveloperWithEditTime.cs" />
     <Compile Include="Extensions\SimplifiedDeveloperExpertise.cs" />
     <Compile Include="Extensions\DeveloperExpertiseSum.cs" />
     <Compile Include="Extensions\ExpertiseDBEntities.cs" />

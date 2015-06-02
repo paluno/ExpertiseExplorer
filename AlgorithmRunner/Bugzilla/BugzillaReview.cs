@@ -7,6 +7,7 @@
     using System.Text;
     using System.Linq;
     using AlgorithmRunner.AbstractIssueTracker;
+    using ExpertiseExplorerCommon;
 
     internal class BugzillaReview : ReviewInfo
     {
@@ -107,26 +108,10 @@
             return true;
         }
 
-        public static DateTime UnixTime2PDTDateTime(long unixTime)
-        {
-            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                .AddSeconds(unixTime)
-                .Subtract(new TimeSpan(0, 7, 0, 0)); // From Utc to PDT
-        }
-
-        public static long PDTDateTime2unixTime(DateTime pdtTime)
-        {
-            return Convert.ToInt64(
-                pdtTime.AddHours(7)  // to UTC
-                    .Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
-                    .TotalSeconds
-                );
-        }
-
         public void SetDateTimeFromUnixTime(long unixTime)
         {
             UnixTime = unixTime;
-            When = UnixTime2PDTDateTime(UnixTime);
+            When = UnixTime.UnixTime2PDTDateTime();
         }
 
         public override string ToString()

@@ -81,6 +81,10 @@
       <Project>{afa7c444-d43d-4030-8539-a2177173d706}</Project>
       <Name>ExpertiseDB</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ExpertiseExplorerCommon\ExpertiseExplorerCommon.csproj">
+      <Project>{6707ef18-0f6e-481a-b1c2-17f6a4222cb9}</Project>
+      <Name>ExpertiseExplorerCommon</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

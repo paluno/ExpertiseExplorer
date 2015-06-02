@@ -349,11 +349,11 @@
                         });
         }
 
-        public virtual ComputedReviewer GetDevelopersForArtifact(int artifactId)
+        public virtual ComputedReviewer GetDevelopersForArtifacts(IEnumerable<int> artifactIds)
         {
             using (var entities = new ExpertiseDBEntities())
             {
-                var developers = entities.GetDevelopersForArtifactAndAlgorithm(artifactId, AlgorithmId).OrderByDescending(sde => sde.Expertise).Take(5).ToList();
+                var developers = entities.GetDevelopersForArtifactsAndAlgorithm(artifactIds, AlgorithmId).OrderByDescending(sde => sde.Expertise).Take(5).ToList();
                 while (developers.Count < 5)
                     developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, DeveloperName = string.Empty, Expertise = 0d });
 
