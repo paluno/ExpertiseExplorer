@@ -69,8 +69,8 @@
         {
             DateTime starttime = DateTime.Now;
             Debug.WriteLine("Starting comparison at: " + starttime);
-            IEnumerable<ReviewInfo> list = factory.parseIssueTrackerEvents();
-            HandleReviewInfoList(list, resumeFrom, continueUntil, noComparison);
+            IEnumerable<IssueTrackerEvent> list = factory.parseIssueTrackerEvents();
+            HandleIssueTrackerEventList(list, resumeFrom, continueUntil, noComparison);
             Debug.WriteLine("Ending comparison at: " + DateTime.Now);
             Debug.WriteLine("Time: " + (DateTime.Now - starttime));
         }
@@ -81,7 +81,7 @@
         /// Go through a list of review activities. For each review, calculate expertises at the time of review and store five
         /// computed reviewers
         /// </summary>
-        private void HandleReviewInfoList(IEnumerable<ReviewInfo> reviewInfo, DateTime resumeFrom, DateTime continueUntil, bool noComparison)
+        private void HandleIssueTrackerEventList(IEnumerable<IssueTrackerEvent> issueTrackerEventList, DateTime resumeFrom, DateTime continueUntil, bool noComparison)
         {
             using (StreamWriter found = new StreamWriter(_foundFilesOnlyPath, true))
             using (StreamWriter performanceLog = new StreamWriter(_performancePath, true))
@@ -91,7 +91,7 @@
                 DateTime start = DateTime.MinValue;
                 int count = 0;
                 Stopwatch stopwatch = new Stopwatch();
-                foreach (ReviewInfo info in reviewInfo)
+                foreach (IssueTrackerEvent info in issueTrackerEventList)
                 {
                     stopwatch.Start();
                     count++;
@@ -131,6 +131,18 @@
                     if (info.When < resumeFrom)
                         continue;
 
+                    switch(info.GetType())
+                    {
+                        case IssueTrackerEvent.IssueTrackerEventType.Review:
+                            break;
+                        case IssueTrackerEvent.IssueTrackerEventType.PatchUpload:
+                            if (noComparison)
+                                continue;
+                            ProcessPatchUpload(info);
+                            break;
+                    }
+
+
                     IList<string> involvedFiles = info.Filenames;
 
                     DateTime end = info.When;
@@ -139,32 +151,34 @@
 
                     ProcessReviewInfo(info, involvedFiles, found, stopwatch);
 
-                    if (noComparison)
-                        continue;
-
-                    foreach (var involvedFile in involvedFiles)
-                    {
-                        int artifactId = Algorithms[0].FindOrCreateFileArtifactId(involvedFile);
-
-                        using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
-                        {
-                            ActualReviewer actualReviewer = FindOrCreateActualReviewer(entities, info, artifactId, Algorithms[0].RepositoryId);
-
-                            // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
-                            IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
-
-                            Task.WaitAll(tasks.ToArray());
-                            foreach (Task<ComputedReviewer> task in tasks)
-                            {
-                                actualReviewer.ComputedReviewers.Add(task.Result);
-                            }
-
-                            entities.SaveChanges();
-                        }
-                    }
-
                     stopwatch.Stop();
                     Log.Info("-- " + stopwatch.Elapsed);
+                }
+            }
+        }
+
+        private void ProcessPatchUpload(IssueTrackerEvent info)
+        {
+            IList<string> involvedFiles = info.Filenames;
+
+            foreach (var involvedFile in involvedFiles)
+            {
+                int artifactId = Algorithms[0].FindOrCreateFileArtifactId(involvedFile);
+
+                using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
+                {
+                    ActualReviewer actualReviewer = FindOrCreateActualReviewer(entities, info, artifactId, Algorithms[0].RepositoryId);
+
+                    // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
+                    IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
+
+                    Task.WaitAll(tasks.ToArray());
+                    foreach (Task<ComputedReviewer> task in tasks)
+                    {
+                        actualReviewer.ComputedReviewers.Add(task.Result);
+                    }
+
+                    entities.SaveChanges();
                 }
             }
         }

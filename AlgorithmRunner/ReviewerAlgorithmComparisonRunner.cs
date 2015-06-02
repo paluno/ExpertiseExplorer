@@ -11,8 +11,6 @@ namespace AlgorithmRunner
 {
     internal class ReviewerAlgorithmComparisonRunner : AlgorithmComparisonRunner
     {
-        RootDirectory FpsTree { get; set; }
-
         private ReviewerAlgorithmComparisonRunner(string sourceUrl, string basepath, RootDirectory fpsTree)
             : base(sourceUrl, basepath,
                 new AlgorithmBase[]
@@ -21,7 +19,6 @@ namespace AlgorithmRunner
                     new FPSReviewAlgorithm(fpsTree)
                 })
         {
-            FpsTree = fpsTree;
         }
 
         public ReviewerAlgorithmComparisonRunner(string sourceUrl, string basepath)
