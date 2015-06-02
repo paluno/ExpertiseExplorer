@@ -88,12 +88,10 @@
             {
                 DateTime timeAfterOneK = DateTime.Now;
 
-                DateTime start = DateTime.MinValue;
+                DateTime repositoryWatermark = DateTime.MinValue;   // Until which date are the number of deliveries, modifications, and so on counted?
                 int count = 0;
-                Stopwatch stopwatch = new Stopwatch();
                 foreach (IssueTrackerEvent info in issueTrackerEventList)
                 {
-                    stopwatch.Start();
                     count++;
                     if (count % 1000 == 0)
                     {
@@ -131,84 +129,36 @@
                     if (info.When < resumeFrom)
                         continue;
 
-                    switch(info.GetType())
-                    {
-                        case IssueTrackerEvent.IssueTrackerEventType.Review:
-                            break;
-                        case IssueTrackerEvent.IssueTrackerEventType.PatchUpload:
-                            if (noComparison)
-                                continue;
-                            ProcessPatchUpload(info);
-                            break;
-                    }
+                    ReviewInfo ri = info as ReviewInfo;
+                    if (null != ri)
+                        ProcessReviewInfo(ri, found, noComparison);
 
-
-                    IList<string> involvedFiles = info.Filenames;
-
-                    DateTime end = info.When;
-                    Algorithms[0].BuildConnectionsForSourceRepositoryBetween(start, end);
-                    start = end;
-
-                    ProcessReviewInfo(info, involvedFiles, found, stopwatch);
-
-                    stopwatch.Stop();
-                    Log.Info("-- " + stopwatch.Elapsed);
+                    PatchUpload pu = info as PatchUpload;
+                    if (null != pu && !noComparison)
+                        ProcessPatchUpload(pu, found, noComparison, ref repositoryWatermark);
                 }
             }
         }
 
-        private void ProcessPatchUpload(IssueTrackerEvent info)
+        /// <summary>
+        /// 1. Check whether this is the first upload for this bug (maybe not necessary)
+        /// 2. Calculate algorithm values for the files in the bug
+        /// 3. Calculate reviewers for the bug
+        /// </summary>
+        private void ProcessPatchUpload(IssueTrackerEvent info, StreamWriter found, bool noComparison, ref DateTime repositoryWatermark)
         {
+            // 1. Check whether this is the first upload for this bug (maybe not necessary)
+
+            // TODO: Do this
+            
+            // 2. Calculate algorithm values for the files in the bug
+
+            DateTime end = info.When;
+            Algorithms[0].BuildConnectionsForSourceRepositoryBetween(repositoryWatermark, end);
+            repositoryWatermark = end;
+
             IList<string> involvedFiles = info.Filenames;
 
-            foreach (var involvedFile in involvedFiles)
-            {
-                int artifactId = Algorithms[0].FindOrCreateFileArtifactId(involvedFile);
-
-                using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
-                {
-                    ActualReviewer actualReviewer = FindOrCreateActualReviewer(entities, info, artifactId, Algorithms[0].RepositoryId);
-
-                    // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
-                    IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
-
-                    Task.WaitAll(tasks.ToArray());
-                    foreach (Task<ComputedReviewer> task in tasks)
-                    {
-                        actualReviewer.ComputedReviewers.Add(task.Result);
-                    }
-
-                    entities.SaveChanges();
-                }
-            }
-        }
-
-        private static ActualReviewer FindOrCreateActualReviewer(ExpertiseDBEntities entities, ReviewInfo info, int artifactId, int repositoryId)
-        {
-            ActualReviewer actualReviewer = entities.ActualReviewers.SingleOrDefault(
-                        reviewer => reviewer.ArtifactId == artifactId && 
-                        reviewer.ChangeId == info.ChangeId && 
-                        reviewer.ActivityId == info.ActivityId);
-
-            if (null == actualReviewer)
-            {
-                actualReviewer = new ActualReviewer
-                    {
-                        ActivityId = info.ActivityId,
-                        ArtifactId = artifactId,
-                        ChangeId = info.ChangeId,
-                        Reviewer = info.Reviewer,
-                        Time = info.When,
-                        RepositoryId = repositoryId
-                    };
-                entities.ActualReviewers.Add(actualReviewer);
-            }
-
-            return actualReviewer;
-        }
-
-        protected virtual void ProcessReviewInfo(ReviewInfo info, IList<string> involvedFiles, StreamWriter found, Stopwatch stopwatch)
-        {
             DateTime maxDateTime = Algorithms[0].MaxDateTime;
             int repositoryId = Algorithms[0].RepositoryId;
             int sourceRepositoryId = Algorithms[0].SourceRepositoryId;
@@ -234,9 +184,6 @@
                     }
 
                     Task.WaitAll(tasks.ToArray());
-                    stopwatch.Stop();
-                    Log.Info("- " + stopwatch.Elapsed);
-                    stopwatch.Start();
 
                     found.WriteLine(info.ToString());
                     found.Flush();
@@ -267,11 +214,55 @@
             }
             while (!fSuccess);
 
-            return;
+            if (noComparison)
+                return;
+
+            // 3. Calculate reviewers for the bug
+
+            // TODO: Implement this
+
+            //foreach (var involvedFile in involvedFiles)
+            //{
+            //    int artifactId = Algorithms[0].FindOrCreateFileArtifactId(involvedFile);
+
+            //    using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
+            //    {
+            //        ActualReviewer actualReviewer = FindOrCreateActualReviewer(entities, info, artifactId, Algorithms[0].RepositoryId);
+
+            //        // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
+            //        IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
+
+            //        Task.WaitAll(tasks.ToArray());
+            //        foreach (Task<ComputedReviewer> task in tasks)
+            //        {
+            //            actualReviewer.ComputedReviewers.Add(task.Result);
+            //        }
+
+            //        entities.SaveChanges();
+            //    }
+            //}
         }
 
+        /// <summary>
+        /// Handles a review by doing two things:
+        ///  - Store in DB that the reviewer is a possible reviewer in this bug/change.
+        ///  - Grant the reviewer review experience for the review.
+        /// </summary>
+        protected virtual void ProcessReviewInfo(ReviewInfo info, StreamWriter found, bool noComparison)
+        {
+            IList<string> involvedFiles = info.Filenames;
 
+                // Grant the reviewer review experience for the review
+            foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
+                reviewAlgorithm.AddReviewScore(info.Reviewer, involvedFiles);
 
+            if (noComparison)
+                return;
+
+            // Store in DB that the reviewer is a possible reviewer in this bug/change.
+            
+            // TODO: Implement this
+         }
         #endregion
     }
 }

@@ -4,6 +4,7 @@
     using AlgorithmRunner.Bugzilla;
     using AlgorithmRunner.Gerrit;
     using Algorithms;
+    using Algorithms.FPS;
     using System;
 
     public class Program
@@ -45,26 +46,44 @@
                     DateTime resumeTime = DateTime.MinValue;
                     DateTime maxTime = DateTime.MaxValue;
 
-                    AlgorithmComparisonRunner comparisonRunner;
+                    AlgorithmBase[] algorithms;
                     if ("review" == mode)
                     {
-                        comparisonRunner = new ReviewerAlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
-                        ((ReviewerAlgorithmComparisonRunner)comparisonRunner).InitFromDB();
+                        RootDirectory fpsTree = new RootDirectory();
+                        WeighedReviewCountAlgorithm wrcAlgo = new WeighedReviewCountAlgorithm(fpsTree);
+                        wrcAlgo.LoadReviewScoresFromDB();
+                        algorithms = new AlgorithmBase[]
+                        {
+                            wrcAlgo,
+                            new FPSReviewAlgorithm(fpsTree)
+                        };
                     }
                     else if ("t" == mode || "tosem" == mode)
                     {
-                        comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath, new AlgorithmBase[] { 
+                        algorithms = new AlgorithmBase[] { 
                             new DegreeOfAuthorshipAlgorithm(DegreeOfAuthorshipAlgorithm.WeightingType.UniversalTOSEM)
-                        });
+                        };
                     }
                     else if ("a" == mode || "algorithm" == mode)
-                        comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath);
+                    {
+                        algorithms = new AlgorithmBase[]
+                        { 
+                            new Line10RuleAlgorithm(),
+                            new ExpertiseCloudAlgorithm(),
+                            new DegreeOfAuthorshipAlgorithm(DegreeOfAuthorshipAlgorithm.WeightingType.UniversalTOSEM),
+                            new ExperienceAtomsAlgorithm(),
+                            new CodeOwnershipAlgorithm(),
+                            new ExpertiseIntersectionAlgorithm()
+                        };
+                    }
                     else
                     {
                         Console.WriteLine("Invalid mode \"" + mode + "\""); // cannot happen if the switch is okay
                         return;
                     }
 
+                    AlgorithmComparisonRunner comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath, algorithms);
+                    
                     if (args.Length > 4)
                     {
                         for (int i = 4; i < args.Length; i++)

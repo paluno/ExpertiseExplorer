@@ -63,7 +63,6 @@
     <Compile Include="Gerrit\GerritReviewFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReviewerAlgorithmComparisonRunner.cs" />
     <Compile Include="AbstractIssueTracker\ReviewInfo.cs" />
     <Compile Include="AbstractIssueTracker\IssueTrackerEventFactory.cs" />
   </ItemGroup>
