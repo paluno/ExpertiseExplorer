@@ -235,6 +235,14 @@
 
             // 3. Calculate reviewers for the bug
 
+            IEnumerable<int> artifactIds = involvedFiles
+                .Select(fileName => Algorithms[0].FindOrCreateFileArtifactId(fileName));
+
+            // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
+            IEnumerable<Task<ComputedReviewer>> computedReviewerTasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifacts(artifactIds))).ToList();
+
+            Task.WaitAll(computedReviewerTasks.ToArray());
+
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
             {
                 Bug currentBug = new Bug()
@@ -243,34 +251,14 @@
                     RepositoryId = this.RepositoryId
                 };
                 repository.Bugs.Add(currentBug);
+
+                foreach (Task<ComputedReviewer> task in computedReviewerTasks)
+                {
+                    currentBug.ComputedReviewers.Add(task.Result);
+                }
+
                 repository.SaveChanges();
             }
-
-            IEnumerable<int> artifactIds = involvedFiles
-                .Select(fileName => Algorithms[0].FindOrCreateFileArtifactId(fileName));
-
-            // TODO: Implement this
-
-            //foreach (var involvedFile in involvedFiles)
-            //{
-            //    int artifactId = Algorithms[0].FindOrCreateFileArtifactId(involvedFile);
-
-            //    using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
-            //    {
-            //        ActualReviewer actualReviewer = FindOrCreateActualReviewer(entities, info, artifactId, Algorithms[0].RepositoryId);
-
-            //        // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
-            //        IEnumerable<Task<ComputedReviewer>> tasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifact(artifactId))).ToList();
-
-            //        Task.WaitAll(tasks.ToArray());
-            //        foreach (Task<ComputedReviewer> task in tasks)
-            //        {
-            //            actualReviewer.ComputedReviewers.Add(task.Result);
-            //        }
-
-            //        entities.SaveChanges();
-            //    }
-            //}
         }
 
         /// <summary>
@@ -290,8 +278,22 @@
                 return;
 
             // Store in DB that the reviewer is a possible reviewer in this bug/change.
-            
-            // TODO: Implement this
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+            {
+                Bug theBug = repository.Bugs.Single(bug => bug.ChangeId == info.ChangeId);
+
+                if (theBug.ActualReviewers.Any(reviewer => reviewer.Reviewer == info.Reviewer))
+                    return;     //  the reviewer is already in the list
+
+                theBug.ActualReviewers.Add(new ActualReviewer()
+                    {
+                        ActivityId = info.ActivityId,
+                        Bug = theBug,
+                        Reviewer = info.Reviewer
+                    });
+
+                repository.SaveChanges();
+            }
          }
         #endregion
     }
