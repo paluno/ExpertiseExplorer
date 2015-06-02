@@ -1,5 +1,7 @@
 ﻿namespace AlgorithmRunner
 {
+    using AlgorithmRunner.Bugzilla;
+    using AlgorithmRunner.Gerrit;
     using Algorithms;
     using System;
 

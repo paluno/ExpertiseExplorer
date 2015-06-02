@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AlgorithmRunner.AbstractIssueTracker;
 
-namespace AlgorithmRunner
+namespace AlgorithmRunner.Gerrit
 {
     class GerritReviewFactory : ReviewInfoFactory
     {

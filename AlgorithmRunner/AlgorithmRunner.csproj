@@ -53,17 +53,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BugzillaReview.cs" />
-    <Compile Include="BugzillaReviewFactory.cs" />
+    <Compile Include="Bugzilla\BugzillaReview.cs" />
+    <Compile Include="Bugzilla\BugzillaReviewFactory.cs" />
     <Compile Include="AlgorithmComparisonRunner.cs" />
     <Compile Include="FilenameCleanup.cs" />
-    <Compile Include="GerritReview.cs" />
-    <Compile Include="GerritReviewFactory.cs" />
+    <Compile Include="Gerrit\GerritReview.cs" />
+    <Compile Include="Gerrit\GerritReviewFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReviewerAlgorithmComparisonRunner.cs" />
-    <Compile Include="ReviewInfo.cs" />
-    <Compile Include="ReviewInfoFactory.cs" />
+    <Compile Include="AbstractIssueTracker\ReviewInfo.cs" />
+    <Compile Include="AbstractIssueTracker\ReviewInfoFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -81,6 +81,7 @@
       <Name>ExpertiseDB</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -12,6 +12,8 @@
 
     using ExpertiseDB;
     using ExpertiseDB.Extensions;
+    using AlgorithmRunner.AbstractIssueTracker;
+    using AlgorithmRunner.Bugzilla;
 
     internal class AlgorithmComparisonRunner
     {

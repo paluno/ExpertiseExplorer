@@ -1,4 +1,5 @@
-﻿using Algorithms;
+﻿using AlgorithmRunner.AbstractIssueTracker;
+using Algorithms;
 using Algorithms.FPS;
 using System;
 using System.Collections.Generic;
