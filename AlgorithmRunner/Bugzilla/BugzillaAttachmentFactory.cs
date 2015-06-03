@@ -39,8 +39,8 @@ namespace AlgorithmRunner.Bugzilla
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
             {
                 foreach(BugzillaAttachmentInfo bai in rawAttachments)
-                    bai.When = repository.Database.SqlQuery<DateTime>("SELECT creation_ts FROM attachments WHERE attach_id=@attachid",  // this is a table directly from the Bugzilla Database
-                        new SqlParameter("@attachid", System.Data.SqlDbType.BigInt) { Value = bai.AttachmentId } 
+                    bai.When = repository.Database.SqlQuery<DateTime>("SELECT creation_ts FROM attachments WHERE attach_id={0}",  // this is a table directly from the Bugzilla Database
+                        bai.AttachmentId  
                     ).Single();
             }
 

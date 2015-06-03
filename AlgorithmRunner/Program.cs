@@ -8,6 +8,7 @@
     using System;
 
     using ExpertiseExplorerCommon;
+    using System.Collections.Generic;
 
     public class Program
     {
@@ -38,58 +39,24 @@
 
                 case "a":
                 case "algorithm":
-                case "review":
-                case "t":
-                case "tosem":
                     var forceOverwrite = false;
                     var noComp = false;
                     long timeOfLastComparison = 0;
                     long timeOfMaxComparison = int.MaxValue;
                     DateTime resumeTime = DateTime.MinValue;
                     DateTime maxTime = DateTime.MaxValue;
+                    string algoSelectString = "1cdaoif";    // the default: All algorithms
 
-                    AlgorithmBase[] algorithms;
-                    if ("review" == mode)
-                    {
-                        RootDirectory fpsTree = new RootDirectory();
-                        WeighedReviewCountAlgorithm wrcAlgo = new WeighedReviewCountAlgorithm(fpsTree);
-                        wrcAlgo.LoadReviewScoresFromDB();
-                        algorithms = new AlgorithmBase[]
-                        {
-                            wrcAlgo,
-                            new FPSReviewAlgorithm(fpsTree)
-                        };
-                    }
-                    else if ("t" == mode || "tosem" == mode)
-                    {
-                        algorithms = new AlgorithmBase[] { 
-                            new DegreeOfAuthorshipAlgorithm(DegreeOfAuthorshipAlgorithm.WeightingType.UniversalTOSEM)
-                        };
-                    }
-                    else if ("a" == mode || "algorithm" == mode)
-                    {
-                        algorithms = new AlgorithmBase[]
-                        { 
-                            new Line10RuleAlgorithm(),
-                            new ExpertiseCloudAlgorithm(),
-                            new DegreeOfAuthorshipAlgorithm(DegreeOfAuthorshipAlgorithm.WeightingType.UniversalTOSEM),
-                            new ExperienceAtomsAlgorithm(),
-                            new CodeOwnershipAlgorithm(),
-                            new ExpertiseIntersectionAlgorithm()
-                        };
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid mode \"" + mode + "\""); // cannot happen if the switch is okay
-                        return;
-                    }
-
-                    AlgorithmComparisonRunner comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath, algorithms);
-                    
                     if (args.Length > 4)
                     {
                         for (int i = 4; i < args.Length; i++)
                         {
+                            if (args[i].StartsWith("algo-"))
+                            {
+                                algoSelectString = args[i].Substring("algo-".Length);
+                                continue;
+                            }
+
                             switch (args[i].ToLower())
                             {
                                 case "f":
@@ -144,12 +111,11 @@
                     }
 
                     IssueTrackerEventFactory factory;
-
                     switch (reviewSourceType)
                     {
                         case ReviewSourceType.Bugzilla:
                             BugzillaAttachmentFactory baf = new BugzillaAttachmentFactory(basepath + @"attachments_final.txt");
-                            baf.PrepareInput(basepath + @"attachments", forceOverwrite);
+                            baf.PrepareInput(basepath + @"attachments.txt", forceOverwrite);
                             factory = new BugzillaReviewFactory(basepath + "input_final.txt", baf);
                             break;
                         case ReviewSourceType.Gerrit:
@@ -162,6 +128,8 @@
                     }
 
                     factory.PrepareInput(basepath + "input.txt", forceOverwrite);
+
+                    AlgorithmComparisonRunner comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath, selectAlgorithmsFromString(algoSelectString));
                     comparisonRunner.StartComparisonFromFile(factory, resumeTime, maxTime, noComp);
 
                     return;
@@ -170,6 +138,35 @@
                     ShowHelp();
                     break;
             }
+        }
+
+        private static System.Collections.Generic.IList<AlgorithmBase> selectAlgorithmsFromString(string algoSelectString)
+        {
+            string algoSelectUpperCase = algoSelectString.ToUpperInvariant();
+            List<AlgorithmBase> algorithms = new List<AlgorithmBase>();
+
+            if (algoSelectString.Contains("1"))
+                algorithms.Add(new Line10RuleAlgorithm());
+            if (algoSelectString.Contains("C"))
+                algorithms.Add(new ExpertiseCloudAlgorithm());
+            if (algoSelectString.Contains("D"))
+                algorithms.Add(new DegreeOfAuthorshipAlgorithm(DegreeOfAuthorshipAlgorithm.WeightingType.UniversalTOSEM));
+            if (algoSelectString.Contains("A"))
+                algorithms.Add(new ExperienceAtomsAlgorithm());
+            if (algoSelectString.Contains("O"))
+                algorithms.Add(new CodeOwnershipAlgorithm());
+            if (algoSelectString.Contains("I"))
+                algorithms.Add(new ExpertiseIntersectionAlgorithm());
+            if (algoSelectString.Contains("F"))
+            {
+                RootDirectory fpsTree = new RootDirectory();
+                WeighedReviewCountAlgorithm wrcAlgo = new WeighedReviewCountAlgorithm(fpsTree);
+                wrcAlgo.LoadReviewScoresFromDB();
+                algorithms.Add(wrcAlgo);
+                algorithms.Add(new FPSReviewAlgorithm(fpsTree));
+            }
+
+            return algorithms;
         }
 
         private static void ShowHelp()
@@ -182,8 +179,14 @@
             Console.WriteLine("\t c or clean for filename cleanup of crawled filenames (filters everything that does not belong to the Firefox project e.g. files from camino, wallet)");
             Console.WriteLine("\t additional argument: none\n");
             Console.WriteLine("\t a or algorithm for algorithm comparison");
-            Console.WriteLine("\t review is also algorithm comparision, but using the review algorithm set instead of the usual algorithms");
-            Console.WriteLine("\t t or tosem is again an algorithm comparision. It only uses the degree-of-knowledge algorithm with the weightings from the ACM TOSEM paper.");
+            Console.WriteLine("\t additional argument: algo-1cdaoif to restrict the comparison to some algorithms. Each letter stand for one algorithm that will be evaluated if present:");
+            Console.WriteLine("\t\t 1 - Line 10 Rule");
+            Console.WriteLine("\t\t c - Expertise Cloud");
+            Console.WriteLine("\t\t d - Degree-Of-Authorship (TOSEM style)");
+            Console.WriteLine("\t\t a - Experience Atoms");
+            Console.WriteLine("\t\t o - Code Ownership");
+            Console.WriteLine("\t\t i - Expertise Intersection");
+            Console.WriteLine("\t\t f - File-Path-Similarity (Review-based algorithm)");
             Console.WriteLine("\t additional argument: f or force for forcing an existing prepared input to be overwritten (optional)");
             Console.WriteLine("\t additional argument: n or nocomp for only creating expertise values from revision, skipping the comparison (optional)");
             Console.WriteLine("\t additional argument: r or resume arg for resuming the computation from arg datetime, arg has to be in unix time (optional)");
