@@ -11,31 +11,35 @@ namespace AlgorithmRunner.Bugzilla
 {
     class BugzillaReviewFactory : IssueTrackerEventFactory
     {
+        protected BugzillaAttachmentFactory AttachmentFactory { get; private set; }
+        
+        /// <summary>
+        /// Attachments without date
+        /// </summary>
+        private string PathToRawAttachments { get; set; }
 
-        public string AttachmentPath { get; private set; }
-
-        public BugzillaReviewFactory(string pathToActivityLog, string pathToAttachments)
+        public BugzillaReviewFactory(string pathToActivityLog, BugzillaAttachmentFactory attachments)
             : base(pathToActivityLog)
         {
-            AttachmentPath = pathToAttachments;
+            AttachmentFactory = attachments;
         }
 
         public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
         {
-            return GetActivityInfoFromFile(InputFilePath, AttachmentPath);
+                // First get the patch uploads
+            IEnumerable<BugzillaAttachmentInfo> attachmentList = (IEnumerable<BugzillaAttachmentInfo>)AttachmentFactory.parseIssueTrackerEvents();
+            
+                // Lookup table to add file names to BugzillaReviews
+            Dictionary<UInt64, IList<string>> dictAttachments = attachmentList.ToDictionary(bai => bai.AttachmentId, bai => bai.Filenames);
+                
+                // Second, get reviews
+            IEnumerable<BugzillaReview> reviewList = GetActivityInfoFromFile(InputFilePath, dictAttachments);
+
+            return Merge<IssueTrackerEvent>(attachmentList, reviewList, (patch, review) => patch.When < review.When);
         }
 
-        private static IEnumerable<BugzillaReview> GetActivityInfoFromFile(string pathToInputFile, string pathToAttachments)
+        private static IEnumerable<BugzillaReview> GetActivityInfoFromFile(string pathToInputFile, Dictionary<UInt64, IList<string>> attachments)
         {
-            Dictionary<int, List<string>> attachments = new Dictionary<int, List<string>>();
-            var attachmentLines = File.ReadAllLines(pathToAttachments);
-            foreach (var attachmentLine in attachmentLines)
-            {
-                var attachmentId = int.Parse(attachmentLine.Split(';')[1]);
-                attachments.Add(attachmentId, attachmentLine.Split(';')[2].Split(',').Distinct().ToList());
-            }
-
-
             var input = new StreamReader(pathToInputFile);
             var result = new List<BugzillaReview>();
             Debug.WriteLine("Starting ActivityInfo parsing at: " + DateTime.Now);
@@ -45,11 +49,11 @@ namespace AlgorithmRunner.Bugzilla
                 while ((line = input.ReadLine()) != null)
                 {
                     BugzillaReview activityInfo = new BugzillaReview(line);
-                    int? attachmentId = activityInfo.GetAttachmentId();
+                    UInt64? attachmentId = activityInfo.GetAttachmentId();
 
                     if (attachmentId != null)
                     {
-                        activityInfo.Filenames = attachments[(int)attachmentId];
+                        activityInfo.Filenames = attachments[(UInt64)attachmentId];
                     }
 
                     result.Add(activityInfo);
@@ -59,7 +63,6 @@ namespace AlgorithmRunner.Bugzilla
             {
                 input.Close();
             }
-
 
             Debug.WriteLine("Finished ActivityInfo parsing at: " + DateTime.Now);
 
@@ -86,5 +89,50 @@ namespace AlgorithmRunner.Bugzilla
 
             Debug.WriteLine("Starting ordering at: " + DateTime.Now);
         }
+
+        #region Code from svick posted on https://stackoverflow.com/questions/7717871/how-to-perform-merge-sort-using-linq
+        /// <summary>
+        /// Merge-Sort-style ordered union of two sequences
+        /// </summary>
+        static IEnumerable<T> Merge<T>(IEnumerable<T> first,
+                               IEnumerable<T> second,
+                               Func<T, T, bool> predicate)
+        {
+            // validation ommited
+
+            using (var firstEnumerator = first.GetEnumerator())
+            using (var secondEnumerator = second.GetEnumerator())
+            {
+                bool firstCond = firstEnumerator.MoveNext();
+                bool secondCond = secondEnumerator.MoveNext();
+
+                while (firstCond && secondCond)
+                {
+                    if (predicate(firstEnumerator.Current, secondEnumerator.Current))
+                    {
+                        yield return firstEnumerator.Current;
+                        firstCond = firstEnumerator.MoveNext();
+                    }
+                    else
+                    {
+                        yield return secondEnumerator.Current;
+                        secondCond = secondEnumerator.MoveNext();
+                    }
+                }
+
+                while (firstCond)
+                {
+                    yield return firstEnumerator.Current;
+                    firstCond = firstEnumerator.MoveNext();
+                }
+
+                while (secondCond)
+                {
+                    yield return secondEnumerator.Current;
+                    secondCond = secondEnumerator.MoveNext();
+                }
+            }
+        }
+        #endregion Code from svick posted on https://stackoverflow.com/questions/7717871/how-to-perform-merge-sort-using-linq
     }
 }

@@ -55,12 +55,12 @@
             }
         }
 
-        public int? GetAttachmentId()
+        public UInt64? GetAttachmentId()
         {
             if (!What.Contains(ATTACHMENTIDENTIFIER))
                 return null;
 
-            return int.Parse(
+            return UInt64.Parse(
                     What.Replace(ATTACHMENTIDENTIFIER, string.Empty)
                         .Replace(FLAGS, string.Empty)
                         .Trim()

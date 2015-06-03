@@ -23,7 +23,7 @@ namespace AlgorithmRunner.Bugzilla
             }
         }
 
-        public int AttachmentId { get; set; }
+        public UInt64 AttachmentId { get; set; }
 
         public BugzillaAttachmentInfo(string csvAttachmentLine)
         {
@@ -31,7 +31,7 @@ namespace AlgorithmRunner.Bugzilla
             var fields = line.Split(';');
 
             BugId = int.Parse(fields[0]);
-            AttachmentId = int.Parse(fields[1]);
+            AttachmentId = UInt64.Parse(fields[1]);
             Filenames = fields[2].Split(',').Distinct().ToList();
 
             if (fields.Length > 3)    // is the upload date already found out?
@@ -40,10 +40,6 @@ namespace AlgorithmRunner.Bugzilla
 
         public override bool isValid()
         {
-            // filter if not in examined window of time
-            if (When < BugzillaReview.mercurialTransferDate || When > BugzillaReview.endOfHgDump)
-                return false;
-
             // filter if there are no files
             if (!Filenames.Any())
                 return false;
@@ -53,6 +49,11 @@ namespace AlgorithmRunner.Bugzilla
                 return false;
 
             return true;
+        }
+
+        public override string ToString()
+        {
+            return string.Join(";", BugId, AttachmentId, string.Join(",", Filenames), When);
         }
     }
 }
