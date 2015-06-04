@@ -193,10 +193,7 @@
                         algorithm.RepositoryId = repositoryId;
                         algorithm.SourceRepositoryId = sourceRepositoryId;
 
-                        AlgorithmBase fixMyClosure = algorithm; // fixMyClosure is necessary as otherwise all tasks would use the last algorithm: foreach changes variable content instead of creating new variables
-                        tasks.Add(Task.Factory.StartNew(
-                            input => fixMyClosure.CalculateExpertiseForFiles(input as IList<string>),
-                            involvedFiles));
+                        tasks.Add(algorithm.CalculateExpertiseForFilesAsync(involvedFiles));
                     }
 
                     Task.WaitAll(tasks.ToArray());
@@ -239,7 +236,7 @@
                 .Select(fileName => Algorithms[0].FindOrCreateFileArtifactId(fileName));
 
             // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
-            IEnumerable<Task<ComputedReviewer>> computedReviewerTasks = Algorithms.Select(algorithm => Task<ComputedReviewer>.Factory.StartNew(() => algorithm.GetDevelopersForArtifacts(artifactIds))).ToList();
+            IEnumerable<Task<ComputedReviewer>> computedReviewerTasks = Algorithms.Select(algorithm => algorithm.GetDevelopersForArtifactsAsync(artifactIds)).ToList();
 
             Task.WaitAll(computedReviewerTasks.ToArray());
 

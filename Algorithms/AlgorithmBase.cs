@@ -20,9 +20,9 @@
 
         public string Name { get; protected set; }
 
-        private const int NumberOfTasks = 5;
+        private const int TOTAL_NUMBER_OF_CONCURRENT_TASKS = 30;
 
-        protected TaskFactory TaskFactory { get; private set; }
+        protected static readonly TaskFactory algorithmTaskFactory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(TOTAL_NUMBER_OF_CONCURRENT_TASKS));
 
         public int AlgorithmId { get; protected set; }
 
@@ -91,7 +91,7 @@
         
         public abstract void CalculateExpertiseForFile(string filename);
 
-        public void CalculateExpertiseForFiles(IEnumerable<string> filenames)
+        public async Task CalculateExpertiseForFilesAsync(IEnumerable<string> filenames)
         {
             var tasks = new List<Task>();
 
@@ -101,13 +101,13 @@
                     continue;
 
                 tasks.Add(
-                    TaskFactory.StartNew(
+                    algorithmTaskFactory.StartNew(
                         input => CalculateExpertiseForFile(input as string),
                         filename,
                             TaskCreationOptions.AttachedToParent));
             }
 
-            Task.WaitAll(tasks.ToArray());
+            await Task.WhenAll(tasks);
         }
 
         protected void ClearExpertiseForAllDevelopers(string filename)
@@ -237,7 +237,7 @@
             }
         }
 
-        protected void Init(int numberOfParallelTasks = NumberOfTasks)
+        protected void Init()
         {
             using (var repository = new ExpertiseDBEntities())
             {
@@ -254,8 +254,6 @@
             MaxDateTime = DateTime.MinValue;
             RepositoryId = -1;
             SourceRepositoryId = -1;
-
-            TaskFactory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(numberOfParallelTasks));
         }
 
         private List<Revision> GetRevisionsFromSourceRepository()
@@ -392,11 +390,15 @@
                         });
         }
 
-        public virtual ComputedReviewer GetDevelopersForArtifacts(IEnumerable<int> artifactIds)
+        public virtual async Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds)
         {
             using (var entities = new ExpertiseDBEntities())
             {
-                var developers = entities.GetDevelopersForArtifactsAndAlgorithm(artifactIds, AlgorithmId).OrderByDescending(sde => sde.Expertise).Take(5).ToList();
+                List<SimplifiedDeveloperExpertise> developers = await entities.GetDevelopersForArtifactsAndAlgorithm(artifactIds, AlgorithmId)
+                    .OrderByDescending(sde => sde.Expertise)
+                    .Take(5)
+                    .ToListAsync();
+
                 while (developers.Count < 5)
                     developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, DeveloperName = string.Empty, Expertise = 0d });
 

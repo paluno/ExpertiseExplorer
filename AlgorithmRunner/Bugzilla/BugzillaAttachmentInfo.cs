@@ -53,7 +53,7 @@ namespace AlgorithmRunner.Bugzilla
 
         public override string ToString()
         {
-            return string.Join(";", BugId, AttachmentId, string.Join(",", Filenames), When);
+            return string.Join(";", BugId, AttachmentId, string.Join(",", Filenames), When.ToString("u"));
         }
     }
 }

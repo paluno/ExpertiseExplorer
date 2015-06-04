@@ -22,7 +22,7 @@ namespace Algorithms
         {
             Guid = new Guid("F1C17EA9-81E8-4F2B-A08D-A2DBC056F36D");
             this.FpsTree = fpsTree;
-            Init(30);
+            Init();
         }
 
         public override void CalculateExpertiseForFile(string filename)

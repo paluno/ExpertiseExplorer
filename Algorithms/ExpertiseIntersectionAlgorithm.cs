@@ -6,6 +6,7 @@
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
+    using System.Threading.Tasks;
 
     using ExpertiseDB;
     using ExpertiseExplorerCommon;
@@ -74,12 +75,12 @@
             }
         }
 
-        public override ComputedReviewer GetDevelopersForArtifacts(IEnumerable<int> artifactIds)
+        public override async Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds)
         {
             List<SimplifiedDeveloperExpertise> deValues;
             using (var entities = new ExpertiseDBEntities())
             {
-                deValues = entities.DeveloperExpertiseValues
+                deValues = await entities.DeveloperExpertiseValues
                     .Include(dev => dev.DeveloperExpertise.Developer).Include(de => de.DeveloperExpertise)
                     .Where(dev => artifactIds.Contains(dev.DeveloperExpertise.ArtifactId) && dev.AlgorithmId == AlgorithmId)
                     .AsNoTracking()
@@ -93,7 +94,7 @@
                         })
                     .OrderByDescending(sde => sde.Expertise)
                     .Take(5)
-                    .ToList();
+                    .ToListAsync();
             }
 
             while (deValues.Count < 5)

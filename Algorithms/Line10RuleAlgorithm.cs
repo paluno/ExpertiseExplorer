@@ -6,8 +6,11 @@
     using System.IO;
     using System.Linq;
 
+    using System.Data.Entity;
+
     using ExpertiseDB;
     using ExpertiseExplorerCommon;
+    using System.Threading.Tasks;
 
     public class Line10RuleAlgorithm : AlgorithmBase
     {
@@ -61,14 +64,14 @@
             }
         }
 
-        public override ComputedReviewer GetDevelopersForArtifacts(IEnumerable<int> artifactIds)
+        public override async Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds)
         {
             using (var entities = new ExpertiseDBEntities())
             {
-                DeveloperExpertiseValue deValue = entities.DeveloperExpertiseValues
+                DeveloperExpertiseValue deValue = await entities.DeveloperExpertiseValues
                     .Where(dev => dev.AlgorithmId == AlgorithmId && artifactIds.Contains(dev.DeveloperExpertise.ArtifactId))
                     .OrderByDescending(dev => dev.Value)
-                    .FirstOrDefault();
+                    .FirstOrDefaultAsync();
 
                 return new ComputedReviewer()
                 {
