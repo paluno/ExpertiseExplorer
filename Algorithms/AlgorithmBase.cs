@@ -71,7 +71,7 @@
                     RepositoryAlgorithmRunStatus rars = entities.RepositoryAlgorithmRunStatus.Find(RepositoryId, AlgorithmId);
                     if (null == rars)
                     {
-                        rars = new RepositoryAlgorithmRunStatus() { AlgorithmAlgorithmId = this.AlgorithmId, RepositoryRepositoryId = this.RepositoryId, RunUntil = value };
+                        rars = new RepositoryAlgorithmRunStatus() { AlgorithmId = this.AlgorithmId, RepositoryId = this.RepositoryId, RunUntil = value };
                         entities.RepositoryAlgorithmRunStatus.Add(rars);
                     }
                     else if (rars.RunUntil < value)
