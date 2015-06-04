@@ -13,7 +13,8 @@ namespace Algorithms
         /// <summary>
         /// Notify the algorithm about a review, so the algorithm may respect it in its reviewer calculations
         /// </summary>
-        public abstract void AddReviewScore(string authorName, IList<string> involvedFiles);
+        /// <param name="dateOfReview">The algorithm uses dateOfReview to judge whether the review was evaluated already and prevent double-evaluations.</param>
+        public abstract void AddReviewScore(string authorName, IList<string> involvedFiles, DateTime dateOfReview);
 
         // This is a strange "solution"
         public override void CalculateExpertiseForFile(string filename)

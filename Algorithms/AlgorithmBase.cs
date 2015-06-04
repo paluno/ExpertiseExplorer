@@ -38,6 +38,52 @@
 
         public int SourceRepositoryId { get; set; }
 
+        private DateTime? _RunUntil;
+        /// <summary>
+        /// The algorithm's "watermark" to indicate until which date this algorithm was computed. The algorithms usees this for critical operations
+        /// to make themselves idempotent. Automatically persists to database.
+        /// </summary>
+        protected DateTime RunUntil
+        {
+            get
+            {
+                if (null == _RunUntil)
+                    using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
+                    {
+                        RepositoryAlgorithmRunStatus rars = entities.RepositoryAlgorithmRunStatus.Find(RepositoryId, AlgorithmId);
+                        if (null == rars)
+                            _RunUntil = DateTime.MinValue;
+                        else
+                            _RunUntil = rars.RunUntil;
+                    }
+
+                return (DateTime)_RunUntil;
+            }
+            set
+            {
+                if (RunUntil > value)
+                    throw new ArgumentOutOfRangeException("RunUntil", "RunUntil watermark can only rise, but new value " + value + " is smaller than current value " + RunUntil);
+
+                _RunUntil = value;
+
+                using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
+                {
+                    RepositoryAlgorithmRunStatus rars = entities.RepositoryAlgorithmRunStatus.Find(RepositoryId, AlgorithmId);
+                    if (null == rars)
+                    {
+                        rars = new RepositoryAlgorithmRunStatus() { AlgorithmAlgorithmId = this.AlgorithmId, RepositoryRepositoryId = this.RepositoryId, RunUntil = value };
+                        entities.RepositoryAlgorithmRunStatus.Add(rars);
+                    }
+                    else if (rars.RunUntil < value)
+                        rars.RunUntil = value;
+                    else
+                        return;
+
+                    entities.SaveChanges();
+                }
+            }
+        }
+
         protected AlgorithmBase()
         {
             this.Name = GetType().Name;
@@ -48,8 +94,7 @@
         public void CalculateExpertiseForFiles(IEnumerable<string> filenames)
         {
             var tasks = new List<Task>();
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
+
             foreach (var filename in filenames)
             {
                 if (filename == string.Empty)
@@ -63,8 +108,6 @@
             }
 
             Task.WaitAll(tasks.ToArray());
-            stopwatch.Stop();
-            Log.Info(Name + " - " + stopwatch.Elapsed);
         }
 
         protected void ClearExpertiseForAllDevelopers(string filename)

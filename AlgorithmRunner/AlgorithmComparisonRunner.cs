@@ -193,7 +193,7 @@
                         algorithm.RepositoryId = repositoryId;
                         algorithm.SourceRepositoryId = sourceRepositoryId;
 
-                        AlgorithmBase fixMyClosure = algorithm; // Maybe fixMyClosure is necessary as otherwise all tasks would use the last algorithm?
+                        AlgorithmBase fixMyClosure = algorithm; // fixMyClosure is necessary as otherwise all tasks would use the last algorithm: foreach changes variable content instead of creating new variables
                         tasks.Add(Task.Factory.StartNew(
                             input => fixMyClosure.CalculateExpertiseForFiles(input as IList<string>),
                             involvedFiles));
@@ -272,7 +272,7 @@
 
                 // Grant the reviewer review experience for the review
             foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
-                reviewAlgorithm.AddReviewScore(info.Reviewer, involvedFiles);
+                reviewAlgorithm.AddReviewScore(info.Reviewer, involvedFiles, info.When);
 
             if (noComparison)
                 return;

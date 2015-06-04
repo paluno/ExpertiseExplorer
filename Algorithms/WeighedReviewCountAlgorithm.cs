@@ -37,8 +37,11 @@ namespace Algorithms
             }
         }
 
-        public override void AddReviewScore(string authorName, IList<string> involvedFiles)
+        public override void AddReviewScore(string authorName, IList<string> involvedFiles, DateTime dateOfReview)
         {
+            if (dateOfReview < RunUntil)
+                return;     // prevent double evaluation of reviews
+
             int numberOfFiles = involvedFiles.Count;
 
             int idReviewer = FindOrCreateDeveloperFromDevelopernameApproximation(authorName);
@@ -62,6 +65,8 @@ namespace Algorithms
                     repository.SaveChanges();
                 }
             }
+
+            RunUntil = dateOfReview;
         }
     }
 }
