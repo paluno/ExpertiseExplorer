@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AlgorithmRunner.Bugzilla
 {
-    class BugzillaAttachmentInfo : IssueTrackerEvent
+    class BugzillaAttachmentInfo : PatchUpload
     {
         public int BugId { get; set; }
 

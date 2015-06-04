@@ -117,6 +117,8 @@
                             BugzillaAttachmentFactory baf = new BugzillaAttachmentFactory(basepath + @"attachments_final.txt");
                             baf.PrepareInput(basepath + @"attachments.txt", forceOverwrite);
                             factory = new BugzillaReviewFactory(basepath + "input_final.txt", baf);
+                            if (forceOverwrite)
+                                ((BugzillaReviewFactory)factory).filterForUsedAttachmentsAndPersist();
                             break;
                         case ReviewSourceType.Gerrit:
                             factory = new GerritReviewFactory(basepath + "input_final.csv");

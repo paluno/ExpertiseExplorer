@@ -24,6 +24,12 @@ namespace AlgorithmRunner.Bugzilla
             AttachmentFactory = attachments;
         }
 
+        public void filterForUsedAttachmentsAndPersist()
+        {
+            parseIssueTrackerEvents();  // as a side effect, there will be a filter for valid attachments
+            AttachmentFactory.PrepareInput(AttachmentFactory.InputFilePath, true);
+        }
+
         public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
         {
                 // First get the patch uploads
@@ -34,6 +40,9 @@ namespace AlgorithmRunner.Bugzilla
                 
                 // Second, get reviews
             IEnumerable<BugzillaReview> reviewList = GetActivityInfoFromFile(InputFilePath, dictAttachments);
+
+            AttachmentFactory.IncludeFilterAttachments = new HashSet<ulong>(reviewList.Select(review => (UInt64)review.GetAttachmentId()));
+            attachmentList = (IEnumerable<BugzillaAttachmentInfo>)AttachmentFactory.parseIssueTrackerEvents();  // re-read the list
 
             return Merge<IssueTrackerEvent>(attachmentList, reviewList, (patch, review) => patch.When < review.When);
         }

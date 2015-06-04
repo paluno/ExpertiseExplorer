@@ -12,6 +12,12 @@ namespace AlgorithmRunner.Bugzilla
 {
     class BugzillaAttachmentFactory : IssueTrackerEventFactory
     {
+        /// <summary>
+        /// If set, only attachments in the list will be returned.
+        /// As a consequence, attachments not in the list will be deleted when PrepareInput is called.
+        /// </summary>
+        internal HashSet<UInt64> IncludeFilterAttachments { get; set; }
+
         public BugzillaAttachmentFactory(string pathToAttachments)
             : base(pathToAttachments)
         {
@@ -24,8 +30,14 @@ namespace AlgorithmRunner.Bugzilla
 
         public IEnumerable<BugzillaAttachmentInfo> parseIssueTrackerEvents(string attachmentPath)
         {
-            return File.ReadAllLines(attachmentPath)
+            IEnumerable<BugzillaAttachmentInfo> allBugs = File.ReadAllLines(attachmentPath)
                 .Select(attachmentCSVLine => new BugzillaAttachmentInfo(attachmentCSVLine));
+
+            if (null == IncludeFilterAttachments)
+                return allBugs;
+            else
+                return allBugs
+                    .Where(attachment => IncludeFilterAttachments.Contains(attachment.AttachmentId));
         }
 
         /// <summary>
@@ -38,7 +50,7 @@ namespace AlgorithmRunner.Bugzilla
 
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
             {
-                foreach (BugzillaAttachmentInfo bai in rawAttachments)
+                foreach (BugzillaAttachmentInfo bai in rawAttachments.Where(bai => DateTime.MinValue == bai.When))
                     bai.When = repository.Database.SqlQuery<DateTime>("SELECT creation_ts FROM attachments WHERE attach_id={0}",  // this is a table directly from the Bugzilla Database
                         bai.AttachmentId  
                     ).SingleOrDefault();
