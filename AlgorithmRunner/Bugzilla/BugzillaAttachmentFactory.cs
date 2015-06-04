@@ -34,14 +34,14 @@ namespace AlgorithmRunner.Bugzilla
         /// <param name="pathToRawInputFile">Attachment data without upload dates</param>
         protected override void PrefilterRawInput(string pathToRawInputFile)
         {
-            IEnumerable<BugzillaAttachmentInfo> rawAttachments = parseIssueTrackerEvents(pathToRawInputFile);
+            IEnumerable<BugzillaAttachmentInfo> rawAttachments = parseIssueTrackerEvents(pathToRawInputFile).ToList();
 
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
             {
-                foreach(BugzillaAttachmentInfo bai in rawAttachments)
+                foreach (BugzillaAttachmentInfo bai in rawAttachments)
                     bai.When = repository.Database.SqlQuery<DateTime>("SELECT creation_ts FROM attachments WHERE attach_id={0}",  // this is a table directly from the Bugzilla Database
                         bai.AttachmentId  
-                    ).Single();
+                    ).SingleOrDefault();
             }
 
             File.WriteAllLines(InputFilePath,
