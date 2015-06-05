@@ -50,7 +50,7 @@ namespace Algorithms.Statistics
         /// Adds a new value to the dictionary that maps keys to multiple values.
         /// </summary>
         /// <returns>True if the key existed already and the value was new, otherwise (key did not exist or (key and value existed)) false</returns>
-        public static bool Add2CollectionDictionary(IDictionary<string, ISet<string>> dictionary, string key2add, string value2add)
+        private static bool Add2CollectionDictionary(IDictionary<string, ISet<string>> dictionary, string key2add, string value2add)
         {
             if (dictionary.ContainsKey(key2add))
                 return dictionary[key2add].Add(value2add);
@@ -80,7 +80,7 @@ namespace Algorithms.Statistics
             }
         }
 
-        #region names mapping
+        #region names (file from Passionlabs) mapping
         public void InitializeMappingFromNames(IEnumerable<string> nameMappings)
         {
             foreach (string line in nameMappings)
@@ -159,7 +159,7 @@ namespace Algorithms.Statistics
                 mail2mail[alternativeMail].Add(alternativeMail);
             mail2mail[mailAddress] = mail2mail[alternativeMail];
         }
-        #endregion names mapping
+        #endregion names (file from Passionlabs) mapping
 
         /// <summary>
         /// Takes a list of author names and tries to merge names that belong to the same author into one list. 
