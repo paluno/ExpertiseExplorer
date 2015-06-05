@@ -162,6 +162,16 @@ namespace Algorithms.Statistics
         #endregion names (file from Passionlabs) mapping
 
         /// <summary>
+        /// Checks a name for aliases. If aliases exist, the primary alias is returned, otherwise the unmodified name.
+        /// </summary>
+        /// <param name="obfuscatedName">The name to check.</param>
+        /// <returns>Either the name to check again or its primary alias</returns>
+        public string DeanonymizeAuthor(string obfuscatedName)
+        {
+            
+        }
+
+        /// <summary>
         /// Takes a list of author names and tries to merge names that belong to the same author into one list. 
         /// </summary>
         /// <param name="authorNames">A list of author names, each of which may be a semicolon separated list of names itself.</param>
@@ -184,49 +194,7 @@ namespace Algorithms.Statistics
 
                 foreach (string authorName in authorNameLine.Split(','))
                 {
-                    foundAliases.Add(authorName);
-                    
-                    Author currentAuthor = new Author(authorName);
-                    if (null != currentAuthor.MailPart)
-                    {
-                        foundAliases.Add(currentAuthor.MailPart);
-                        string usernamepart = currentAuthor.MailPart.Split('@')[0];
-                        if (!IsNameVeryCommon(usernamepart))
-                            foundAliases.Add(usernamepart);
-                        if (usernamepart.Contains('+'))
-                        {
-                            string realUserNamePart = usernamepart.Split('+')[0];
-                            if (!IsNameVeryCommon(realUserNamePart))
-                                foundAliases.Add(realUserNamePart);
-                        }
-
-                        if (mailaddress2name.ContainsKey(currentAuthor.MailPart))
-                            foreach (string alternativeName in mailaddress2name[currentAuthor.MailPart])
-                                foundAliases.Add(alternativeName);
-
-                        if (mail2mail.ContainsKey(currentAuthor.MailPart))
-                            foreach (string alternativeAddress in mail2mail[currentAuthor.MailPart])
-                                if (alternativeAddress != currentAuthor.MailPart)
-                                    foundAliases.Add(alternativeAddress);
-                    }
-
-                    if (null != currentAuthor.NamePart)
-                    {
-                        if (!IsNameVeryCommon(currentAuthor.NamePart))
-                            foundAliases.Add(currentAuthor.NamePart);
-
-                        if (name2name.ContainsKey(currentAuthor.NamePart))
-                            foreach (string alternativeName in name2name[currentAuthor.NamePart])
-                                if (alternativeName != currentAuthor.NamePart)
-                                    foundAliases.Add(alternativeName);
-
-                        if (name2mailaddress.ContainsKey(currentAuthor.NamePart))
-                            foreach (string alternativeMail in name2mailaddress[currentAuthor.NamePart])
-                                foundAliases.Add(alternativeMail);
-                    }
-
-                    if (null != currentAuthor.LoginNamePart)
-                        foundAliases.Add(currentAuthor.LoginNamePart);
+                    foundAliases.UnionWith(findAliasesForName(authorName));
 
                         // acquire all aliases for all aliases
                     ModuloNewSetIntoMultiDictionary(AuthorMapping, foundAliases);
@@ -249,6 +217,56 @@ namespace Algorithms.Statistics
             }
 
             return listOfAuthorAliases.Values.Distinct();
+        }
+
+        private ISet<string> findAliasesForName(string authorName)
+        {
+            ISet<string> foundAliases = new HashSet<string>();
+            foundAliases.Add(authorName);
+
+            Author currentAuthor = new Author(authorName);
+            if (null != currentAuthor.MailPart)
+            {
+                foundAliases.Add(currentAuthor.MailPart);
+                string usernamepart = currentAuthor.MailPart.Split('@')[0];
+                if (!IsNameVeryCommon(usernamepart))
+                    foundAliases.Add(usernamepart);
+                if (usernamepart.Contains('+'))
+                {
+                    string realUserNamePart = usernamepart.Split('+')[0];
+                    if (!IsNameVeryCommon(realUserNamePart))
+                        foundAliases.Add(realUserNamePart);
+                }
+
+                if (mailaddress2name.ContainsKey(currentAuthor.MailPart))
+                    foreach (string alternativeName in mailaddress2name[currentAuthor.MailPart])
+                        foundAliases.Add(alternativeName);
+
+                if (mail2mail.ContainsKey(currentAuthor.MailPart))
+                    foreach (string alternativeAddress in mail2mail[currentAuthor.MailPart])
+                        if (alternativeAddress != currentAuthor.MailPart)
+                            foundAliases.Add(alternativeAddress);
+            }
+
+            if (null != currentAuthor.NamePart)
+            {
+                if (!IsNameVeryCommon(currentAuthor.NamePart))
+                    foundAliases.Add(currentAuthor.NamePart);
+
+                if (name2name.ContainsKey(currentAuthor.NamePart))
+                    foreach (string alternativeName in name2name[currentAuthor.NamePart])
+                        if (alternativeName != currentAuthor.NamePart)
+                            foundAliases.Add(alternativeName);
+
+                if (name2mailaddress.ContainsKey(currentAuthor.NamePart))
+                    foreach (string alternativeMail in name2mailaddress[currentAuthor.NamePart])
+                        foundAliases.Add(alternativeMail);
+            }
+
+            if (null != currentAuthor.LoginNamePart)
+                foundAliases.Add(currentAuthor.LoginNamePart);
+
+            return foundAliases;
         }
 
         private static readonly string[] commonNames = new string[] { "chris", "philipp", "raymond", "robert", "stephen", "thomas", "anton", "bernd",
