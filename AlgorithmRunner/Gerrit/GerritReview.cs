@@ -9,18 +9,16 @@ namespace AlgorithmRunner.Gerrit
 {
     class GerritReview : ReviewInfo
     {
-        public string RevisionId { get; private set; }
 
         public GerritReview(string reviewLine)
         {
             string[] reviewValues = reviewLine.Split(';');
 
-            ChangeId = reviewValues[1];
-            When = DateTime.Parse(reviewValues[2]);
-            Reviewer = reviewValues[8];
-            Filenames = reviewValues[6].Split(',').Select(filenameWithLineNumbers => parseFilename(filenameWithLineNumbers)).ToList();
-            RevisionId = reviewValues[5];
-            ActivityId = reviewValues[5].GetHashCode();
+            ChangeId = reviewValues[2];
+            When = DateTime.Parse(reviewValues[0]);
+            Reviewer = reviewValues[4];
+            Filenames = reviewValues[3].Split(',').Select(filenameWithLineNumbers => parseFilename(filenameWithLineNumbers)).ToList();
+            ActivityId = Int16.Parse(reviewValues[5]);
         }
 
         private string parseFilename(string filenameWithLineNumbers)
@@ -35,7 +33,7 @@ namespace AlgorithmRunner.Gerrit
 
         public override string ToString()
         {
-            return ";" + ChangeId + ";" + When + ";;;" + RevisionId + ";" + string.Join(",", Filenames) + ";;" + Reviewer;
+            return When + ";r;" + ChangeId + ";" + string.Join(",", Filenames) + ";" + Reviewer + ";" + ActivityId;
         }
     }
 }
