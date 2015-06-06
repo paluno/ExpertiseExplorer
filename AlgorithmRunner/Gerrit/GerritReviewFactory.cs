@@ -23,14 +23,14 @@ namespace AlgorithmRunner.Gerrit
             foreach (string line in lines)
             {
 
-                string typ = line.Split(';')[1];
+                string type = line.Split(';')[1];
 
-                if (typ == "r")
+                if (type == "r")
                     result.Add(new GerritReview(line));
-                else if (typ == "c")
+                else if (type == "c")
                     result.Add(new GerritPathUpload(line));
                 else
-                    throw new SystemException("Unknown Gerrit-Typ: " + typ);
+                    throw new SystemException("Unknown Gerrit-Type: " + type);
 
             }
             return result;
