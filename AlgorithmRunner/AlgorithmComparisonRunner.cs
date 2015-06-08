@@ -16,6 +16,7 @@
     using AlgorithmRunner.Bugzilla;
 
     using ExpertiseExplorerCommon;
+    using Algorithms.Statistics;
 
     internal class AlgorithmComparisonRunner
     {
@@ -53,12 +54,18 @@
 
         public AlgorithmComparisonRunner(string sourceUrl, string basepath, IList<AlgorithmBase> algorithmsToEvaluate)
         {
-            Algorithms = algorithmsToEvaluate;
-
             _foundFilesOnlyPath = basepath + "output.txt";
             _performancePath = basepath + "performance_log.txt";
 
-            //var attachmentFilePath = basepath + @"CrawlerOutput\attachments.txt";
+            Algorithms = algorithmsToEvaluate;
+            string authorMappingPath = basepath + "authors_consolidated.txt";
+            if (File.Exists(authorMappingPath))
+            {
+                AliasFinder af = new AliasFinder();
+                af.InitializeMappingFromAuthorList(File.ReadAllLines(authorMappingPath));
+                foreach (AlgorithmBase algo in algorithmsToEvaluate)
+                    algo.Deduplicator = af;
+            }
 
             InitAlgorithms(sourceUrl);
         }

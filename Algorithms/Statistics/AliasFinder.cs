@@ -161,19 +161,35 @@ namespace Algorithms.Statistics
         }
         #endregion names (file from Passionlabs) mapping
 
+        private static string prefilterAuthorName(string name)
+        {
+            return name.Replace("plus ", string.Empty)
+                        .Replace("and the rest of the Xiph.Org Foundation", string.Empty)
+                        .Replace(" and ", ",")
+                        .Replace(" / ", ",")
+                        .Replace(" & ", ",");
+        }
+
         /// <summary>
-        /// Checks a name for aliases. If aliases exist, the primary alias is returned, otherwise the unmodified name.
+        /// Checks a name for aliases. If aliases exist, the primary alias is returned, otherwise the unmodified name. If the name contains multiple names actually,
+        /// these will be split into names for each authors.
         /// </summary>
         /// <param name="obfuscatedName">The name to check.</param>
         /// <returns>Either the name to check again or its primary alias</returns>
-        public string DeanonymizeAuthor(string obfuscatedName)
+        public IEnumerable<string> DeanonymizeAuthor(string obfuscatedName)
         {
-            ISet<string> allAliases = findAliasesForName(obfuscatedName);
-            string canonicalName = allAliases.FirstOrDefault(aliasName => AuthorMapping.ContainsKey(aliasName));
-            if (null == canonicalName)
-                return obfuscatedName;  // there is no alias
-            else
-                return AuthorMapping[canonicalName].First();
+            return prefilterAuthorName(obfuscatedName)
+                .Split(',')
+                .Select(oneName => oneName.Trim())
+                .Select(delegate (string oneName)
+                    {
+                        ISet<string> allAliases = findAliasesForName(oneName);
+                        string canonicalName = allAliases.FirstOrDefault(aliasName => AuthorMapping.ContainsKey(aliasName));
+                        if (null == canonicalName)
+                            return oneName;  // there is no alias
+                        else
+                            return AuthorMapping[canonicalName].First();
+                    });
         }
 
         /// <summary>

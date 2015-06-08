@@ -51,19 +51,28 @@
 
             int artifactId = FindOrCreateFileArtifactId(filename);
 
-            //var orderedAuthorIds = new List<int>();
-            List<DeveloperWithEditTime> authors;
             using (var repository = new ExpertiseDBEntities())
             {
-                authors = repository.GetUsersOfRevisionsOfBefore(filenameId, MaxDateTime);
+                IEnumerable<DeveloperWithEditTime> authors = repository.GetUsersOfRevisionsOfBefore(filenameId, MaxDateTime);
 
-                if (authors.Count == 0)
+                if (!authors.Any())
                 {
                     ClearExpertiseForAllDevelopers(filename);
                     return;
                 }
 
-                foreach (DeveloperWithEditTime experiencedDeveloper in authors)
+                    // cleanup author list
+                authors = authors
+                    .SelectMany(oneOfTheLastUsers => Deduplicator.DeanonymizeAuthor(oneOfTheLastUsers.User)
+                        .Select(clearName => new DeveloperWithEditTime() { User = clearName, Time = oneOfTheLastUsers.Time }))
+                    .OrderByDescending(dev => dev.Time);
+                ISet<string> includedAuthors = new HashSet<string>();
+                IList<DeveloperWithEditTime> deduplicatedAuthors = new List<DeveloperWithEditTime>();
+                foreach(DeveloperWithEditTime dev in authors)
+                    if (!includedAuthors.Contains(dev.User))
+                        deduplicatedAuthors.Add(dev);
+
+                foreach (DeveloperWithEditTime experiencedDeveloper in deduplicatedAuthors)
                 {
                     var developerId = repository.Developers.Single(d => d.Name == experiencedDeveloper.User && d.RepositoryId == RepositoryId).DeveloperId;
                     var developerExpertise = repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperId == developerId && de.ArtifactId == artifactId);

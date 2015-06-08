@@ -18,7 +18,7 @@
                     {
                         Id = repository.RepositoryId,
                         Name = repository.Name,
-                        Developers = entities.GetTopDeveopersForRepository(repository.RepositoryId, 10)
+                        Developers = entities.GetTopDevelopersForRepository(repository.RepositoryId, 10)
                     };
 
                 return View(result);
@@ -37,7 +37,7 @@
                 {
                     Id = repository.RepositoryId,
                     Name = repository.Name,
-                    Developers = entities.GetTopDeveopersForRepository(repository.RepositoryId)
+                    Developers = entities.GetTopDevelopersForRepository(repository.RepositoryId)
                 };
 
                 return View(result);

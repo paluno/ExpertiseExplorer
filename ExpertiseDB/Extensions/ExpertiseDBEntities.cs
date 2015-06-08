@@ -8,6 +8,7 @@
 
     using ExpertiseDB.Extensions;
     using System.Globalization;
+    using System.Diagnostics;
 
     public partial class ExpertiseDBEntities
     {
@@ -17,33 +18,32 @@
             ((IObjectContextAdapter)this).ObjectContext.CommandTimeout = 240;
         }
 
-        public List<int> GetDeveloperIdFromNameForRepository(string name, int repositoryId)
+        public int GetDeveloperIdFromNameForRepository(string name, int repositoryId)
         {
-            // TODO: place this in a custom filter
-            name = name.Replace("plus ", string.Empty);
-            name = name.Replace("and the rest of the Xiph.Org Foundation", string.Empty);
-            name = name.Replace(" and ", ",");
-            
-            var names = name.Contains(',') ? name.Split(',') : new[] { name };
+            Debug.Assert(!name.Contains(','));
 
-            var result = new List<int>();
-            foreach (var n in names)
-            {
-                var devName = n.Trim();
-                var developer = Developers.SingleOrDefault(d => d.Name == devName && d.RepositoryId == repositoryId);
+            //name = prefilterAuthorName(name);
+            
+            //var names = name.Contains(',') ? name.Split(',') : new[] { name };
+
+            //var result = new List<int>();
+            //foreach (var n in names)
+            //{
+            //    var devName = n.Trim();
+                var developer = Developers.SingleOrDefault(d => d.Name == name && d.RepositoryId == repositoryId);
                 if (developer == null)
                 {
-                    developer = Developers.Add(new Developer { Name = devName, RepositoryId = repositoryId });
+                    developer = Developers.Add(new Developer { Name = name, RepositoryId = repositoryId });
                     SaveChanges();
                 }
 
-                result.Add(developer.DeveloperId);
-            }
+            //    result.Add(developer.DeveloperId);
+            //}
 
-            return result;
+            return developer.DeveloperId;
         }
 
-        public List<Tuple<string, int, double>> GetTopDeveopersForRepository(int repositoryId, int numberOfHits = 0)
+        public List<Tuple<string, int, double>> GetTopDevelopersForRepository(int repositoryId, int numberOfHits = 0)
         {
             var developers = GetDeveloperExpertiseSumForRepository(repositoryId, numberOfHits);
 
@@ -138,20 +138,7 @@
             if (null == dev || string.IsNullOrEmpty(dev.User))
                 return null;
 
-            filterTransformSourceUserNames(dev);
-
             return dev;
-        }
-
-        private static void filterTransformSourceUserNames(DeveloperWithEditTime dev)
-        {
-            dev.User = dev.User.Replace("plus ", string.Empty);
-            dev.User = dev.User.Replace("and the rest of the Xiph.Org Foundation", string.Empty);
-            dev.User = dev.User.Replace(" and ", ",");
-            if (dev.User.Contains(','))
-                dev.User = dev.User.Split(',')[0].Trim();
-            else
-                dev.User = dev.User.Trim();
         }
 
         public List<DeveloperWithEditTime> GetUsersOfRevisionsOfBefore(int filenameId, DateTime before)
@@ -159,19 +146,7 @@
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");
             var sql = string.Format(CultureInfo.InvariantCulture, "CALL GetUsersOfRevisionsOfBefore({0}, '{1}')", filenameId, sqlFormattedDate);
 
-            List<DeveloperWithEditTime> lastDevs = Database.SqlQuery<DeveloperWithEditTime>(sql).ToList();
-
-            IDictionary<string, DeveloperWithEditTime> dictCleanDevelopers = new Dictionary<string,DeveloperWithEditTime>(lastDevs.Count);
-            foreach (DeveloperWithEditTime dev in lastDevs)
-            {
-                filterTransformSourceUserNames(dev);
-                if (dictCleanDevelopers.ContainsKey(dev.User))
-                    continue;
-
-                dictCleanDevelopers[dev.User] = dev;
-            }
-
-            return dictCleanDevelopers.Values.OrderByDescending(devTime => devTime.Time).ToList();
+            return Database.SqlQuery<DeveloperWithEditTime>(sql).ToList();
         }
 
         public List<DeveloperForPath> GetDeveloperForPath(int repositoryId, string path)

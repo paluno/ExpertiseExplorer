@@ -25,7 +25,6 @@
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
 
-            int lastDeveloperId;
             int filenameId;
             try
             {
@@ -43,23 +42,26 @@
             //if (artifactId < 0)
             //    throw new FileNotFoundException(string.Format("Artifact {0} not found", filename));
 
-            DeveloperWithEditTime lastUser;
             using (var entities = new ExpertiseDBEntities())
             {
-                lastUser = entities.GetUserForLastRevisionOfBefore(filenameId, MaxDateTime);
-
+                DeveloperWithEditTime lastUser = entities.GetUserForLastRevisionOfBefore(filenameId, MaxDateTime);
                 if (lastUser == null)   // the file exists but is has not been edited until MaxDateTime. Thus, nobody has expertise.
                 {
                     ClearExpertiseForAllDevelopers(filename);
                     return;
                 }
 
-                lastDeveloperId = entities.Developers.Where(d => d.Name == lastUser.User && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId).First();
+                IEnumerable<DeveloperWithEditTime> listOfLastDevelopers = Deduplicator.DeanonymizeAuthor(lastUser.User)
+                    .Select(clearName => new DeveloperWithEditTime() { User = clearName, Time = lastUser.Time });   // probably just one, but maybe more
 
-                DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(entities, lastDeveloperId, filename, ExpertiseExplorerCommon.ArtifactTypeEnum.File);
+                IEnumerable<int> lastDeveloperIds = entities.Developers.Where(d => d.Name == lastUser.User && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId);
 
-                var expertiseValue = FindOrCreateDeveloperExpertiseValue(entities, developerExpertise);
-                expertiseValue.Value = lastUser.Time.PDTDateTime2unixTime();
+                foreach (int oneOfTheLastDevelopers in lastDeveloperIds)
+                {
+                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(entities, oneOfTheLastDevelopers, filename, ExpertiseExplorerCommon.ArtifactTypeEnum.File);
+                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(entities, developerExpertise);
+                    expertiseValue.Value = lastUser.Time.PDTDateTime2unixTime();
+                }
                 entities.SaveChanges();
             }
         }
