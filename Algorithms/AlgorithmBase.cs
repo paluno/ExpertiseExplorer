@@ -13,6 +13,7 @@
     using ExpertiseExplorerCommon;
     using ExpertiseDB.Extensions;
     using System.Collections.Concurrent;
+using Algorithms.Statistics;
 
     public abstract class AlgorithmBase
     {
@@ -23,6 +24,8 @@
         private const int TOTAL_NUMBER_OF_CONCURRENT_TASKS = 30;
 
         protected static readonly TaskFactory algorithmTaskFactory = new TaskFactory(new LimitedConcurrencyLevelTaskScheduler(TOTAL_NUMBER_OF_CONCURRENT_TASKS));
+
+        public AliasFinder deduplicator { get; set; }
 
         public int AlgorithmId { get; protected set; }
 
@@ -283,7 +286,10 @@
             List<int> fileRevisionIds;
             using (var repository = new ExpertiseDBEntities())
             {
-                developerIds = repository.GetDeveloperIdFromNameForRepository(revision.User, RepositoryId);
+                string primaryDeveloperName = revision.User;
+                if (null != deduplicator)
+                    primaryDeveloperName = deduplicator.DeanonymizeAuthor(revision.User);
+                developerIds = repository.GetDeveloperIdFromNameForRepository(primaryDeveloperName, RepositoryId);
                 fileRevisionIds = repository.FileRevisions.Where(f => f.RevisionId == revision.RevisionId).Select(fi => fi.FileRevisionId).ToList();
             }
 
