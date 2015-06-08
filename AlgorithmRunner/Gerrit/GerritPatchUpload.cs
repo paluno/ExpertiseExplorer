@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace AlgorithmRunner.Gerrit
 {
-    class GerritPathUpload : PatchUpload
+    class GerritPatchUpload : PatchUpload
     {
-        public GerritPathUpload(string reviewLine)
+        public GerritPatchUpload(string reviewLine)
         {
             string[] reviewValues = reviewLine.Split(';');
 
@@ -21,6 +21,11 @@ namespace AlgorithmRunner.Gerrit
         private string parseFilename(string filenameWithLineNumbers)
         {
             return filenameWithLineNumbers.Split(':')[0];
+        }
+
+        public override bool isValid()
+        {
+            return Filenames.Any(str => !String.IsNullOrWhiteSpace(str));
         }
     }
 }

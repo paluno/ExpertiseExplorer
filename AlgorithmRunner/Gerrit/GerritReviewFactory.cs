@@ -28,7 +28,7 @@ namespace AlgorithmRunner.Gerrit
                 if (type == "r")
                     result.Add(new GerritReview(line));
                 else if (type == "c")
-                    result.Add(new GerritPathUpload(line));
+                    result.Add(new GerritPatchUpload(line));
                 else
                     throw new SystemException("Unknown Gerrit-Type: " + type);
 
