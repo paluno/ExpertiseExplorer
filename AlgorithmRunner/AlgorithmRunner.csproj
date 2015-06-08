@@ -68,6 +68,7 @@
     <Compile Include="Bugzilla\BugzillaReviewFactory.cs" />
     <Compile Include="AlgorithmComparisonRunner.cs" />
     <Compile Include="FilenameCleanup.cs" />
+    <Compile Include="Gerrit\GerritPathUpload.cs" />
     <Compile Include="Gerrit\GerritReview.cs" />
     <Compile Include="Gerrit\GerritReviewFactory.cs" />
     <Compile Include="Program.cs" />

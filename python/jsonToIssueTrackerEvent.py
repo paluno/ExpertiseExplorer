@@ -38,7 +38,15 @@ def getAllCommits(jsondata):
     
     for revisionId in revisions:
         revision = revisions[revisionId]
-        date = revision["commit"]["committer"]["date"]
+        
+        if not revision.has_key("commit"): continue
+        commit = revision["commit"]
+        
+        if not commit.has_key("committer"): continue
+        committer = commit["committer"]
+        
+        if not committer.has_key("date"): continue
+        date = committer["date"]
         
         if not revision.has_key("files"): continue  
         files = revision["files"]
