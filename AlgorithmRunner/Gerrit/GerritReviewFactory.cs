@@ -17,8 +17,23 @@ namespace AlgorithmRunner.Gerrit
 
         public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
         {
-            return File.ReadAllLines(InputFilePath)
-                .Select(reviewCSVLine => new GerritReview(reviewCSVLine));
+            List<IssueTrackerEvent> result = new List<IssueTrackerEvent>();
+            string[] lines = File.ReadAllLines(InputFilePath);
+
+            foreach (string line in lines)
+            {
+
+                string type = line.Split(';')[1];
+
+                if (type == "r")
+                    result.Add(new GerritReview(line));
+                else if (type == "c")
+                    result.Add(new GerritPatchUpload(line));
+                else
+                    throw new SystemException("Unknown Gerrit-Type: " + type);
+
+            }
+            return result;
         }
 
     }
