@@ -168,7 +168,12 @@ namespace Algorithms.Statistics
         /// <returns>Either the name to check again or its primary alias</returns>
         public string DeanonymizeAuthor(string obfuscatedName)
         {
-            
+            ISet<string> allAliases = findAliasesForName(obfuscatedName);
+            string canonicalName = allAliases.FirstOrDefault(aliasName => AuthorMapping.ContainsKey(aliasName));
+            if (null == canonicalName)
+                return obfuscatedName;  // there is no alias
+            else
+                return AuthorMapping[canonicalName].First();
         }
 
         /// <summary>

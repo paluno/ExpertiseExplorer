@@ -183,6 +183,22 @@ namespace AlgorithmsTest
         }
 
         [TestMethod]
+        public void TestSingleNameMatching()
+        {
+            AliasFinder af = new AliasFinder();
+
+            af.InitializeMappingFromAuthorList(authorMultiList.Split('\n'));
+
+            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("Full Name"));
+            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("email@address"));
+            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("address2@test"));
+            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("Full Name <address2@test>"));
+
+            Assert.AreEqual("Not Related", af.DeanonymizeAuthor("unrelated@test"));
+            Assert.AreEqual("Not Related", af.DeanonymizeAuthor("Absoluteley Not Related"));
+        }
+
+        [TestMethod]
         public void TestAuthorParsing()
         {
             Author a = new Author("Chinese (Joe) Name <oneguy@address.com>");
