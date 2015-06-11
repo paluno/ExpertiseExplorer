@@ -147,19 +147,19 @@
             string algoSelectUpperCase = algoSelectString.ToUpperInvariant();
             List<AlgorithmBase> algorithms = new List<AlgorithmBase>();
 
-            if (algoSelectString.Contains("1"))
+            if (algoSelectUpperCase.Contains("1"))
                 algorithms.Add(new Line10RuleAlgorithm());
-            if (algoSelectString.Contains("C"))
+            if (algoSelectUpperCase.Contains("C"))
                 algorithms.Add(new ExpertiseCloudAlgorithm());
-            if (algoSelectString.Contains("D"))
+            if (algoSelectUpperCase.Contains("D"))
                 algorithms.Add(new DegreeOfAuthorshipAlgorithm(DegreeOfAuthorshipAlgorithm.WeightingType.UniversalTOSEM));
-            if (algoSelectString.Contains("A"))
+            if (algoSelectUpperCase.Contains("A"))
                 algorithms.Add(new ExperienceAtomsAlgorithm());
-            if (algoSelectString.Contains("O"))
+            if (algoSelectUpperCase.Contains("O"))
                 algorithms.Add(new CodeOwnershipAlgorithm());
-            if (algoSelectString.Contains("I"))
+            if (algoSelectUpperCase.Contains("I"))
                 algorithms.Add(new ExpertiseIntersectionAlgorithm());
-            if (algoSelectString.Contains("F"))
+            if (algoSelectUpperCase.Contains("F"))
             {
                 RootDirectory fpsTree = new RootDirectory();
                 WeighedReviewCountAlgorithm wrcAlgo = new WeighedReviewCountAlgorithm(fpsTree);
