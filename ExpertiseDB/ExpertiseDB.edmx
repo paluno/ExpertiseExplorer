@@ -982,11 +982,14 @@
           <Property Name="RepositoryId" Type="Int32" Nullable="false" />
         </EntityType>
         <Association Name="ArtifactBugRelation">
-          <End Type="ExpertiseDB.Artifact" Role="Artifact" Multiplicity="*" />
+          <End Type="ExpertiseDB.Artifact" Role="Artifact" Multiplicity="*" >
+          </End>
           <End Type="ExpertiseDB.Bug" Role="Bug" Multiplicity="*" />
         </Association>
         <Association Name="BugActualReviewerRelation">
-          <End Type="ExpertiseDB.Bug" Role="Bug" Multiplicity="1" />
+          <End Type="ExpertiseDB.Bug" Role="Bug" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
           <End Type="ExpertiseDB.ActualReviewer" Role="ActualReviewer" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Bug">
@@ -998,7 +1001,9 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="BugComputedReviewerRelation">
-          <End Type="ExpertiseDB.Bug" Role="Bug" Multiplicity="1" />
+          <End Type="ExpertiseDB.Bug" Role="Bug" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
           <End Type="ExpertiseDB.ComputedReviewer" Role="ComputedReviewer" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Bug">
@@ -1046,7 +1051,9 @@
         </Association>
         <Association Name="BugRepository">
           <End Type="ExpertiseDB.Bug" Role="Bug" Multiplicity="*" />
-          <End Type="ExpertiseDB.Repository" Role="Repository" Multiplicity="1" />
+          <End Type="ExpertiseDB.Repository" Role="Repository" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
           <ReferentialConstraint>
             <Principal Role="Repository">
               <PropertyRef Name="RepositoryId" />
