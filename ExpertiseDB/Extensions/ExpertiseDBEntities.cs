@@ -73,7 +73,7 @@
                     (devId, expertiseValues) => new SimplifiedDeveloperExpertise()
                         {
                             DeveloperId = devId,
-                            DeveloperName = expertiseValues.First().DeveloperExpertise.Developer.Name,
+                            DeveloperName = expertiseValues.FirstOrDefault().DeveloperExpertise.Developer.Name,
                             Expertise = expertiseValues.Select(exValue => exValue.Value).Sum()
                         });
         }

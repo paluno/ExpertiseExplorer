@@ -218,18 +218,10 @@
                     }
                     else
                     {
-                        Log.Fatal(ae);
+                        Log.Fatal("Error when computing expertise values", ae);
                         Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + info.When.PDTDateTime2unixTime());
                         throw;
                     }
-
-                    //foreach (var ex in ae.Flatten().InnerExceptions)
-                    //{
-                    //    if (ex is FileNotFoundException)
-                    //        Log.Error(ex.Message);
-                    //    else
-                    //        throw;
-                    //}
                 }
             }
             while (!fSuccess);
@@ -245,7 +237,24 @@
             // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
             IEnumerable<Task<ComputedReviewer>> computedReviewerTasks = Algorithms.Select(algorithm => algorithm.GetDevelopersForArtifactsAsync(artifactIds)).ToList();
 
-            Task.WaitAll(computedReviewerTasks.ToArray());
+            try
+            {
+                Task.WaitAll(computedReviewerTasks.ToArray());
+            }
+            catch (AggregateException ae)
+            {
+                if (++retryNumber <= NUMBER_OF_FAIL_RETRIES)
+                {        // try again, but wait a little, up to 50 * 5^3 = 6.25 seconds
+                    Log.Error(ae);
+                    System.Threading.Thread.Sleep(50 * retryNumber * retryNumber * retryNumber);
+                }
+                else
+                {
+                    Log.Fatal("Error when computing suggested reviewers", ae);
+                    Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + info.When.PDTDateTime2unixTime());
+                    throw;
+                }
+            }
 
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
             {

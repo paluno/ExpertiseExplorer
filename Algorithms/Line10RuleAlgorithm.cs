@@ -75,10 +75,24 @@
                     .OrderByDescending(dev => dev.Value)
                     .FirstOrDefaultAsync();
 
+                string developerName;
+                double developerExpertise;
+
+                if (null == deValue)
+                {
+                    developerName = string.Empty;
+                    developerExpertise = 0d;
+                }
+                else
+                {
+                    developerName = deValue.DeveloperExpertise.Developer.Name;
+                    developerExpertise = deValue.Value;
+                }
+
                 return new ComputedReviewer()
                 {
-                    Expert1 = deValue.DeveloperExpertise.Developer.Name,
-                    Expert1Value = deValue.Value,
+                    Expert1 = developerName,
+                    Expert1Value = developerExpertise,
                     Expert2 = string.Empty,
                     Expert2Value = 0d,
                     Expert3 = string.Empty,
