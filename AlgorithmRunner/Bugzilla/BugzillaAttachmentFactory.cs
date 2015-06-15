@@ -16,11 +16,12 @@ namespace AlgorithmRunner.Bugzilla
         /// If set, only attachments in the list will be returned.
         /// As a consequence, attachments not in the list will be deleted when PrepareInput is called.
         /// </summary>
-        internal HashSet<UInt64> IncludeFilterAttachments { get; set; }
+        internal Func<BugzillaAttachmentInfo, bool> IncludeAttachmentsFilter { get; set; }
 
         public BugzillaAttachmentFactory(string pathToAttachments)
             : base(pathToAttachments)
         {
+            IncludeAttachmentsFilter = (dummy) => true;
         }
 
         public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
@@ -33,11 +34,7 @@ namespace AlgorithmRunner.Bugzilla
             IEnumerable<BugzillaAttachmentInfo> allBugs = File.ReadAllLines(attachmentPath)
                 .Select(attachmentCSVLine => new BugzillaAttachmentInfo(attachmentCSVLine));
 
-            if (null == IncludeFilterAttachments)
-                return allBugs;
-            else
-                return allBugs
-                    .Where(attachment => IncludeFilterAttachments.Contains(attachment.AttachmentId));
+            return allBugs.Where(IncludeAttachmentsFilter);
         }
 
         /// <summary>
