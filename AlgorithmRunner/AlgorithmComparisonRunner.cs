@@ -125,10 +125,10 @@
                         {
                             case ConsoleKey.X:
                                 Console.WriteLine("Now at: " + count);
-                                Console.WriteLine("Time of next item (use with resume): " + info.When.PDTDateTime2unixTime());
+                                Console.WriteLine("Time of next item (use with resume): " + info.When);
                                 Console.WriteLine("Stopping due to user request.");
 
-                                Log.Info("Stopping due to user request. Time of next item (use with resume): " + info.When.PDTDateTime2unixTime());
+                                Log.Info("Stopping due to user request. Time of next item (use with resume): " + info.When);
                                 return;
                             case ConsoleKey.S:
                                 Console.WriteLine("Now at: " + count);
@@ -219,7 +219,7 @@
                     else
                     {
                         Log.Fatal("Error when computing expertise values", ae);
-                        Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + info.When.PDTDateTime2unixTime());
+                        Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + info.When);
                         throw;
                     }
                 }
@@ -251,7 +251,7 @@
                 else
                 {
                     Log.Fatal("Error when computing suggested reviewers", ae);
-                    Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + info.When.PDTDateTime2unixTime());
+                    Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + info.When);
                     throw;
                 }
             }

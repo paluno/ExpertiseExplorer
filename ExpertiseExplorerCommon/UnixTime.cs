@@ -8,19 +8,17 @@ namespace ExpertiseExplorerCommon
 {
     public static class UnixTime
     {
-        public static DateTime UnixTime2PDTDateTime(this long unixTime)
+        public static readonly DateTime UnixStartOfTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        public static DateTime UnixTime2UTCDateTime(this long unixTime)
         {
-            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-                .AddSeconds(unixTime)
-                .Subtract(new TimeSpan(0, 7, 0, 0)); // From Utc to PDT
+            return UnixStartOfTime.AddSeconds(unixTime);
         }
 
-        public static long PDTDateTime2unixTime(this DateTime pdtTime)
+        public static long UTCDateTime2unixTime(this DateTime utcTime)
         {
             return Convert.ToInt64(
-                pdtTime.AddHours(7)  // to UTC
-                    .Subtract(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc))
-                    .TotalSeconds
+                utcTime.Subtract(UnixStartOfTime).TotalSeconds
                 );
         }
     }

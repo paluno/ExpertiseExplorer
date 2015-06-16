@@ -41,8 +41,6 @@
                 case "algorithm":
                     var forceOverwrite = false;
                     var noComp = false;
-                    long timeOfLastComparison = 0;
-                    long timeOfMaxComparison = int.MaxValue;
                     DateTime resumeTime = DateTime.MinValue;
                     DateTime maxTime = DateTime.MaxValue;
                     string algoSelectString = "1cdaoif";    // the default: All algorithms
@@ -77,10 +75,12 @@
                                         Console.WriteLine("Error: resume argument is missing the parameter.");
                                         return;
                                     }
-
-                                    if (!long.TryParse(args[i], out timeOfLastComparison))
+                                    long timeOfLastComparison;
+                                    if (long.TryParse(args[i], out timeOfLastComparison))
+                                        resumeTime = timeOfLastComparison.UnixTime2UTCDateTime() - new TimeSpan(0, 0, 0, 1);
+                                    else if (!DateTime.TryParse(args[i], out resumeTime))
                                     {
-                                        Console.WriteLine("Error: Unable to parse {0} as int.", args[i]);
+                                        Console.WriteLine("Error: Unable to parse {0} as int or DateTime.", args[i]);
                                         return;
                                     }
 
@@ -93,7 +93,10 @@
                                         return;
                                     }
 
-                                    if (!long.TryParse(args[i], out timeOfMaxComparison))
+                                    long timeOfMaxComparison;
+                                    if (long.TryParse(args[i], out timeOfMaxComparison))
+                                        maxTime = timeOfMaxComparison.UnixTime2UTCDateTime();
+                                    else if (!DateTime.TryParse(args[i], out maxTime))
                                     {
                                         Console.WriteLine("Error: Unable to parse {0} as int.", args[i]);
                                         return;
@@ -106,8 +109,6 @@
                             }
                         }
 
-                        resumeTime = timeOfLastComparison.UnixTime2PDTDateTime() - new TimeSpan(0, 0, 0, 1);
-                        maxTime = timeOfMaxComparison.UnixTime2PDTDateTime();
                     }
 
                     IssueTrackerEventFactory factory;
@@ -191,7 +192,7 @@
             Console.WriteLine("\t\t f - File-Path-Similarity (Review-based algorithm)");
             Console.WriteLine("\t additional argument: f or force for forcing an existing prepared input to be overwritten (optional)");
             Console.WriteLine("\t additional argument: n or nocomp for only creating expertise values from revision, skipping the comparison (optional)");
-            Console.WriteLine("\t additional argument: r or resume arg for resuming the computation from arg datetime, arg has to be in unix time (optional)");
+            Console.WriteLine("\t additional argument: r or resume arg for resuming the computation from arg datetime, arg can be in unix time (optional)");
             Console.WriteLine("\t \t Useful for resuming the calculations after an error. Use repository.lastUpdate as the value for arg\n");
             Console.WriteLine("\t additional argument: m or max to compute expertises only up to arg datetime, arg has to be in unix time (optional)");
             Console.WriteLine("\t Example of usage:");

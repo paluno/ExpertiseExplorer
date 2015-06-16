@@ -111,7 +111,7 @@
         public void SetDateTimeFromUnixTime(long unixTime)
         {
             UnixTime = unixTime;
-            When = UnixTime.UnixTime2PDTDateTime();
+            When = UnixTime.UnixTime2UTCDateTime();
         }
 
         public override string ToString()

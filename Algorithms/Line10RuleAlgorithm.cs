@@ -60,7 +60,7 @@
                 {
                     DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(entities, oneOfTheLastDevelopers, filename, ExpertiseExplorerCommon.ArtifactTypeEnum.File);
                     var expertiseValue = FindOrCreateDeveloperExpertiseValue(entities, developerExpertise);
-                    expertiseValue.Value = lastUser.Time.PDTDateTime2unixTime();
+                    expertiseValue.Value = lastUser.Time.UTCDateTime2unixTime();
                 }
                 entities.SaveChanges();
             }

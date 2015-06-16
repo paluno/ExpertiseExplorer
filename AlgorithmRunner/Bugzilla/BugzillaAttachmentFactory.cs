@@ -44,13 +44,16 @@ namespace AlgorithmRunner.Bugzilla
         protected override void PrefilterRawInput(string pathToRawInputFile)
         {
             IEnumerable<BugzillaAttachmentInfo> rawAttachments = parseIssueTrackerEvents(pathToRawInputFile).ToList();
+            TimeZoneInfo pacificTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");    // Bugzilla stores times in PST
 
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
             {
                 foreach (BugzillaAttachmentInfo bai in rawAttachments.Where(bai => DateTime.MinValue == bai.When))
-                    bai.When = repository.Database.SqlQuery<DateTime>("SELECT creation_ts FROM attachments WHERE attach_id={0}",  // this is a table directly from the Bugzilla Database
-                        bai.AttachmentId  
-                    ).SingleOrDefault();
+                    bai.When = TimeZoneInfo.ConvertTimeToUtc(                        
+                            repository.Database.SqlQuery<DateTime>("SELECT creation_ts FROM attachments WHERE attach_id={0}",  // this is a table directly from the Bugzilla Database
+                            bai.AttachmentId  
+                        ).SingleOrDefault(),
+                        pacificTimeZone);
             }
 
             File.WriteAllLines(InputFilePath,
