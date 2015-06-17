@@ -54,7 +54,7 @@
                 IEnumerable<DeveloperWithEditTime> listOfLastDevelopers = Deduplicator.DeanonymizeAuthor(lastUser.User)
                     .Select(clearName => new DeveloperWithEditTime() { User = clearName, Time = lastUser.Time });   // probably just one, but maybe more
 
-                IEnumerable<int> lastDeveloperIds = entities.Developers.Where(d => d.Name == lastUser.User && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId);
+                IEnumerable<int> lastDeveloperIds = entities.Developers.Where(d => d.Name == lastUser.User && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId).ToList();
 
                 foreach (int oneOfTheLastDevelopers in lastDeveloperIds)
                 {
