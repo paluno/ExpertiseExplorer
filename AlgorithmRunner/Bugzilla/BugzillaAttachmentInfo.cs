@@ -35,7 +35,7 @@ namespace AlgorithmRunner.Bugzilla
             Filenames = fields[2].Split(',').Distinct().ToList();
 
             if (fields.Length > 3)    // is the upload date already found out?
-                When = DateTime.Parse(fields[3]);
+                When = DateTime.Parse(fields[3]).ToUniversalTime();
         }
 
         public override bool isValid()
@@ -53,7 +53,7 @@ namespace AlgorithmRunner.Bugzilla
 
         public override string ToString()
         {
-            return string.Join(";", BugId, AttachmentId, string.Join(",", Filenames), When.ToString("u"));
+            return string.Join(";", BugId, AttachmentId, string.Join(",", Filenames), When.ToUniversalTime().ToString("u"));
         }
     }
 }
