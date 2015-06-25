@@ -71,7 +71,7 @@ using Algorithms.Statistics;
 
                 using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
                 {
-                    RepositoryAlgorithmRunStatus rars = entities.RepositoryAlgorithmRunStatus.Find(RepositoryId, AlgorithmId);
+                    RepositoryAlgorithmRunStatus rars = entities.RepositoryAlgorithmRunStatus.Find(AlgorithmId, RepositoryId);
                     if (null == rars)
                     {
                         rars = new RepositoryAlgorithmRunStatus() { AlgorithmId = this.AlgorithmId, RepositoryId = this.RepositoryId, RunUntil = value };
