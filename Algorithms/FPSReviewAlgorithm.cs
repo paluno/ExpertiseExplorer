@@ -40,7 +40,7 @@ namespace Algorithms
                             repository.Developers.Single(dev => dev.Name == devNameExpertisePair.Key && dev.RepositoryId == RepositoryId)
                                 .DeveloperId,
                             devNameExpertisePair.Value
-                        ));     // convert developer names into DeveloperIds
+                        )).ToList();     // convert developer names into DeveloperIds
             }
             storeDeveloperExpertiseValues(filename, devIdsWithExpertiseValues);
         }

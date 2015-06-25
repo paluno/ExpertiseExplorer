@@ -8,6 +8,7 @@
     using System.Linq;
 
     using ExpertiseDB;
+    using ExpertiseDB.Extensions;
 
     public class ExpertiseCloudAlgorithm : AlgorithmBase
     {
@@ -47,34 +48,9 @@
                 }
             }
 
-            using (var repository = new ExpertiseDBEntities())
-            {
-                foreach (var developerForPath in developersForPath)
-                {
-                    var developerExpertise = repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).SingleOrDefault(de => de.DeveloperId == developerForPath.DeveloperId && de.ArtifactId == artifactId);
-                    if (developerExpertise == null)
-                    {
-                        developerExpertise = repository.DeveloperExpertises.Add(
-                            new DeveloperExpertise
-                            {
-                                ArtifactId = artifactId,
-                                DeveloperId = developerForPath.DeveloperId,
-                                Inferred = true
-                            });
-
-                        repository.DeveloperExpertises.Add(developerExpertise);
-                        repository.SaveChanges();
-
-                        developerExpertise = repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperId == developerForPath.DeveloperId && de.ArtifactId == artifactId);
-                    }
-
-                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
-
-                    expertiseValue.Value = developerForPath.DeliveriesCount + developerForPath.IsFirstAuthorCount;
-                }
-
-                repository.SaveChanges();
-            }
+            IEnumerable<DeveloperWithExpertise> experiencedDevelopers = developersForPath
+                .Select(dev4path => new DeveloperWithExpertise(dev4path.DeveloperId,dev4path.DeliveriesCount + dev4path.IsFirstAuthorCount));
+            storeDeveloperExpertiseValues(filename, experiencedDevelopers);
         }
     }
 }

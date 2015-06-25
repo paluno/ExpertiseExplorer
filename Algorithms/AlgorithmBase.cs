@@ -314,13 +314,8 @@ using Algorithms.Statistics;
             }
         }
 
-        public int FindOrCreateFileArtifactId(string artifactname)
-        {
-            Debug.Assert(RepositoryId > -1, "Initialize RepositoryId first");
-
-            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
-                return FindOrCreateArtifact(repository, artifactname, ArtifactTypeEnum.File).ArtifactId;
-        }
+        private static NameLockFactory artifactLocks = new NameLockFactory();
+        private static NameLockFactory developerExpertiseLocksOnArtifacts = new NameLockFactory();
 
         /// <summary>
         /// Stores multiple expertise values for one artifact.
@@ -331,7 +326,7 @@ using Algorithms.Statistics;
         {
             using (var repository = new ExpertiseDBEntities())
             {
-                //int artifactId = FindOrCreateArtifact(repository,filename, ArtifactTypeEnum.File).ArtifactId;
+                int artifactId = FindOrCreateArtifact(repository, filename, ArtifactTypeEnum.File).ArtifactId;
 
                 bool fNewAdditions = false;
 
@@ -343,7 +338,7 @@ using Algorithms.Statistics;
                         fNewAdditions = false;      // Therefore we save after additions.
                     }
 
-                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, devExpertise.DeveloperId, filename, ArtifactTypeEnum.File);
+                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, devExpertise.DeveloperId, artifactId);
                     fNewAdditions |= 0 == developerExpertise.DeveloperExpertiseId;  // hack: is it a new DeveloperExpertise?
                     DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
                     devExpertiseValue.Value = devExpertise.Expertise;
@@ -354,30 +349,54 @@ using Algorithms.Statistics;
             }
         }
 
-        private static NameLockFactory artifactLocks = new NameLockFactory();
-
-        protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, string FileName, ArtifactTypeEnum artifactType)
+        protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, string filename, ArtifactTypeEnum artifactType)
         {
-            var developerExpertise = repository.DeveloperExpertises.SingleOrDefault(
-                de => de.DeveloperId == developerId && de.Artifact.Name == FileName);
+            int artifactId = FindOrCreateArtifact(repository, filename, ArtifactTypeEnum.File).ArtifactId;
+
+            return FindOrCreateDeveloperExpertise(repository, developerId, artifactId);
+        }
+
+        protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, int artifactId)
+        {
+            DeveloperExpertise developerExpertise = repository.DeveloperExpertises.SingleOrDefault(
+                de => de.DeveloperId == developerId && de.ArtifactId == artifactId);
 
             if (developerExpertise == null)
             {
-                Artifact artifact = FindOrCreateArtifact(repository, FileName, artifactType);
-
-                // There is exactly one thread for each developer/artifact combination if this method was called from FPSAlgorithm. Therefore only one thread
-                // tries to create this specific DeveloperExpertise entry. Thus, no thread safety measures must be taken.
-                // If this method is called from LinkDeveloperAndArtifact or WeighedReviewCountAlgorithm, there is only one thread.
-
-                developerExpertise = repository.DeveloperExpertises.Add(
-                    new DeveloperExpertise
+                lock (developerExpertiseLocksOnArtifacts.acquireLock(developerId + "-" + artifactId))
+                {
+                    using (ExpertiseDBEntities freshRepository = new ExpertiseDBEntities())
                     {
-                        Artifact = artifact,
-                        DeveloperId = developerId
-                    });
+                        developerExpertise = freshRepository.DeveloperExpertises.SingleOrDefault(
+                            de => de.DeveloperId == developerId && de.ArtifactId == artifactId);
+
+                        if (null == developerExpertise)
+                        {
+                            developerExpertise = freshRepository.DeveloperExpertises.Add(
+                                new DeveloperExpertise
+                                {
+                                    ArtifactId = artifactId,
+                                    DeveloperId = developerId
+                                });
+                            freshRepository.SaveChanges();
+                        }
+                    }
+                }
+                developerExpertiseLocksOnArtifacts.releaseLock(developerId + "-" + artifactId);
+
+                developerExpertise = repository.DeveloperExpertises
+                    .Single(de => de.DeveloperId == developerId && de.ArtifactId == artifactId);    // re-retrieve from original repository
             }
 
             return developerExpertise;
+        }
+
+        public int FindOrCreateFileArtifactId(string artifactname)
+        {
+            Debug.Assert(RepositoryId > -1, "Initialize RepositoryId first");
+
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+                return FindOrCreateArtifact(repository, artifactname, ArtifactTypeEnum.File).ArtifactId;
         }
 
         protected Artifact FindOrCreateArtifact(ExpertiseDBEntities repository, string FileName, ArtifactTypeEnum artifactType)
