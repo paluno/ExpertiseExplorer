@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ExpertiseDB.Extensions;
 
 namespace Algorithms
 {
@@ -30,12 +31,12 @@ namespace Algorithms
 
             IDictionary<String, Double> dictExpertiseValues = FpsTree.CalculateDeveloperExpertisesForFile(filename);
 
-            IEnumerable<KeyValuePair<int, Double>> devIdsWithExpertiseValues;
+            IEnumerable<DeveloperWithExpertise> devIdsWithExpertiseValues;
                 // REVISIT: Multithreading
             using (var repository = new ExpertiseDBEntities())
             {
                 devIdsWithExpertiseValues = dictExpertiseValues.
-                    Select(devNameExpertisePair => new KeyValuePair<int, double>(
+                    Select(devNameExpertisePair => new DeveloperWithExpertise(
                             repository.Developers.Single(dev => dev.Name == devNameExpertisePair.Key && dev.RepositoryId == RepositoryId)
                                 .DeveloperId,
                             devNameExpertisePair.Value

@@ -300,7 +300,7 @@ using Algorithms.Statistics;
         }
 #endregion Updating Repository from SourceRepository
 
-        public int GetFilenameIdFromFilenameApproximation(string filename)
+        protected int GetFilenameIdFromFilenameApproximation(string filename)
         {
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
 
@@ -322,13 +322,12 @@ using Algorithms.Statistics;
                 return FindOrCreateArtifact(repository, artifactname, ArtifactTypeEnum.File).ArtifactId;
         }
 
-
         /// <summary>
         /// Stores multiple expertise values for one artifact.
         /// </summary>
         /// <param name="filename">The name of the artifact for which the experts are sought</param>
         /// <param name="devIdsWithExpertiseValues">A dictionary that maps DeveloperIds to expertise values</param>
-        protected void storeDeveloperExpertiseValues(string filename, IEnumerable<KeyValuePair<int, Double>> devIdsWithExpertiseValues)
+        protected void storeDeveloperExpertiseValues(string filename, IEnumerable<DeveloperWithExpertise> devIdsWithExpertiseValues)
         {
             using (var repository = new ExpertiseDBEntities())
             {
@@ -336,7 +335,7 @@ using Algorithms.Statistics;
 
                 bool fNewAdditions = false;
 
-                foreach (KeyValuePair<int, Double> pair in devIdsWithExpertiseValues)
+                foreach (DeveloperWithExpertise devExpertise in devIdsWithExpertiseValues)
                 {
                     if (fNewAdditions)
                     {
@@ -344,10 +343,10 @@ using Algorithms.Statistics;
                         fNewAdditions = false;      // Therefore we save after additions.
                     }
 
-                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, pair.Key, filename, ArtifactTypeEnum.File);
+                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, devExpertise.DeveloperId, filename, ArtifactTypeEnum.File);
                     fNewAdditions |= 0 == developerExpertise.DeveloperExpertiseId;  // hack: is it a new DeveloperExpertise?
                     DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
-                    devExpertiseValue.Value = pair.Value;
+                    devExpertiseValue.Value = devExpertise.Expertise;
                     fNewAdditions |= 0 == devExpertiseValue.DeveloperExpertiseValueId;  // hack: is it a new DeveloperExpertiseValue?
                 }
 
