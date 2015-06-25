@@ -246,11 +246,11 @@
   </EntityType>
   <EntityType Name="RepositoryAlgorithmRunStatus">
     <Key>
-      <PropertyRef Name="AlgorithmAlgorithmId" />
-      <PropertyRef Name="RepositoryRepositoryId" />
+      <PropertyRef Name="AlgorithmId" />
+      <PropertyRef Name="RepositoryId" />
     </Key>
-    <Property Name="RepositoryRepositoryId" Type="int" Nullable="false" />
-    <Property Name="AlgorithmAlgorithmId" Type="int" Nullable="false" />
+    <Property Name="RepositoryId" Type="int" Nullable="false" />
+    <Property Name="AlgorithmId" Type="int" Nullable="false" />
     <Property Name="RunUntil" Type="datetime" Nullable="false" />
   </EntityType>
   <EntityType Name="ArtifactBugRelation">
@@ -473,7 +473,7 @@
         <PropertyRef Name="RepositoryId" />
       </Principal>
       <Dependent Role="RepositoryAlgorithmRunStatus">
-        <PropertyRef Name="RepositoryRepositoryId" />
+        <PropertyRef Name="RepositoryId" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -485,7 +485,7 @@
         <PropertyRef Name="AlgorithmId" />
       </Principal>
       <Dependent Role="RepositoryAlgorithmRunStatus">
-        <PropertyRef Name="AlgorithmAlgorithmId" />
+        <PropertyRef Name="AlgorithmId" />
       </Dependent>
     </ReferentialConstraint>
   </Association>
@@ -1227,8 +1227,8 @@
     <EntitySetMapping Name="RepositoryAlgorithmRunStatus">
       <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.RepositoryAlgorithmRunStatus)">
         <MappingFragment StoreEntitySet="RepositoryAlgorithmRunStatus">
-          <ScalarProperty Name="AlgorithmId" ColumnName="AlgorithmAlgorithmId" />
-          <ScalarProperty Name="RepositoryId" ColumnName="RepositoryRepositoryId" />
+          <ScalarProperty Name="AlgorithmId" ColumnName="AlgorithmId" />
+          <ScalarProperty Name="RepositoryId" ColumnName="RepositoryId" />
           <ScalarProperty Name="RunUntil" ColumnName="RunUntil" />
         </MappingFragment>
       </EntityTypeMapping>
