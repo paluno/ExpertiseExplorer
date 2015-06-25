@@ -30,31 +30,18 @@ namespace Algorithms
 
             IDictionary<String, Double> dictExpertiseValues = FpsTree.CalculateDeveloperExpertisesForFile(filename);
 
+            IEnumerable<KeyValuePair<int, Double>> devIdsWithExpertiseValues;
+                // REVISIT: Multithreading
             using (var repository = new ExpertiseDBEntities())
             {
-                //int artifactId = FindOrCreateArtifact(repository,filename, ArtifactTypeEnum.File).ArtifactId;
-
-                bool fNewAdditions = false;
-
-                foreach (KeyValuePair<String, Double> pair in dictExpertiseValues)
-                {
-                    if (fNewAdditions)
-                    {
-                        repository.SaveChanges();   // The Entity Framework does not seem to like it if multiple new entries are added in the above way.
-                        fNewAdditions = false;      // Therefore we save after additions.
-                    }
-                    
-                    //repository.StoreDeveloperExpertiseValue(pair.Key, pair.Value, artifactId, RepositoryId, AlgorithmId);
-                    Developer developer = repository.Developers.SingleOrDefault(dev => dev.Name == pair.Key && dev.RepositoryId == RepositoryId);
-                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, developer.DeveloperId, filename, ArtifactTypeEnum.File);
-                    fNewAdditions |= 0 == developerExpertise.DeveloperExpertiseId;
-                    DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
-                    devExpertiseValue.Value = pair.Value;
-                    fNewAdditions |= 0 == devExpertiseValue.DeveloperExpertiseValueId;
-                }
-
-                repository.SaveChanges();
+                devIdsWithExpertiseValues = dictExpertiseValues.
+                    Select(devNameExpertisePair => new KeyValuePair<int, double>(
+                            repository.Developers.Single(dev => dev.Name == devNameExpertisePair.Key && dev.RepositoryId == RepositoryId)
+                                .DeveloperId,
+                            devNameExpertisePair.Value
+                        ));     // convert developer names into DeveloperIds
             }
+            storeDeveloperExpertiseValues(filename, devIdsWithExpertiseValues);
         }
     }
 }

@@ -129,89 +129,6 @@ using Algorithms.Statistics;
             }
         }
 
-        public void BuildConnectionsFromSourceUrl(string sourceUrl, bool failIfAlreadyExists = true)
-        {
-            InitIdsFromDbForSourceUrl(sourceUrl, failIfAlreadyExists);
-            BuildConnectionsFromRevisions(GetRevisionsFromSourceRepository());
-        }
-
-        //public void BuildConnectionsForSourceRepositoryBetween(string sourceUrl, DateTime start, DateTime end)
-        //{
-        //    InitIdsFromDbForSourceUrl(sourceUrl, false);
-        //    BuildConnectionsForSourceRepositoryBetween(start, end);
-        //}
-
-        public virtual void BuildConnectionsForSourceRepositoryBetween(DateTime start, DateTime end)
-        {
-            Debug.Assert(RepositoryId != -1, "Set RepositoryId first!");
-
-            List<Revision> revisions;
-            using (var entities = new ExpertiseDBEntities())
-            {
-                var lastUpdate = entities.Repositorys.Single(r => r.RepositoryId == RepositoryId).LastUpdate;
-                if (lastUpdate.HasValue)
-                {
-                    if (lastUpdate.Value >= end)
-                    {
-                        MaxDateTime = lastUpdate.Value;
-                        return;
-                    }
-
-                    if (start < lastUpdate.Value) start = lastUpdate.Value;
-
-                    revisions = entities.GetRevisionsFromSourceRepositoryBetween(SourceRepositoryId, start, end);
-                    if (revisions.Count == 0)
-                    {
-                        MaxDateTime = lastUpdate.Value;
-                        return;
-                    }
-                }
-                else
-                    revisions = entities.GetRevisionsFromSourceRepositoryBetween(SourceRepositoryId, start, end);
-                    if (revisions.Count == 0)
-                    {
-                        MaxDateTime = end;
-                        return;
-                    }
-            }
-
-            BuildConnectionsFromRevisions(revisions);
-        }
-
-        public void BuildConnectionsFromRevisions(List<Revision> revisions)
-        {
-            var orderedRevisions = revisions.OrderBy(r => r.Time).ToList();
-            MaxDateTime = orderedRevisions.Last().Time;
-
-            foreach (var revision in orderedRevisions)
-            {
-                HandleRevision(revision);
-                SetLastUpdated(revision.Time);
-            }
-        }
-
-        public int GetFilenameIdFromFilenameApproximation(string filename)
-        {
-            Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
-
-            using (var repository = new ExpertiseDBEntities())
-            {
-                var file = repository.Filenames.SingleOrDefault(f => f.Name == filename && f.SourceRepositoryId == SourceRepositoryId);
-                if (file == null)
-                    throw new ArgumentException("The file \"" + filename + "\" does not exist in the repository.", "filename");
-
-                return file.FilenameId;
-            }
-        }
-
-        public int FindOrCreateFileArtifactId(string artifactname)
-        {
-            Debug.Assert(RepositoryId > -1, "Initialize RepositoryId first");
-
-            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
-                return FindOrCreateArtifact(repository, artifactname, ArtifactTypeEnum.File).ArtifactId;
-        }
-
         public void InitIdsFromDbForSourceUrl(string sourceUrl, bool failIfAlreadyExists)
         {
             using (var entities = new ExpertiseDBEntities())
@@ -258,6 +175,56 @@ using Algorithms.Statistics;
             MaxDateTime = DateTime.MinValue;
             RepositoryId = -1;
             SourceRepositoryId = -1;
+        }
+
+#region Updating Repository from SourceRepository
+        public virtual void BuildConnectionsForSourceRepositoryBetween(DateTime start, DateTime end)
+        {
+            Debug.Assert(RepositoryId != -1, "Set RepositoryId first!");
+
+            List<Revision> revisions;
+            using (var entities = new ExpertiseDBEntities())
+            {
+                var lastUpdate = entities.Repositorys.Single(r => r.RepositoryId == RepositoryId).LastUpdate;
+                if (lastUpdate.HasValue)
+                {
+                    if (lastUpdate.Value >= end)
+                    {
+                        MaxDateTime = lastUpdate.Value;
+                        return;
+                    }
+
+                    if (start < lastUpdate.Value) start = lastUpdate.Value;
+
+                    revisions = entities.GetRevisionsFromSourceRepositoryBetween(SourceRepositoryId, start, end);
+                    if (revisions.Count == 0)
+                    {
+                        MaxDateTime = lastUpdate.Value;
+                        return;
+                    }
+                }
+                else
+                    revisions = entities.GetRevisionsFromSourceRepositoryBetween(SourceRepositoryId, start, end);
+                if (revisions.Count == 0)
+                {
+                    MaxDateTime = end;
+                    return;
+                }
+            }
+
+            BuildConnectionsFromRevisions(revisions);
+        }
+
+        public void BuildConnectionsFromRevisions(List<Revision> revisions)
+        {
+            var orderedRevisions = revisions.OrderBy(r => r.Time).ToList();
+            MaxDateTime = orderedRevisions.Last().Time;
+
+            foreach (var revision in orderedRevisions)
+            {
+                HandleRevision(revision);
+                SetLastUpdated(revision.Time);
+            }
         }
 
         private List<Revision> GetRevisionsFromSourceRepository()
@@ -327,6 +294,62 @@ using Algorithms.Statistics;
                     developerExpertise.IsFirstAuthor = true;
                 else
                     developerExpertise.DeliveriesCount++;
+
+                repository.SaveChanges();
+            }
+        }
+#endregion Updating Repository from SourceRepository
+
+        public int GetFilenameIdFromFilenameApproximation(string filename)
+        {
+            Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
+
+            using (var repository = new ExpertiseDBEntities())
+            {
+                var file = repository.Filenames.SingleOrDefault(f => f.Name == filename && f.SourceRepositoryId == SourceRepositoryId);
+                if (file == null)
+                    throw new ArgumentException("The file \"" + filename + "\" does not exist in the repository.", "filename");
+
+                return file.FilenameId;
+            }
+        }
+
+        public int FindOrCreateFileArtifactId(string artifactname)
+        {
+            Debug.Assert(RepositoryId > -1, "Initialize RepositoryId first");
+
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+                return FindOrCreateArtifact(repository, artifactname, ArtifactTypeEnum.File).ArtifactId;
+        }
+
+
+        /// <summary>
+        /// Stores multiple expertise values for one artifact.
+        /// </summary>
+        /// <param name="filename">The name of the artifact for which the experts are sought</param>
+        /// <param name="devIdsWithExpertiseValues">A dictionary that maps DeveloperIds to expertise values</param>
+        protected void storeDeveloperExpertiseValues(string filename, IEnumerable<KeyValuePair<int, Double>> devIdsWithExpertiseValues)
+        {
+            using (var repository = new ExpertiseDBEntities())
+            {
+                //int artifactId = FindOrCreateArtifact(repository,filename, ArtifactTypeEnum.File).ArtifactId;
+
+                bool fNewAdditions = false;
+
+                foreach (KeyValuePair<int, Double> pair in devIdsWithExpertiseValues)
+                {
+                    if (fNewAdditions)
+                    {
+                        repository.SaveChanges();   // The Entity Framework does not seem to like it if multiple new entries are added in the above way.
+                        fNewAdditions = false;      // Therefore we save after additions.
+                    }
+
+                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, pair.Key, filename, ArtifactTypeEnum.File);
+                    fNewAdditions |= 0 == developerExpertise.DeveloperExpertiseId;  // hack: is it a new DeveloperExpertise?
+                    DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
+                    devExpertiseValue.Value = pair.Value;
+                    fNewAdditions |= 0 == devExpertiseValue.DeveloperExpertiseValueId;  // hack: is it a new DeveloperExpertiseValue?
+                }
 
                 repository.SaveChanges();
             }
