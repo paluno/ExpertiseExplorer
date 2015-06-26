@@ -32,7 +32,6 @@ namespace Algorithms
             IDictionary<String, Double> dictExpertiseValues = FpsTree.CalculateDeveloperExpertisesForFile(filename);
 
             IEnumerable<DeveloperWithExpertise> devIdsWithExpertiseValues;
-                // REVISIT: Multithreading
             using (var repository = new ExpertiseDBEntities())
             {
                 devIdsWithExpertiseValues = dictExpertiseValues.
