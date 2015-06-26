@@ -53,7 +53,7 @@ using Algorithms.Statistics;
                 if (null == _RunUntil)
                     using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
                     {
-                        RepositoryAlgorithmRunStatus rars = entities.RepositoryAlgorithmRunStatus.Find(RepositoryId, AlgorithmId);
+                        RepositoryAlgorithmRunStatus rars = entities.RepositoryAlgorithmRunStatus.Find(AlgorithmId, RepositoryId);
                         if (null == rars)
                             _RunUntil = DateTime.MinValue;
                         else
