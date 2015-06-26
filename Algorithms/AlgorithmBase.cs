@@ -251,33 +251,21 @@ using Algorithms.Statistics;
         private void HandleRevision(Revision revision)
         {
             List<int> developerIds;
-            List<int> fileRevisionIds;
+            IEnumerable<FileRevision> fileRevisions;
             using (var repository = new ExpertiseDBEntities())
             {
                 developerIds = Deduplicator.DeanonymizeAuthor(revision.User)
                     .Select(developerName => repository.GetDeveloperIdFromNameForRepository(developerName, RepositoryId))
                     .ToList();
-                fileRevisionIds = repository.FileRevisions.Where(f => f.RevisionId == revision.RevisionId).Select(fi => fi.FileRevisionId).ToList();
+                fileRevisions = repository.FileRevisions
+                    .Include(f => f.Filename)
+                    .Where(f => f.RevisionId == revision.RevisionId)
+                    .ToList();
             }
 
-            foreach (var developerId in developerIds)
-            {
-                foreach (var fileId in fileRevisionIds)
-                {
-                    HandleFileRevisions(fileId, developerId);
-                }
-            }
-        }
-
-        private void HandleFileRevisions(int fileRevisionId, int developerId)
-        {
-            FileRevision file;
-            using (var repository = new ExpertiseDBEntities())
-            {
-                file = repository.FileRevisions.Include(f => f.Filename).Single(f => f.FileRevisionId == fileRevisionId);
-            }
-
-            LinkDeveloperAndArtifact(developerId, file, ArtifactTypeEnum.File);
+            foreach (int developerId in developerIds)
+                foreach (FileRevision file in fileRevisions)
+                    LinkDeveloperAndArtifact(developerId, file, ArtifactTypeEnum.File);
         }
 
         private void LinkDeveloperAndArtifact(int developerId, FileRevision fileRevision, ArtifactTypeEnum artifactType)
