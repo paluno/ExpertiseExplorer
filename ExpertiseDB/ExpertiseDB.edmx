@@ -1027,7 +1027,9 @@
         </EntityType>
         <Association Name="RepositoryAlgorithmRunStatusRepository">
           <End Type="ExpertiseDB.RepositoryAlgorithmRunStatus" Role="RepositoryAlgorithmRunStatus" Multiplicity="*" />
-          <End Type="ExpertiseDB.Repository" Role="Repository" Multiplicity="1" />
+          <End Type="ExpertiseDB.Repository" Role="Repository" Multiplicity="1" >
+            <OnDelete Action="Cascade" />
+          </End>
           <ReferentialConstraint>
             <Principal Role="Repository">
               <PropertyRef Name="RepositoryId" />
