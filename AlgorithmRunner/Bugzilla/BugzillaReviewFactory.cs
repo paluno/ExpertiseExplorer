@@ -45,7 +45,7 @@ namespace AlgorithmRunner.Bugzilla
             AttachmentFactory.IncludeAttachmentsFilter = (attachment) => setOfAllUsedBugIds.Contains(attachment.BugId);
             attachmentList = (IEnumerable<BugzillaAttachmentInfo>)AttachmentFactory.parseIssueTrackerEvents();  // re-read the list
 
-            return Merge<IssueTrackerEvent>(attachmentList, reviewList, (patch, review) => patch.When < review.When);
+            return Merge<IssueTrackerEvent>(attachmentList, reviewList, (patch, review) => patch.When <= review.When);
         }
 
         private static IEnumerable<BugzillaReview> GetActivityInfoFromFile(string pathToInputFile, Dictionary<UInt64, IList<string>> attachments)
