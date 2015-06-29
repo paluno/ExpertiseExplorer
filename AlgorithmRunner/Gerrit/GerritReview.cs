@@ -33,7 +33,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Gerrit
 
         public override string ToString()
         {
-            return When + ";r;" + ChangeId + ";" + string.Join(",", Filenames) + ";" + Reviewer + ";" + ActivityId;
+            return string.Join(";",  When, "r", ChangeId, string.Join(",", Filenames), Reviewer, ActivityId);
         }
     }
 }

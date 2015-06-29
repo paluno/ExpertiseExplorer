@@ -14,7 +14,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Gerrit
             string[] reviewValues = reviewLine.Split(';');
 
             ChangeId = reviewValues[2];
-            When = DateTime.Parse(reviewValues[0]);
+            When = DateTime.Parse(reviewValues[0]).ToUniversalTime();
             Filenames = reviewValues[3].Split(',').Select(filenameWithLineNumbers => parseFilename(filenameWithLineNumbers)).ToList();
         }
 
@@ -26,6 +26,11 @@ namespace ExpertiseExplorer.AlgorithmRunner.Gerrit
         public override bool isValid()
         {
             return Filenames.Any(str => !String.IsNullOrWhiteSpace(str));
+        }
+
+        public override string ToString()
+        {
+            return string.Join(";", When.ToUniversalTime().ToString("u"), "c", ChangeId, string.Join(",", Filenames));
         }
     }
 }
