@@ -1,5 +1,5 @@
 ﻿using System;
-namespace ExpertiseDB
+namespace ExpertiseExplorer.ExpertiseDB
 {
     public class DeveloperWithEditTime
     {

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlgorithmRunner.AbstractIssueTracker
+namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
 {
     /// <summary>
     /// Abstract Factory

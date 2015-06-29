@@ -1,5 +1,5 @@
-﻿using AlgorithmRunner.AbstractIssueTracker;
-using ExpertiseDB;
+﻿using ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker;
+using ExpertiseExplorer.ExpertiseDB;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlgorithmRunner.Bugzilla
+namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
 {
     class BugzillaAttachmentFactory : IssueTrackerEventFactory
     {

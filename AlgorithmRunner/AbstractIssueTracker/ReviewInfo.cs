@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ExpertiseExplorerCommon;
+using ExpertiseExplorer.Common;
 
-namespace AlgorithmRunner.AbstractIssueTracker
+namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
 {
     abstract class ReviewInfo : IssueTrackerEvent
     {

@@ -1,8 +1,8 @@
-﻿namespace ExpertiseExplorerMVC.Controllers
+﻿namespace ExpertiseExplorer.MVC.Controllers
 {
     using System.Linq;
     using System.Web.Mvc;
-    using ExpertiseDB;
+    using ExpertiseExplorer.ExpertiseDB;
 
     public class HomeController : Controller
     {

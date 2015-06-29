@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Algorithms
+namespace ExpertiseExplorer.Algorithms
 {
     /// <summary>
     /// Provides name-based locks, i.e. each string identifies a lock. Locks that are not in use anymore are recycled.

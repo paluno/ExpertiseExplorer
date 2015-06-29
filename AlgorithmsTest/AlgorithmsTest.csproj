@@ -6,7 +6,7 @@
     <ProjectGuid>{76077090-D25C-40D3-B01A-BF1C69A740BE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AlgorithmsTest</RootNamespace>
+    <RootNamespace>ExpertiseExplorer.Algorithms.Test</RootNamespace>
     <AssemblyName>AlgorithmsTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

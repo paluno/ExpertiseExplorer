@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Algorithms.FPS;
+using ExpertiseExplorer.Algorithms.FPS;
 using System.Collections.Generic;
 
-namespace AlgorithmsTest
+namespace ExpertiseExplorer.Algorithms.Test
 {
     [TestClass]
     public class FPSTreeTest

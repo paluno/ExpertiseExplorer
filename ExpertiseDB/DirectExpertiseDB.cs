@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExpertiseDB
+namespace ExpertiseExplorer.ExpertiseDB
 {
     public static class DirectExpertiseDB
     {

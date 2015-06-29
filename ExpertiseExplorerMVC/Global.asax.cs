@@ -1,4 +1,4 @@
-﻿namespace ExpertiseExplorerMVC
+﻿namespace ExpertiseExplorer.MVC
 {
     using System.Web.Mvc;
     using System.Web.Optimization;

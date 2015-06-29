@@ -1,4 +1,4 @@
-﻿namespace ExpertiseExplorerMVC.Models
+﻿namespace ExpertiseExplorer.MVC.Models
 {
     using System;
     using System.Collections.Generic;

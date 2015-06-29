@@ -1,4 +1,4 @@
-﻿namespace ExpertiseDB.Extensions
+﻿namespace ExpertiseExplorer.ExpertiseDB.Extensions
 {
     public class ActualReviewersGrouped
     {

@@ -1,13 +1,13 @@
-﻿namespace AlgorithmRunner
+﻿namespace ExpertiseExplorer.AlgorithmRunner
 {
-    using AlgorithmRunner.AbstractIssueTracker;
-    using AlgorithmRunner.Bugzilla;
-    using AlgorithmRunner.Gerrit;
-    using Algorithms;
-    using Algorithms.FPS;
+    using ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker;
+    using ExpertiseExplorer.AlgorithmRunner.Bugzilla;
+    using ExpertiseExplorer.AlgorithmRunner.Gerrit;
+    using ExpertiseExplorer.Algorithms;
+    using ExpertiseExplorer.Algorithms.FPS;
     using System;
 
-    using ExpertiseExplorerCommon;
+    using ExpertiseExplorer.Common;
     using System.Collections.Generic;
 
     public class Program

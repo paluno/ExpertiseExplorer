@@ -7,7 +7,7 @@
     <ProjectGuid>{85A18B33-D1CC-42DA-9318-81E84BCFBD3F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Algorithms</RootNamespace>
+    <RootNamespace>ExpertiseExplorer.Algorithms</RootNamespace>
     <AssemblyName>Algorithms</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

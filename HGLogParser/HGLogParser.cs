@@ -1,4 +1,4 @@
-﻿namespace HGLogParser
+﻿namespace ExpertiseExplorer.HGLogParser
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@
     using System.IO;
     using System.Linq;
     using System.Xml.Serialization;
-    using ExpertiseExplorerCommon;
+    using ExpertiseExplorer.Common;
 
     public class HgLogParser
     {

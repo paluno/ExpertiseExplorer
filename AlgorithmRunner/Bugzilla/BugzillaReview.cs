@@ -1,4 +1,4 @@
-﻿namespace AlgorithmRunner.Bugzilla
+﻿namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
 {
     using System;
     using System.Collections.Generic;
@@ -6,8 +6,8 @@
     using System.IO;
     using System.Text;
     using System.Linq;
-    using AlgorithmRunner.AbstractIssueTracker;
-    using ExpertiseExplorerCommon;
+    using ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker;
+    using ExpertiseExplorer.Common;
 
     internal class BugzillaReview : ReviewInfo
     {

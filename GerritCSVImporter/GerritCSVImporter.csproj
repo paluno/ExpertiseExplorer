@@ -7,7 +7,7 @@
     <ProjectGuid>{77E722B7-8F1F-492D-9E86-555977137584}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GerritCSVImporter</RootNamespace>
+    <RootNamespace>ExpertiseExplorer.GerritCSVImporter</RootNamespace>
     <AssemblyName>GerritCSVImporter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

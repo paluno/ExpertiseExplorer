@@ -1,12 +1,12 @@
-﻿using ExpertiseDB;
-using ExpertiseExplorerCommon;
+﻿using ExpertiseExplorer.ExpertiseDB;
+using ExpertiseExplorer.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Algorithms
+namespace ExpertiseExplorer.Algorithms
 {
     /// <summary>
     /// Calculates the weighed number of reviews for the files. The weight comes in if multiple files are reviewed at once, in which case

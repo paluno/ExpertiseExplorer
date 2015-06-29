@@ -1,4 +1,4 @@
-﻿using ExpertiseDB;
+﻿using ExpertiseExplorer.ExpertiseDB;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GerritCSVImporter
+namespace ExpertiseExplorer.GerritCSVImporter
 {
     class Program
     {

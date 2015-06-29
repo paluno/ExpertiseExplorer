@@ -1,4 +1,4 @@
-﻿namespace AlgorithmRunner
+﻿namespace ExpertiseExplorer.AlgorithmRunner
 {
     using System.Collections.Generic;
     using System.IO;

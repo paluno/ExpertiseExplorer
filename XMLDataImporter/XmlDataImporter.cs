@@ -1,4 +1,4 @@
-﻿namespace XMLDataImporter
+﻿namespace ExpertiseExplorer.XMLDataImporter
 {
     using System;
     using System.Data.Entity.Validation;
@@ -6,8 +6,8 @@
     using System.IO;
     using System.Linq;
     using System.Xml.Serialization;
-    using ExpertiseDB;
-    using ExpertiseExplorerCommon;
+    using ExpertiseExplorer.ExpertiseDB;
+    using ExpertiseExplorer.Common;
 
     public class XmlDataImporter
     {

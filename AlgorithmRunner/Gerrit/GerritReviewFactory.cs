@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AlgorithmRunner.AbstractIssueTracker;
+using ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker;
 
-namespace AlgorithmRunner.Gerrit
+namespace ExpertiseExplorer.AlgorithmRunner.Gerrit
 {
     class GerritReviewFactory : IssueTrackerEventFactory
     {

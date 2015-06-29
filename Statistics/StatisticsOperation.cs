@@ -1,4 +1,4 @@
-﻿namespace Statistics
+﻿namespace ExpertiseExplorer.Statistics
 {
     internal enum StatisticsOperation
     {

@@ -1,4 +1,4 @@
-﻿namespace Algorithms
+﻿namespace ExpertiseExplorer.Algorithms
 {
     using System;
     using System.Collections.Generic;
@@ -21,7 +21,6 @@
         {
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
-            var stopwatch = new Stopwatch();
 
             int filenameId;
             try
@@ -37,14 +36,10 @@
             }
 
             List<FileRevision> fileRevisions;
-            stopwatch.Start();
             using (var repository = new ExpertiseDBEntities())
             {
                 fileRevisions = repository.FileRevisions.Include(fr => fr.Revision).Where(f => f.FilenameId == filenameId && f.Revision.Time < MaxDateTime).OrderBy(f => f.Revision.Time).AsNoTracking().ToList();
             }
-
-            stopwatch.Stop();
-            Log.Info(Name + " - fileRevisions - " + stopwatch.Elapsed);
 
             if (fileRevisions.Count == 0)
             {
@@ -73,7 +68,6 @@
             int artifactId = FindOrCreateFileArtifactId(filename);
 
             var developerLookup = new Dictionary<string, DeveloperExpertiseValue>();
-            stopwatch.Start();
             using (var repository = new ExpertiseDBEntities())
             {
                 List<Developer> developers = repository.DeveloperExpertises.Where(de => de.ArtifactId == artifactId && de.Inferred == false).Select(de => de.Developer).Distinct().ToList();
@@ -114,9 +108,6 @@
 
                 repository.SaveChanges();
             }
-
-            stopwatch.Stop();
-            Log.Info(Name + " - SaveChanges() - " + stopwatch.Elapsed);
         }
     }
 }

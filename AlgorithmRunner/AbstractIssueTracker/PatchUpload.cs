@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlgorithmRunner.AbstractIssueTracker
+namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
 {
     /// <summary>
     /// Represents the upload of a patch (Bugzilla) or a commit (Gerrit); in all cases, this is the moment

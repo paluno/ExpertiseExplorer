@@ -1,4 +1,4 @@
-﻿namespace AlgorithmRunner
+﻿namespace ExpertiseExplorer.AlgorithmRunner
 {
     using System;
     using System.Collections.Generic;
@@ -8,23 +8,22 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    using Algorithms;
+    using ExpertiseExplorer.Algorithms;
 
     using ExpertiseDB;
     using ExpertiseDB.Extensions;
     using AlgorithmRunner.AbstractIssueTracker;
     using AlgorithmRunner.Bugzilla;
 
-    using ExpertiseExplorerCommon;
-    using Algorithms.Statistics;
+    using ExpertiseExplorer.Common;
+    using ExpertiseExplorer.Algorithms.Statistics;
+    using log4net;
 
     internal class AlgorithmComparisonRunner
     {
-        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        private readonly string _foundFilesOnlyPath;
-
-        private readonly string _performancePath;
+        private static readonly ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog OutputLog = LogManager.GetLogger("ExpertiseExplorer.AlgorithmRunner.Output");
+        private static readonly ILog PerformanceLog = LogManager.GetLogger("ExpertiseExplorer.AlgorithmRunner.Performance");
 
         public int RepositoryId
         {
@@ -54,9 +53,6 @@
 
         public AlgorithmComparisonRunner(string sourceUrl, string basepath, IList<AlgorithmBase> algorithmsToEvaluate)
         {
-            _foundFilesOnlyPath = basepath + "output.txt";
-            _performancePath = basepath + "performance_log.txt";
-
             Algorithms = algorithmsToEvaluate;
             string authorMappingPath = basepath + "authors_consolidated.txt";
             if (File.Exists(authorMappingPath))
@@ -84,12 +80,10 @@
 
         public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
         {
-            DateTime starttime = DateTime.Now;
-            Debug.WriteLine("Starting comparison at: " + starttime);
+            Log.Debug("Starting comparison");
             IEnumerable<IssueTrackerEvent> list = factory.parseIssueTrackerEvents();
             HandleIssueTrackerEventList(list, resumeFrom, continueUntil, noComparison);
-            Debug.WriteLine("Ending comparison at: " + DateTime.Now);
-            Debug.WriteLine("Time: " + (DateTime.Now - starttime));
+            Log.Debug("Ending comparison");
         }
 
         #region Private Methods
@@ -100,60 +94,60 @@
         /// </summary>
         private void HandleIssueTrackerEventList(IEnumerable<IssueTrackerEvent> issueTrackerEventList, DateTime resumeFrom, DateTime continueUntil, bool noComparison)
         {
-            using (StreamWriter found = new StreamWriter(_foundFilesOnlyPath, true))
-            using (StreamWriter performanceLog = new StreamWriter(_performancePath, true))
+            DateTime timeAfterOneK = DateTime.Now;
+
+            DateTime repositoryWatermark = DateTime.MinValue;   // Until which date are the number of deliveries, modifications, and so on counted?
+            int count = 0;
+            foreach (IssueTrackerEvent info in issueTrackerEventList)
             {
-                DateTime timeAfterOneK = DateTime.Now;
-
-                DateTime repositoryWatermark = DateTime.MinValue;   // Until which date are the number of deliveries, modifications, and so on counted?
-                int count = 0;
-                foreach (IssueTrackerEvent info in issueTrackerEventList)
+                count++;
+                if (count % 1000 == 0)
                 {
-                    count++;
-                    if (count % 1000 == 0)
-                    {
-                        Console.WriteLine("Now at: " + count);
-                        performanceLog.WriteLine(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
-                        timeAfterOneK = DateTime.Now;
-                        performanceLog.Flush();
-                    }
-
-                    if (Console.KeyAvailable)
-                    {
-                        ConsoleKeyInfo keypressed = Console.ReadKey(true);
-                        switch (keypressed.Key)
-                        {
-                            case ConsoleKey.X:
-                                Console.WriteLine("Now at: " + count);
-                                Console.WriteLine("Time of next item (use with resume): " + info.When);
-                                Console.WriteLine("Stopping due to user request.");
-
-                                Log.Info("Stopping due to user request. Time of next item (use with resume): " + info.When);
-                                return;
-                            case ConsoleKey.S:
-                                Console.WriteLine("Now at: " + count);
-                                break;
-                            default:
-                                Console.WriteLine("Press \"S\" for current status or \"X\" to initiate a stop of calculations.");
-                                break;
-                        }
-                        while (Console.KeyAvailable)
-                            Console.ReadKey(true);  // Flush input buffer
-                    }
-
-                    if (info.When > continueUntil)
-                        return;
-                    if (info.When < resumeFrom)
-                        continue;
-
-                    ReviewInfo ri = info as ReviewInfo;
-                    if (null != ri)
-                        ProcessReviewInfo(ri, found, noComparison);
-
-                    PatchUpload pu = info as PatchUpload;
-                    if (null != pu && !noComparison)
-                        ProcessPatchUpload(pu, found, noComparison, ref repositoryWatermark);
+                    Console.WriteLine("Now at: " + count);
+                    PerformanceLog.Info(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
+                    timeAfterOneK = DateTime.Now;
                 }
+
+                if (Console.KeyAvailable)
+                {
+                    ConsoleKeyInfo keypressed = Console.ReadKey(true);
+                    switch (keypressed.Key)
+                    {
+                        case ConsoleKey.X:
+                            Console.WriteLine("Now at: " + count);
+                            Console.WriteLine("Time of next item (use with resume): " + info.When);
+                            Console.WriteLine("Stopping due to user request.");
+
+                            Log.Warn("Stopping due to user request. Time of next item (use with resume): " + info.When);
+                            PerformanceLog.Info(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
+                            return;
+                        case ConsoleKey.S:
+                            Console.WriteLine("Now at: " + count);
+                            break;
+                        default:
+                            Console.WriteLine("Press \"S\" for current status or \"X\" to initiate a stop of calculations.");
+                            break;
+                    }
+                    while (Console.KeyAvailable)
+                        Console.ReadKey(true);  // Flush input buffer
+                }
+
+                if (info.When > continueUntil)
+                    return;
+                if (info.When < resumeFrom)
+                    continue;
+
+                Log.Debug("Evaluating next entry of type " + info.GetType() + ": " + info);
+
+                ReviewInfo ri = info as ReviewInfo;
+                if (null != ri)
+                    ProcessReviewInfo(ri, noComparison);
+
+                PatchUpload pu = info as PatchUpload;
+                if (null != pu && !noComparison)
+                    ProcessPatchUpload(pu, noComparison, ref repositoryWatermark);
+
+                OutputLog.Info(info);
             }
         }
 
@@ -162,7 +156,7 @@
         /// 2. Calculate algorithm values for the files in the bug
         /// 3. Calculate reviewers for the bug
         /// </summary>
-        private void ProcessPatchUpload(IssueTrackerEvent info, StreamWriter found, bool noComparison, ref DateTime repositoryWatermark)
+        private void ProcessPatchUpload(IssueTrackerEvent info, bool noComparison, ref DateTime repositoryWatermark)
         {
             // 1. Check whether this is the first upload for this bug (maybe not necessary)
 
@@ -205,8 +199,6 @@
 
                     Task.WaitAll(tasks.ToArray());
 
-                    found.WriteLine(info.ToString());
-                    found.Flush();
                     fSuccess = true;
                 }
                 catch (AggregateException ae)
@@ -279,7 +271,7 @@
         ///  - Store in DB that the reviewer is a possible reviewer in this bug/change.
         ///  - Grant the reviewer review experience for the review.
         /// </summary>
-        protected virtual void ProcessReviewInfo(ReviewInfo info, StreamWriter found, bool noComparison)
+        protected void ProcessReviewInfo(ReviewInfo info, bool noComparison)
         {
             IList<string> involvedFiles = info.Filenames;
 

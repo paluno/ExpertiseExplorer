@@ -1,4 +1,4 @@
-namespace ExpertiseExplorerCommon
+namespace ExpertiseExplorer.Common
 {
     public enum ArtifactTypeEnum
     {

@@ -7,7 +7,7 @@
     <ProjectGuid>{BC267407-9939-4F37-A397-83EC36E2FCCD}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>XMLDataImporter</RootNamespace>
+    <RootNamespace>ExpertiseExplorer.XMLDataImporter</RootNamespace>
     <AssemblyName>XMLDataImporter</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

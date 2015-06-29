@@ -7,7 +7,7 @@
     <ProjectGuid>{AFA7C444-D43D-4030-8539-A2177173D706}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ExpertiseDB</RootNamespace>
+    <RootNamespace>ExpertiseExplorer.ExpertiseDB</RootNamespace>
     <AssemblyName>ExpertiseDB</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -1,10 +1,10 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Algorithms.Statistics;
+using ExpertiseExplorer.Algorithms.Statistics;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace AlgorithmsTest
+namespace ExpertiseExplorer.Algorithms.Test
 {
     [TestClass]
     public class StatisticsTest

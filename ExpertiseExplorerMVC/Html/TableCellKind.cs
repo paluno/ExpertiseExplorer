@@ -1,4 +1,4 @@
-﻿namespace ExpertiseExplorerMVC.Html
+﻿namespace ExpertiseExplorer.MVC.Html
 {
     public enum TableCellKind
     {

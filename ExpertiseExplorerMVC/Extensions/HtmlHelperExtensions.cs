@@ -1,4 +1,4 @@
-﻿namespace ExpertiseExplorerMVC.Extensions
+﻿namespace ExpertiseExplorer.MVC.Extensions
 {
     using System;
     using System.Collections.Generic;
@@ -7,7 +7,7 @@
     using System.Web.Mvc;
     using System.Web.Routing;
 
-    using ExpertiseExplorerMVC.Html;
+    using ExpertiseExplorer.MVC.Html;
 
     public static class HtmlHelperExtensions
     {

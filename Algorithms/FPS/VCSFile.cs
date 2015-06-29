@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Algorithms.FPS
+namespace ExpertiseExplorer.Algorithms.FPS
 {
     internal class VCSFile : VCSObject
     {

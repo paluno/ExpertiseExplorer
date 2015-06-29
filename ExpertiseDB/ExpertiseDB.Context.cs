@@ -10,7 +10,7 @@
 //------------------------------------------------------------------------------
 
 
-namespace ExpertiseDB
+namespace ExpertiseExplorer.ExpertiseDB
 {
 
 using System;

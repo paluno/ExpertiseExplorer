@@ -1,4 +1,4 @@
-﻿namespace HGLogParser
+﻿namespace ExpertiseExplorer.HGLogParser
 {
     using System;
 

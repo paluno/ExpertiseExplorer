@@ -1,8 +1,8 @@
-﻿using Algorithms.Statistics;
+﻿using ExpertiseExplorer.Algorithms.Statistics;
 using System;
 using System.IO;
 
-namespace Statistics
+namespace ExpertiseExplorer.Statistics
 {
     public class Program
     {
@@ -18,7 +18,7 @@ namespace Statistics
 
             string sourceURL = args[0];
             string basepath = args[1];
-            Algorithms.Statistics.Statistics statistics = new Algorithms.Statistics.Statistics(sourceURL, basepath);
+            ExpertiseExplorer.Algorithms.Statistics.Statistics statistics = new ExpertiseExplorer.Algorithms.Statistics.Statistics(sourceURL, basepath);
 
             StatisticsOperation statisticsOperation;
             try

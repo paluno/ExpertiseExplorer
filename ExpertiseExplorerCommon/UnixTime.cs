@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExpertiseExplorerCommon
+namespace ExpertiseExplorer.Common
 {
     public static class UnixTime
     {

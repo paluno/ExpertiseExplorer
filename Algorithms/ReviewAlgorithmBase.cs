@@ -1,4 +1,4 @@
-﻿using ExpertiseDB;
+﻿using ExpertiseExplorer.ExpertiseDB;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Algorithms
+namespace ExpertiseExplorer.Algorithms
 {
     public abstract class ReviewAlgorithmBase : AlgorithmBase
     {

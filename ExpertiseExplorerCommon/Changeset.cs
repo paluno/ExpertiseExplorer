@@ -1,4 +1,4 @@
-﻿namespace ExpertiseExplorerCommon
+﻿namespace ExpertiseExplorer.Common
 {
     using System;
     using System.Collections.Generic;

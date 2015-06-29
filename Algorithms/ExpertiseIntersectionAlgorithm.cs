@@ -1,4 +1,4 @@
-﻿namespace Algorithms
+﻿namespace ExpertiseExplorer.Algorithms
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@
     using System.Threading.Tasks;
 
     using ExpertiseDB;
-    using ExpertiseExplorerCommon;
+    using ExpertiseExplorer.Common;
     using ExpertiseDB.Extensions;
 
     /// <summary>

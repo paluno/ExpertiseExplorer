@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Algorithms;
+using ExpertiseExplorer.Algorithms;
 using System.Threading;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AlgorithmsTest
+namespace ExpertiseExplorer.Algorithms.Test
 {
     [TestClass]
     public class NameLockTest : NameLockFactory

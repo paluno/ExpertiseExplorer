@@ -1,4 +1,4 @@
-﻿using AlgorithmRunner.AbstractIssueTracker;
+﻿using ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AlgorithmRunner.Bugzilla
+namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
 {
     class BugzillaReviewFactory : IssueTrackerEventFactory
     {

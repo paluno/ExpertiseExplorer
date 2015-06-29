@@ -1,4 +1,4 @@
-﻿namespace Algorithms
+﻿namespace ExpertiseExplorer.Algorithms
 {
     using System;
     using System.Collections.Generic;
@@ -9,7 +9,7 @@
     using System.Data.Entity;
 
     using ExpertiseDB;
-    using ExpertiseExplorerCommon;
+    using ExpertiseExplorer.Common;
     using System.Threading.Tasks;
 
     public class Line10RuleAlgorithm : AlgorithmBase
@@ -58,7 +58,7 @@
 
                 foreach (int oneOfTheLastDevelopers in lastDeveloperIds)
                 {
-                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(entities, oneOfTheLastDevelopers, filename, ExpertiseExplorerCommon.ArtifactTypeEnum.File);
+                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(entities, oneOfTheLastDevelopers, filename, ExpertiseExplorer.Common.ArtifactTypeEnum.File);
                     var expertiseValue = FindOrCreateDeveloperExpertiseValue(entities, developerExpertise);
                     expertiseValue.Value = lastUser.Time.UTCDateTime2unixTime();
                 }

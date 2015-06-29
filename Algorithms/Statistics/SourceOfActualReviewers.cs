@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Algorithms.Statistics
+namespace ExpertiseExplorer.Algorithms.Statistics
 {
     public abstract class SourceOfActualReviewers
     {

@@ -1,4 +1,4 @@
-﻿namespace Algorithms
+﻿namespace ExpertiseExplorer.Algorithms
 {
     using System;
     using System.Collections.Generic;

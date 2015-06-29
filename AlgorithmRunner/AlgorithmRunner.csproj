@@ -7,7 +7,7 @@
     <ProjectGuid>{98EBCE0C-233C-44E8-9AD5-7E77CE6DE590}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AlgorithmRunner</RootNamespace>
+    <RootNamespace>ExpertiseExplorer.AlgorithmRunner</RootNamespace>
     <AssemblyName>AlgorithmRunner</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -1,4 +1,4 @@
-﻿namespace Algorithms
+﻿namespace ExpertiseExplorer.Algorithms
 {
     using System;
     using System.Collections.Generic;
@@ -10,10 +10,10 @@
 
     using ExpertiseDB;
 
-    using ExpertiseExplorerCommon;
+    using ExpertiseExplorer.Common;
     using ExpertiseDB.Extensions;
     using System.Collections.Concurrent;
-using Algorithms.Statistics;
+    using ExpertiseExplorer.Algorithms.Statistics;
 
     public abstract class AlgorithmBase
     {
@@ -118,7 +118,7 @@ using Algorithms.Statistics;
         {
             using (var entities = new ExpertiseDBEntities())
             {
-                Artifact artifact = FindOrCreateArtifact(entities, filename, ExpertiseExplorerCommon.ArtifactTypeEnum.File);
+                Artifact artifact = FindOrCreateArtifact(entities, filename, ExpertiseExplorer.Common.ArtifactTypeEnum.File);
                 foreach (DeveloperExpertise expertise in artifact.DeveloperExpertises)
                 {
                     IEnumerator<DeveloperExpertiseValue> iteratorOnValuesToClear = expertise.DeveloperExpertiseValues.Where(dev => dev.AlgorithmId == AlgorithmId).GetEnumerator();

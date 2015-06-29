@@ -1,11 +1,11 @@
-﻿using ExpertiseDB;
+﻿using ExpertiseExplorer.ExpertiseDB;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Algorithms.Statistics
+namespace ExpertiseExplorer.Algorithms.Statistics
 {
     class SourceOfAllActualReviewers : SourceOfActualReviewers
     {

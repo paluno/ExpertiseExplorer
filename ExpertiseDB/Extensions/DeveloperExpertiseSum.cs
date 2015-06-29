@@ -1,4 +1,4 @@
-namespace ExpertiseDB
+namespace ExpertiseExplorer.ExpertiseDB
 {
     public class DeveloperExpertiseSum
     {

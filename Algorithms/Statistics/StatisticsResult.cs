@@ -1,4 +1,4 @@
-namespace Algorithms.Statistics
+namespace ExpertiseExplorer.Algorithms.Statistics
 {
     internal class StatisticsResult
     {

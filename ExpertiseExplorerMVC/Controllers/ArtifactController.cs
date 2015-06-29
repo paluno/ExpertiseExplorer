@@ -1,8 +1,8 @@
-﻿namespace ExpertiseExplorerMVC.Controllers
+﻿namespace ExpertiseExplorer.MVC.Controllers
 {
     using System.Web.Mvc;
-    using ExpertiseDB;
-    using ExpertiseExplorerMVC.Models;
+    using ExpertiseExplorer.ExpertiseDB;
+    using ExpertiseExplorer.MVC.Models;
 
     public class ArtifactController : Controller
     {

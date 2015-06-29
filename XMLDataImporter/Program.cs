@@ -1,4 +1,4 @@
-﻿namespace XMLDataImporter
+﻿namespace ExpertiseExplorer.XMLDataImporter
 {
     using System;
 

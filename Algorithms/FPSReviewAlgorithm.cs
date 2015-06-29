@@ -1,14 +1,14 @@
-﻿using ExpertiseDB;
-using ExpertiseExplorerCommon;
+﻿using ExpertiseExplorer.ExpertiseDB;
+using ExpertiseExplorer.Common;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ExpertiseDB.Extensions;
+using ExpertiseExplorer.ExpertiseDB.Extensions;
 
-namespace Algorithms
+namespace ExpertiseExplorer.Algorithms
 {
     /// <summary>
     /// Calculates Thongtanunam et al.s FPS algorithm for reviewer recommendation in the delta=1.0 parameterization

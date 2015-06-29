@@ -7,7 +7,7 @@
     <ProjectGuid>{61316512-170E-4EBE-9CBF-B5C174D9D212}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Statistics</RootNamespace>
+    <RootNamespace>ExpertiseExplorer.Statistics</RootNamespace>
     <AssemblyName>Statistics</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

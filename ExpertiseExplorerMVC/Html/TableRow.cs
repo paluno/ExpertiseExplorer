@@ -1,4 +1,4 @@
-﻿namespace ExpertiseExplorerMVC.Html
+﻿namespace ExpertiseExplorer.MVC.Html
 {
     using System;
     using System.Web.Mvc;

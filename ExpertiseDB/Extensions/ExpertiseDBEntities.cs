@@ -1,4 +1,4 @@
-﻿namespace ExpertiseDB
+﻿namespace ExpertiseExplorer.ExpertiseDB
 {
     using System;
     using System.Collections.Generic;
@@ -6,7 +6,7 @@
     using System.Data.Entity.Infrastructure;
     using System.Linq;
 
-    using ExpertiseDB.Extensions;
+    using ExpertiseExplorer.ExpertiseDB.Extensions;
     using System.Globalization;
     using System.Diagnostics;
 
