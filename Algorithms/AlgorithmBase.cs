@@ -17,8 +17,6 @@
 
     public abstract class AlgorithmBase
     {
-        protected static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
         public string Name { get; protected set; }
 
         private const int TOTAL_NUMBER_OF_CONCURRENT_TASKS = 30;

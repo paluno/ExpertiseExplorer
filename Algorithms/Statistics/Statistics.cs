@@ -13,7 +13,7 @@
 
     public class Statistics
     {
-        private readonly ILog log = LogManager.GetLogger("Statistics");
+        private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly string repositoryURL;
         private readonly string basepath;

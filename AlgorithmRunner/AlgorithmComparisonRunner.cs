@@ -80,10 +80,10 @@
 
         public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
         {
-            Log.Debug("Starting comparison");
+            Log.Info("Starting comparison");
             IEnumerable<IssueTrackerEvent> list = factory.parseIssueTrackerEvents();
             HandleIssueTrackerEventList(list, resumeFrom, continueUntil, noComparison);
-            Log.Debug("Ending comparison");
+            Log.Info("Ending comparison");
         }
 
         #region Private Methods
@@ -100,7 +100,7 @@
             int count = 0;
             foreach (IssueTrackerEvent info in issueTrackerEventList)
             {
-                count++;
+                ++count;
                 if (count % 1000 == 0)
                 {
                     Console.WriteLine("Now at: " + count);
@@ -137,15 +137,41 @@
                 if (info.When < resumeFrom)
                     continue;
 
-                Log.Debug("Evaluating next entry of type " + info.GetType() + ": " + info);
+                Log.Debug("Evaluating [" + info.GetType() + "]: " + info);
 
-                ReviewInfo ri = info as ReviewInfo;
-                if (null != ri)
-                    ProcessReviewInfo(ri, noComparison);
+                const int NUMBER_OF_FAIL_RETRIES = 5;
+                int retryNumber = 0;
+                bool fSuccess = false;
+                do
+                {
+                    try
+                    {
+                        ReviewInfo ri = info as ReviewInfo;
+                        if (null != ri)
+                            ProcessReviewInfo(ri, noComparison);
 
-                PatchUpload pu = info as PatchUpload;
-                if (null != pu && !noComparison)
-                    ProcessPatchUpload(pu, noComparison, ref repositoryWatermark);
+                        PatchUpload pu = info as PatchUpload;
+                        if (null != pu && !noComparison)
+                            ProcessPatchUpload(pu, noComparison, ref repositoryWatermark);
+
+                        fSuccess = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (++retryNumber <= NUMBER_OF_FAIL_RETRIES)
+                        {        // try again, but wait a little, up to 50 * 5^3 = 6.25 seconds
+                            Log.Error(ex);
+                            System.Threading.Thread.Sleep(50 * retryNumber * retryNumber * retryNumber);
+                        }
+                        else
+                        {
+                            Log.Fatal("Error on handling an issue entry", ex);
+                            Log.Info("The current entry involves " + info.Filenames.Count + " files. Its type is [" + info.GetType() + "]. You should resume on " + info.When);
+                            throw;
+                        }
+                    }
+                }
+                while (!fSuccess);
 
                 OutputLog.Info(info);
             }
@@ -180,43 +206,17 @@
             int repositoryId = Algorithms[0].RepositoryId;
             int sourceRepositoryId = Algorithms[0].SourceRepositoryId;
 
-            const int NUMBER_OF_FAIL_RETRIES = 5;
-            int retryNumber = 0;
-            bool fSuccess = false;
-            do
+            List<Task> tasks = new List<Task>();
+            foreach (AlgorithmBase algorithm in Algorithms)
             {
-                try
-                {
-                    List<Task> tasks = new List<Task>();
-                    foreach (AlgorithmBase algorithm in Algorithms)
-                    {
-                        algorithm.MaxDateTime = maxDateTime;
-                        algorithm.RepositoryId = repositoryId;
-                        algorithm.SourceRepositoryId = sourceRepositoryId;
+                algorithm.MaxDateTime = maxDateTime;
+                algorithm.RepositoryId = repositoryId;
+                algorithm.SourceRepositoryId = sourceRepositoryId;
 
-                        tasks.Add(algorithm.CalculateExpertiseForFilesAsync(involvedFiles));
-                    }
-
-                    Task.WaitAll(tasks.ToArray());
-
-                    fSuccess = true;
-                }
-                catch (AggregateException ae)
-                {
-                    if (++retryNumber <= NUMBER_OF_FAIL_RETRIES)
-                    {        // try again, but wait a little, up to 50 * 5^3 = 6.25 seconds
-                        Log.Error(ae);
-                        System.Threading.Thread.Sleep(50 * retryNumber * retryNumber * retryNumber);
-                    }
-                    else
-                    {
-                        Log.Fatal("Error when computing expertise values", ae);
-                        Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + info.When);
-                        throw;
-                    }
-                }
+                tasks.Add(algorithm.CalculateExpertiseForFilesAsync(involvedFiles));
             }
-            while (!fSuccess);
+
+            Task.WaitAll(tasks.ToArray());
 
             if (noComparison)
                 return;
@@ -229,24 +229,7 @@
             // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
             IEnumerable<Task<ComputedReviewer>> computedReviewerTasks = Algorithms.Select(algorithm => algorithm.GetDevelopersForArtifactsAsync(artifactIds)).ToList();
 
-            try
-            {
-                Task.WaitAll(computedReviewerTasks.ToArray());
-            }
-            catch (AggregateException ae)
-            {
-                if (++retryNumber <= NUMBER_OF_FAIL_RETRIES)
-                {        // try again, but wait a little, up to 50 * 5^3 = 6.25 seconds
-                    Log.Error(ae);
-                    System.Threading.Thread.Sleep(50 * retryNumber * retryNumber * retryNumber);
-                }
-                else
-                {
-                    Log.Fatal("Error when computing suggested reviewers", ae);
-                    Log.Info("The current job involves " + involvedFiles.Count + " files. You should resume with " + info.When);
-                    throw;
-                }
-            }
+            Task.WaitAll(computedReviewerTasks.ToArray());
 
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
             {
@@ -273,32 +256,28 @@
         /// </summary>
         protected void ProcessReviewInfo(ReviewInfo info, bool noComparison)
         {
-            IList<string> involvedFiles = info.Filenames;
-
-                // Grant the reviewer review experience for the review
-            foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
-                reviewAlgorithm.AddReviewScore(info.Reviewer, involvedFiles, info.When);
-
-            if (noComparison)
-                return;
-
             // Store in DB that the reviewer is a possible reviewer in this bug/change.
-            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
-            {
-                Bug theBug = repository.Bugs.Single(bug => bug.ChangeId == info.ChangeId);
+            if (!noComparison)
+                using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+                {
+                    Bug theBug = repository.Bugs.Single(bug => bug.ChangeId == info.ChangeId);
 
-                if (theBug.ActualReviewers.Any(reviewer => reviewer.Reviewer == info.Reviewer))
-                    return;     //  the reviewer is already in the list
+                    if (theBug.ActualReviewers.Any(reviewer => reviewer.Reviewer == info.Reviewer))
+                        return;     //  the reviewer is already in the list
 
-                theBug.ActualReviewers.Add(new ActualReviewer()
-                    {
-                        ActivityId = info.ActivityId,
-                        Bug = theBug,
-                        Reviewer = info.Reviewer
-                    });
+                    theBug.ActualReviewers.Add(new ActualReviewer()
+                        {
+                            ActivityId = info.ActivityId,
+                            Bug = theBug,
+                            Reviewer = info.Reviewer
+                        });
 
-                repository.SaveChanges();
-            }
+                    repository.SaveChanges();
+                }
+
+            // Grant the reviewer review experience for the review
+            foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
+                reviewAlgorithm.AddReviewScore(info.Reviewer, info.Filenames, info.When);
          }
         #endregion
     }
