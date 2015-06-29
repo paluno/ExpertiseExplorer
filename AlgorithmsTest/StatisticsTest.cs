@@ -189,13 +189,13 @@ namespace ExpertiseExplorer.Algorithms.Test
 
             af.InitializeMappingFromAuthorList(authorMultiList.Split('\n'));
 
-            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("Full Name"));
-            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("email@address"));
-            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("address2@test"));
-            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("Full Name <address2@test>"));
+            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("Full Name").Single());
+            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("email@address").Single());
+            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("address2@test").Single());
+            Assert.AreEqual("Full Name <email@address>", af.DeanonymizeAuthor("Full Name <address2@test>").Single());
 
-            Assert.AreEqual("Not Related", af.DeanonymizeAuthor("unrelated@test"));
-            Assert.AreEqual("Not Related", af.DeanonymizeAuthor("Absoluteley Not Related"));
+            Assert.AreEqual("Not Related", af.DeanonymizeAuthor("unrelated@test").Single());
+            Assert.AreEqual("Not Related", af.DeanonymizeAuthor("Absoluteley Not Related").Single());
         }
 
         [TestMethod]
