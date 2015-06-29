@@ -26,14 +26,14 @@ namespace ExpertiseExplorer.Algorithms.FPS
             this.Children = new Dictionary<string, VCSObject>(10);
         }
 
-        public override void AddReview(string reviewer, IEnumerable<string> filenameComponents, double reviewWeight)
+        public override void AddReview(int idReviewer, IEnumerable<string> filenameComponents, double reviewWeight)
         {
             if (!filenameComponents.Any())  // this happens if the parent object created this object as Directory and it is afterwards used as a file
             {
                 if (null == DirectEdits)
                     DirectEdits = new VCSFile(string.Empty);
 
-                DirectEdits.AddReview(reviewer, filenameComponents, reviewWeight);
+                DirectEdits.AddReview(idReviewer, filenameComponents, reviewWeight);
                 return;
             }
             
@@ -46,10 +46,10 @@ namespace ExpertiseExplorer.Algorithms.FPS
                 else        // it's a file
                     Children.Add(nextComponent, new VCSFile(nextComponent));
 
-            Children[nextComponent].AddReview(reviewer, remainingComponents, reviewWeight);
+            Children[nextComponent].AddReview(idReviewer, remainingComponents, reviewWeight);
         }
 
-        internal override void CalculateDeveloperExpertises(ConcurrentDictionary<string, double> dictExpertises, string[] filenameComponents, int currentDepth, int numberOfMatchingComponents)
+        internal override void CalculateDeveloperExpertises(ConcurrentDictionary<int, double> dictExpertises, string[] filenameComponents, int currentDepth, int numberOfMatchingComponents)
         {
             int numberOfStillMatchingComponents;
             if (currentDepth - 1 == numberOfMatchingComponents && 

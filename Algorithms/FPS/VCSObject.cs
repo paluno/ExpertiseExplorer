@@ -16,7 +16,7 @@ namespace ExpertiseExplorer.Algorithms.FPS
             this.RelativeName = name;
         }
 
-        public abstract void AddReview(string reviewer, IEnumerable<string> filenameComponents, double reviewWeight);
+        public abstract void AddReview(int idReviewer, IEnumerable<string> filenameComponents, double reviewWeight);
 
         /// <summary>
         /// Helps calculating the FPS score, but should not be called from other classes than FPSObjects (cannot make it
@@ -27,6 +27,6 @@ namespace ExpertiseExplorer.Algorithms.FPS
         /// <param name="currentDepth">Which depth of the tree are we currently in, i.e. what is the depth of the called object?</param>
         /// <param name="numberOfMatchingComponents">When comparing the current object's filename with the checked filename, on how many
         ///     componentens do they match? Every callee has to evaluate current matching until after the first difference.</param>
-        internal abstract void CalculateDeveloperExpertises(ConcurrentDictionary<string, double> dictExpertises, string[] filenameComponents, int currentDepth, int numberOfMatchingComponents);
+        internal abstract void CalculateDeveloperExpertises(ConcurrentDictionary<int, double> dictExpertises, string[] filenameComponents, int currentDepth, int numberOfMatchingComponents);
      }
 }

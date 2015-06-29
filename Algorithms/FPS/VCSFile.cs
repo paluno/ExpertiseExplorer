@@ -11,23 +11,23 @@ namespace ExpertiseExplorer.Algorithms.FPS
         /// <summary>
         /// Result of the WeighedReviewCountAlgorithm: Which developers have reviewed this file already? And how often, according to FPS?
         /// </summary>
-        public IDictionary<string, double> WeighedDeveloperExpertise { get; private set; }
+        public IDictionary<int, double> WeighedDeveloperExpertise { get; private set; }
 
         public VCSFile(string name)
             : base(name)
         {
-            WeighedDeveloperExpertise = new Dictionary<string, double>(10);
+            WeighedDeveloperExpertise = new Dictionary<int, double>(10);
         }
 
-        public override void AddReview(string reviewer, IEnumerable<string> filenameComponents, double reviewWeight)
+        public override void AddReview(int idReviewer, IEnumerable<string> filenameComponents, double reviewWeight)
         {
-            if (WeighedDeveloperExpertise.ContainsKey(reviewer))
-                WeighedDeveloperExpertise[reviewer] += reviewWeight;
+            if (WeighedDeveloperExpertise.ContainsKey(idReviewer))
+                WeighedDeveloperExpertise[idReviewer] += reviewWeight;
             else
-                WeighedDeveloperExpertise.Add(reviewer, reviewWeight);
+                WeighedDeveloperExpertise.Add(idReviewer, reviewWeight);
         }
 
-        internal override void CalculateDeveloperExpertises(System.Collections.Concurrent.ConcurrentDictionary<string, double> dictExpertises, string[] filenameComponents, int currentDepth, int numberOfMatchingComponents)
+        internal override void CalculateDeveloperExpertises(System.Collections.Concurrent.ConcurrentDictionary<int, double> dictExpertises, string[] filenameComponents, int currentDepth, int numberOfMatchingComponents)
         {
             int maxLength = Math.Max(filenameComponents.Length, currentDepth);
             int matchLength = numberOfMatchingComponents;   // there will be some difference, unless ...
@@ -36,7 +36,7 @@ namespace ExpertiseExplorer.Algorithms.FPS
 
             double fileSimilarity = matchLength / (double)maxLength;
 
-            foreach(KeyValuePair<string,double> weighedExpertise in WeighedDeveloperExpertise)
+            foreach(KeyValuePair<int,double> weighedExpertise in WeighedDeveloperExpertise)
             {
                 double weighedValue = weighedExpertise.Value * fileSimilarity;
                 dictExpertises.AddOrUpdate(

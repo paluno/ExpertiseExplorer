@@ -60,6 +60,10 @@
       <Project>{85a18b33-d1cc-42da-9318-81e84bcfbd3f}</Project>
       <Name>Algorithms</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ExpertiseDB\ExpertiseDB.csproj">
+      <Project>{afa7c444-d43d-4030-8539-a2177173d706}</Project>
+      <Name>ExpertiseDB</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

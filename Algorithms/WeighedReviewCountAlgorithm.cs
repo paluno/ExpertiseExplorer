@@ -31,9 +31,8 @@ namespace ExpertiseExplorer.Algorithms
             {
                 foreach (DeveloperExpertiseValue dev in repository.DeveloperExpertiseValues
                     .Include("DeveloperExpertise.Artifact")
-                    .Include("DeveloperExpertise.Developer")
                     .Where(dev => dev.AlgorithmId == AlgorithmId && dev.DeveloperExpertise.Artifact.RepositoryId == RepositoryId))
-                    FpsTree.AddReview(dev.DeveloperExpertise.Developer.Name, dev.DeveloperExpertise.Artifact.Name.Split('/'), dev.Value);
+                    FpsTree.AddReview(dev.DeveloperExpertise.DeveloperId, dev.DeveloperExpertise.Artifact.Name.Split('/'), dev.Value);
             }
         }
 
@@ -44,25 +43,28 @@ namespace ExpertiseExplorer.Algorithms
 
             int numberOfFiles = involvedFiles.Count;
 
-            int idReviewer = FindOrCreateDeveloperFromDevelopernameApproximation(authorName);
+            IEnumerable<int> idReviewers = FindOrCreateDeveloperFromDevelopernameApproximation(authorName); // usually just one
 
                 // write to tree
-            FpsTree.AddReview(authorName, involvedFiles);
+            foreach (int reviewerId in idReviewers)
+            {
+                FpsTree.AddReview(reviewerId, involvedFiles);
 
                 // write to DB
-            foreach (string reviewedFileName in involvedFiles)
-            {
-                using (var repository = new ExpertiseDBEntities())
+                foreach (string reviewedFileName in involvedFiles)
                 {
-                    DeveloperExpertise devExpertise = FindOrCreateDeveloperExpertise(repository, idReviewer, reviewedFileName, ArtifactTypeEnum.File, true);
+                    using (var repository = new ExpertiseDBEntities())
+                    {
+                        DeveloperExpertise devExpertise = FindOrCreateDeveloperExpertise(repository, reviewerId, reviewedFileName, ArtifactTypeEnum.File, true);
 
-                    DeveloperExpertiseValue currentWeightedReviewValue = FindOrCreateDeveloperExpertiseValue(devExpertise);
-                    if (double.IsNaN(currentWeightedReviewValue.Value))
-                        currentWeightedReviewValue.Value = (1D / numberOfFiles);
-                    else
-                        currentWeightedReviewValue.Value += (1D / numberOfFiles);
+                        DeveloperExpertiseValue currentWeightedReviewValue = FindOrCreateDeveloperExpertiseValue(devExpertise);
+                        if (double.IsNaN(currentWeightedReviewValue.Value))
+                            currentWeightedReviewValue.Value = (1D / numberOfFiles);
+                        else
+                            currentWeightedReviewValue.Value += (1D / numberOfFiles);
 
-                    repository.SaveChanges();
+                        repository.SaveChanges();
+                    }
                 }
             }
 

@@ -28,19 +28,8 @@ namespace ExpertiseExplorer.Algorithms
 
         public override void CalculateExpertiseForFile(string filename)
         {
+            IEnumerable<DeveloperWithExpertise> devIdsWithExpertiseValues = FpsTree.CalculateDeveloperExpertisesForFile(filename);
 
-            IDictionary<String, Double> dictExpertiseValues = FpsTree.CalculateDeveloperExpertisesForFile(filename);
-
-            IEnumerable<DeveloperWithExpertise> devIdsWithExpertiseValues;
-            using (var repository = new ExpertiseDBEntities())
-            {
-                devIdsWithExpertiseValues = dictExpertiseValues.
-                    Select(devNameExpertisePair => new DeveloperWithExpertise(
-                            repository.Developers.Single(dev => dev.Name == devNameExpertisePair.Key && dev.RepositoryId == RepositoryId)
-                                .DeveloperId,
-                            devNameExpertisePair.Value
-                        )).ToList();     // convert developer names into DeveloperIds
-            }
             storeDeveloperExpertiseValues(filename, devIdsWithExpertiseValues);
         }
     }

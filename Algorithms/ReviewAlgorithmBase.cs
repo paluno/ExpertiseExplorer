@@ -27,28 +27,32 @@ namespace ExpertiseExplorer.Algorithms
             // Nothing to be done here. Review algorithms build the connections on their own.
         }
 
-        public int FindOrCreateDeveloperFromDevelopernameApproximation(string developername)
+        public IEnumerable<int> FindOrCreateDeveloperFromDevelopernameApproximation(string developername)
         {
             Debug.Assert(RepositoryId > -1, "Initialize RepositoryId first");
 
+            List<int> foundDeveloperIds = new List<int>();
             using (var repository = new ExpertiseDBEntities())
             {
-                Developer developer = repository.Developers.SingleOrDefault(dev => dev.Name == developername && dev.RepositoryId == RepositoryId);
-                if (developer == null)
+                foreach (string deanonymizedDeveloperName in Deduplicator.DeanonymizeAuthor(developername))
                 {
-                    // TODO: Some smarter searching. Like using lists with matching developer names or checking whether the part in front of the domain matches
-
-                    developer = repository.Developers.Add(new Developer()
+                    Developer developer = repository.Developers.SingleOrDefault(dev => dev.Name == deanonymizedDeveloperName && dev.RepositoryId == RepositoryId);
+                    if (developer == null)
                     {
-                        RepositoryId = RepositoryId,
-                        Name = developername
-                    });
+                        developer = repository.Developers.Add(new Developer()
+                        {
+                            RepositoryId = RepositoryId,
+                            Name = deanonymizedDeveloperName
+                        });
 
-                    repository.SaveChanges();
+                        repository.SaveChanges();
+                    }
+
+                    foundDeveloperIds.Add(developer.DeveloperId);
                 }
-
-                return developer.DeveloperId;
             }
+
+            return foundDeveloperIds;
         }
     }
 }
