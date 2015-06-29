@@ -166,7 +166,7 @@
                         else
                         {
                             Log.Fatal("Error on handling an issue entry", ex);
-                            Log.Info("The current entry involves " + info.Filenames.Count + " files. Its type is [" + info.GetType() + "]. You should resume on " + info.When);
+                            Log.Info("The current entry \"" + info.ChangeId + "\" involves " + info.Filenames.Count + " files. Its type is [" + info.GetType() + "]. You should resume on " + info.When);
                             throw;
                         }
                     }

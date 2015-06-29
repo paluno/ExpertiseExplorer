@@ -83,6 +83,7 @@
                                         Console.WriteLine("Error: Unable to parse {0} as int or DateTime.", args[i]);
                                         return;
                                     }
+                                    resumeTime = resumeTime.ToUniversalTime();
 
                                     break;
                                 case "m":
