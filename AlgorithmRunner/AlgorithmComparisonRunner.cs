@@ -35,6 +35,8 @@
 
         public IList<AlgorithmBase> Algorithms { get; set; }
 
+        public AliasFinder NameConsolidator { get; set; }
+
         public AlgorithmComparisonRunner(string sourceUrl, string basepath)
             : this(
                 sourceUrl,
@@ -54,13 +56,14 @@
         public AlgorithmComparisonRunner(string sourceUrl, string basepath, IList<AlgorithmBase> algorithmsToEvaluate)
         {
             Algorithms = algorithmsToEvaluate;
+
+            NameConsolidator = new AliasFinder();
             string authorMappingPath = basepath + "authors_consolidated.txt";
             if (File.Exists(authorMappingPath))
             {
-                AliasFinder af = new AliasFinder();
-                af.InitializeMappingFromAuthorList(File.ReadAllLines(authorMappingPath));
+                NameConsolidator.InitializeMappingFromAuthorList(File.ReadAllLines(authorMappingPath));
                 foreach (AlgorithmBase algo in algorithmsToEvaluate)
-                    algo.Deduplicator = af;
+                    algo.Deduplicator = NameConsolidator;
             }
 
             InitAlgorithms(sourceUrl);
@@ -262,17 +265,23 @@
                 {
                     Bug theBug = repository.Bugs.Single(bug => bug.ChangeId == info.ChangeId);
 
-                    if (theBug.ActualReviewers.Any(reviewer => reviewer.Reviewer == info.Reviewer))
-                        return;     //  the reviewer is already in the list
+                    bool fBugDirty = false;
+                    foreach (string primaryName in NameConsolidator.DeanonymizeAuthor(info.Reviewer))   // this is usually just one
+                    {
+                        if (theBug.ActualReviewers.Any(reviewer => reviewer.Reviewer == primaryName))
+                            continue;     //  the reviewer is already in the list
 
-                    theBug.ActualReviewers.Add(new ActualReviewer()
-                        {
-                            ActivityId = info.ActivityId,
-                            Bug = theBug,
-                            Reviewer = info.Reviewer
-                        });
+                        theBug.ActualReviewers.Add(new ActualReviewer()
+                            {
+                                ActivityId = info.ActivityId,
+                                Bug = theBug,
+                                Reviewer = primaryName
+                            });
+                        fBugDirty = true;
+                    }
 
-                    repository.SaveChanges();
+                    if (fBugDirty)
+                        repository.SaveChanges();
                 }
 
             // Grant the reviewer review experience for the review

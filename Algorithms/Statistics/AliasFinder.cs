@@ -172,10 +172,10 @@ namespace ExpertiseExplorer.Algorithms.Statistics
 
         /// <summary>
         /// Checks a name for aliases. If aliases exist, the primary alias is returned, otherwise the unmodified name. If the name contains multiple names actually,
-        /// these will be split into names for each authors.
+        /// these will be split into primary names for each author.
         /// </summary>
         /// <param name="obfuscatedName">The name to check.</param>
-        /// <returns>Either the name to check again or its primary alias</returns>
+        /// <returns>Either the name to check again or its primary alias(es)</returns>
         public IEnumerable<string> DeanonymizeAuthor(string obfuscatedName)
         {
             return prefilterAuthorName(obfuscatedName)

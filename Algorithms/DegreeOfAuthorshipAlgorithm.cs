@@ -86,7 +86,7 @@
 
                     double expertise = constantSummand + fistAuthorshipValue + deliveriesValue + acceptancesValue;
 
-                    DeveloperExpertiseValue expertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
+                    DeveloperExpertiseValue expertiseValue = FindOrCreateDeveloperExpertiseValue(developerExpertise);
 
                     expertiseValue.Value = expertise;
 

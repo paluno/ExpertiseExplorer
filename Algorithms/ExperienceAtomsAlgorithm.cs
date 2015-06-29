@@ -22,13 +22,16 @@
 
             using (var repository = new ExpertiseDBEntities())
             {
-                var developers = repository.DeveloperExpertises.Where(de => de.ArtifactId == artifactId && de.Inferred == false).Select(de => de.DeveloperId).Distinct().ToList();
+                var developers = repository.DeveloperExpertises
+                    .Where(de => de.ArtifactId == artifactId && de.Inferred == false && (de.DeliveriesCount>0 || de.IsFirstAuthor))
+                    .Select(de => de.DeveloperId)
+                    .Distinct().ToList();
 
                 foreach (var developerId in developers)
                 {
                     DeveloperExpertise developerExpertise = repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperId == developerId && de.ArtifactId == artifactId);
 
-                    DeveloperExpertiseValue expertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
+                    DeveloperExpertiseValue expertiseValue = FindOrCreateDeveloperExpertiseValue(developerExpertise);
 
                     expertiseValue.Value = developerExpertise.DeliveriesCount + (developerExpertise.IsFirstAuthor ? 1f : 0f);
                 }

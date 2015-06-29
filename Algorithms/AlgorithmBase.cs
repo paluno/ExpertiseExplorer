@@ -272,7 +272,7 @@
             {
                 string FileName = fileRevision.Filename.Name;
 
-                var developerExpertise = FindOrCreateDeveloperExpertise(repository, developerId, FileName, artifactType);
+                var developerExpertise = FindOrCreateDeveloperExpertise(repository, developerId, FileName, artifactType, false);
 
                 developerExpertise.Artifact.ModificationCount++;
 
@@ -324,9 +324,9 @@
                         fNewAdditions = false;      // Therefore we save after additions.
                     }
 
-                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, devExpertise.DeveloperId, artifactId);
+                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(repository, devExpertise.DeveloperId, artifactId, true);
                     fNewAdditions |= 0 == developerExpertise.DeveloperExpertiseId;  // hack: is it a new DeveloperExpertise?
-                    DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
+                    DeveloperExpertiseValue devExpertiseValue = FindOrCreateDeveloperExpertiseValue(developerExpertise);
                     devExpertiseValue.Value = devExpertise.Expertise;
                     fNewAdditions |= 0 == devExpertiseValue.DeveloperExpertiseValueId;  // hack: is it a new DeveloperExpertiseValue?
                 }
@@ -335,14 +335,20 @@
             }
         }
 
-        protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, string filename, ArtifactTypeEnum artifactType)
+        protected DeveloperExpertise FindDeveloperExpertiseWithArtifactName(ExpertiseDBEntities repository, int developerId, string filename)
         {
-            int artifactId = FindOrCreateArtifact(repository, filename, ArtifactTypeEnum.File).ArtifactId;
-
-            return FindOrCreateDeveloperExpertise(repository, developerId, artifactId);
+            return repository.Artifacts.Single(a => a.Name == filename && a.RepositoryId == RepositoryId)  // now we have the artifact
+                        .DeveloperExpertises.Single(de => de.DeveloperId == developerId);
         }
 
-        protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, int artifactId)
+        protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, string filename, ArtifactTypeEnum artifactType, bool isInferred)
+        {
+            int artifactId = FindOrCreateArtifact(repository, filename, artifactType).ArtifactId;
+
+            return FindOrCreateDeveloperExpertise(repository, developerId, artifactId, isInferred);
+        }
+
+        protected DeveloperExpertise FindOrCreateDeveloperExpertise(ExpertiseDBEntities repository, int developerId, int artifactId, bool isInferred)
         {
             DeveloperExpertise developerExpertise = repository.DeveloperExpertises.SingleOrDefault(
                 de => de.DeveloperId == developerId && de.ArtifactId == artifactId);
@@ -362,7 +368,8 @@
                                 new DeveloperExpertise
                                 {
                                     ArtifactId = artifactId,
-                                    DeveloperId = developerId
+                                    DeveloperId = developerId,
+                                    Inferred = isInferred
                                 });
                             freshRepository.SaveChanges();
                         }
@@ -411,16 +418,23 @@
             return artifact;
         }
 
-        protected DeveloperExpertiseValue FindOrCreateDeveloperExpertiseValue(ExpertiseDBEntities repository, DeveloperExpertise developerExpertise)
+        protected DeveloperExpertiseValue FindOrCreateDeveloperExpertiseValue(DeveloperExpertise developerExpertise)
         {
-            return
-                developerExpertise.DeveloperExpertiseValues.SingleOrDefault(
-                    dev => dev.AlgorithmId == AlgorithmId) ?? repository.DeveloperExpertiseValues.Add(
-                        new DeveloperExpertiseValue
-                        {
-                            AlgorithmId = AlgorithmId,
-                            DeveloperExpertiseId = developerExpertise.DeveloperExpertiseId
-                        });
+            DeveloperExpertiseValue dev = developerExpertise.DeveloperExpertiseValues.SingleOrDefault(
+                    devCandidate => devCandidate.AlgorithmId == AlgorithmId);
+
+            if (null == dev)
+            {
+                dev = new DeveloperExpertiseValue
+                {
+                    AlgorithmId = AlgorithmId,
+                    DeveloperExpertiseId = developerExpertise.DeveloperExpertiseId
+                };
+
+                developerExpertise.DeveloperExpertiseValues.Add(dev);
+            }
+
+            return dev;
         }
 
         public virtual async Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds)

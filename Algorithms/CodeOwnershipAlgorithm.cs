@@ -70,7 +70,9 @@
             var developerLookup = new Dictionary<string, DeveloperExpertiseValue>();
             using (var repository = new ExpertiseDBEntities())
             {
-                List<Developer> developers = repository.DeveloperExpertises.Where(de => de.ArtifactId == artifactId && de.Inferred == false).Select(de => de.Developer).Distinct().ToList();
+                List<Developer> developers = repository.DeveloperExpertises
+                    .Where(de => de.ArtifactId == artifactId && de.Inferred == false && (de.DeliveriesCount > 0 || de.IsFirstAuthor))
+                    .Select(de => de.Developer).Distinct().ToList();
 
                 foreach (var developer in developers)
                 {
@@ -78,7 +80,7 @@
                         repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).Single(
                             de => de.DeveloperId == developer.DeveloperId && de.ArtifactId == artifactId);
 
-                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
+                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(developerExpertise);
 
                     expertiseValue.Value = developerExpertise.IsFirstAuthor ? 1f : 0f;
 

@@ -76,7 +76,7 @@
                 {
                     var developerId = repository.Developers.Single(d => d.Name == experiencedDeveloper.User && d.RepositoryId == RepositoryId).DeveloperId;
                     var developerExpertise = repository.DeveloperExpertises.Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperId == developerId && de.ArtifactId == artifactId);
-                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(repository, developerExpertise);
+                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(developerExpertise);
                     expertiseValue.Value = experiencedDeveloper.Time.UTCDateTime2unixTime();
                 }
 

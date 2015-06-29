@@ -58,8 +58,8 @@
 
                 foreach (int oneOfTheLastDevelopers in lastDeveloperIds)
                 {
-                    DeveloperExpertise developerExpertise = FindOrCreateDeveloperExpertise(entities, oneOfTheLastDevelopers, filename, ExpertiseExplorer.Common.ArtifactTypeEnum.File);
-                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(entities, developerExpertise);
+                    DeveloperExpertise developerExpertise = FindDeveloperExpertiseWithArtifactName(entities, oneOfTheLastDevelopers, filename);
+                    var expertiseValue = FindOrCreateDeveloperExpertiseValue(developerExpertise);
                     expertiseValue.Value = lastUser.Time.UTCDateTime2unixTime();
                 }
                 entities.SaveChanges();

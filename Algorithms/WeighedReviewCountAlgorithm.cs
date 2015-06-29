@@ -54,9 +54,9 @@ namespace ExpertiseExplorer.Algorithms
             {
                 using (var repository = new ExpertiseDBEntities())
                 {
-                    DeveloperExpertise devExpertise = FindOrCreateDeveloperExpertise(repository, idReviewer, reviewedFileName, ArtifactTypeEnum.File);
+                    DeveloperExpertise devExpertise = FindOrCreateDeveloperExpertise(repository, idReviewer, reviewedFileName, ArtifactTypeEnum.File, true);
 
-                    DeveloperExpertiseValue currentWeightedReviewValue = FindOrCreateDeveloperExpertiseValue(repository, devExpertise);
+                    DeveloperExpertiseValue currentWeightedReviewValue = FindOrCreateDeveloperExpertiseValue(devExpertise);
                     if (double.IsNaN(currentWeightedReviewValue.Value))
                         currentWeightedReviewValue.Value = (1D / numberOfFiles);
                     else
