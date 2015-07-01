@@ -111,44 +111,44 @@
                     timeAfterOneK = DateTime.Now;
                 }
 
-                if (Console.KeyAvailable)
-                {
-                    ConsoleKeyInfo keypressed = Console.ReadKey(true);
-                    switch (keypressed.Key)
-                    {
-                        case ConsoleKey.X:
-                            Console.WriteLine("Now at: " + count);
-                            Console.WriteLine("Time of next item (use with resume): " + info.When);
-                            Console.WriteLine("Stopping due to user request.");
-
-                            Log.Warn("Stopping due to user request. Time of next item (use with resume): " + info.When);
-                            PerformanceLog.Info(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
-                            return;
-                        case ConsoleKey.S:
-                            Console.WriteLine("Now at: " + count);
-                            break;
-                        default:
-                            Console.WriteLine("Press \"S\" for current status or \"X\" to initiate a stop of calculations.");
-                            break;
-                    }
-                    while (Console.KeyAvailable)
-                        Console.ReadKey(true);  // Flush input buffer
-                }
-
-                if (info.When > continueUntil)
-                    return;
-                if (info.When < resumeFrom)
-                    continue;
-
-                Log.Debug("Evaluating [" + info.GetType() + "]: " + info);
-
-                const int NUMBER_OF_FAIL_RETRIES = 5;
+                const int NUMBER_OF_FAIL_RETRIES = 20;
                 int retryNumber = 0;
                 bool fSuccess = false;
                 do
                 {
                     try
                     {
+                        if (Console.KeyAvailable)
+                        {
+                            ConsoleKeyInfo keypressed = Console.ReadKey(true);
+                            switch (keypressed.Key)
+                            {
+                                case ConsoleKey.X:
+                                    Console.WriteLine("Now at: " + count);
+                                    Console.WriteLine("Time of next item (use with resume): " + info.When);
+                                    Console.WriteLine("Stopping due to user request.");
+
+                                    Log.Warn("Stopping due to user request. Time of next item (use with resume): " + info.When);
+                                    PerformanceLog.Info(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
+                                    return;
+                                case ConsoleKey.S:
+                                    Console.WriteLine("Now at: " + count);
+                                    break;
+                                default:
+                                    Console.WriteLine("Press \"S\" for current status or \"X\" to initiate a stop of calculations.");
+                                    break;
+                            }
+                            while (Console.KeyAvailable)
+                                Console.ReadKey(true);  // Flush input buffer
+                        }
+
+                        if (info.When > continueUntil)
+                            return;
+                        if (info.When < resumeFrom)
+                            continue;
+
+                        Log.Debug("Evaluating [" + info.GetType() + "]: " + info);
+
                         ReviewInfo ri = info as ReviewInfo;
                         if (null != ri)
                             ProcessReviewInfo(ri, noComparison);
@@ -162,9 +162,9 @@
                     catch (Exception ex)
                     {
                         if (++retryNumber <= NUMBER_OF_FAIL_RETRIES)
-                        {        // try again, but wait a little, up to 50 * 5^3 = 6.25 seconds
+                        {        // try again, but wait a little, up to 50 * 20^2 = 20000 seconds = 5.5 hours
                             Log.Error(ex);
-                            System.Threading.Thread.Sleep(50 * retryNumber * retryNumber * retryNumber);
+                            System.Threading.Thread.Sleep(50 * retryNumber * retryNumber);
                         }
                         else
                         {
