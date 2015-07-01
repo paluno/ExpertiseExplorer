@@ -111,6 +111,13 @@
                     timeAfterOneK = DateTime.Now;
                 }
 
+                if (info.When > continueUntil)
+                    return;
+                if (info.When < resumeFrom)
+                    continue;
+
+                Log.Debug("Evaluating [" + info.GetType() + "]: " + info);
+
                 const int NUMBER_OF_FAIL_RETRIES = 20;
                 int retryNumber = 0;
                 bool fSuccess = false;
@@ -141,13 +148,6 @@
                             while (Console.KeyAvailable)
                                 Console.ReadKey(true);  // Flush input buffer
                         }
-
-                        if (info.When > continueUntil)
-                            return;
-                        if (info.When < resumeFrom)
-                            continue;
-
-                        Log.Debug("Evaluating [" + info.GetType() + "]: " + info);
 
                         ReviewInfo ri = info as ReviewInfo;
                         if (null != ri)
