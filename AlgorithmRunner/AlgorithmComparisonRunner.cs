@@ -99,6 +99,7 @@
             DateTime timeAfterOneK = DateTime.Now;
 
             DateTime repositoryWatermark = DateTime.MinValue;   // Until which date are the number of deliveries, modifications, and so on counted?
+            bool fComparisonHasBegun = false;
             int count = 0;
             foreach (IssueTrackerEvent info in issueTrackerEventList)
             {
@@ -114,6 +115,11 @@
                     return;
                 if (info.When < resumeFrom)
                     continue;
+                if (!fComparisonHasBegun)
+                {
+                    fComparisonHasBegun = true;
+                    Log.Info("Starting comparison at date " + info.When.ToUniversalTime().ToString("u"));
+                }
 
                 Log.Debug("Evaluating [" + info.GetType() + "]: " + info);
 
@@ -131,10 +137,10 @@
                             {
                                 case ConsoleKey.X:
                                     Console.WriteLine("Now at: " + count);
-                                    Console.WriteLine("Time of next item (use with resume): " + info.When);
+                                    Console.WriteLine("Time of next item (use with resume): " + info.When.ToUniversalTime().ToString("u"));
                                     Console.WriteLine("Stopping due to user request.");
 
-                                    Log.Warn("Stopping due to user request. Time of next item (use with resume): " + info.When);
+                                    Log.Warn("Stopping due to user request. Time of next item (use with resume): " + info.When.ToUniversalTime().ToString("u"));
                                     PerformanceLog.Info(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
                                     return;
                                 case ConsoleKey.S:
@@ -160,6 +166,7 @@
                     }
                     catch (Exception ex)
                     {
+                        Log.Warn("Exception on event " + count + ": " + info);
                         if (++retryNumber <= NUMBER_OF_FAIL_RETRIES)
                         {        // try again, but wait a little, up to 50 * 20^2 = 20000 seconds = 5.5 hours
                             Log.Error(ex);
@@ -175,6 +182,8 @@
                 }
                 while (!fSuccess);
 
+                if (retryNumber > 0)
+                    Log.Warn("Recovered from exception and continuing after event " + count);
                 OutputLog.Info(info);
             }
         }
