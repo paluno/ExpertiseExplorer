@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using log4net;
 
 namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
 {
@@ -13,6 +14,8 @@ namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
     /// </summary>
     abstract class IssueTrackerEventFactory
     {
+        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         public string InputFilePath { get; set; }
 
         abstract public IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents();
@@ -39,7 +42,10 @@ namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
             foreach (IssueTrackerEvent currentEvent in list)
             {
                 if (!currentEvent.isValid())
+                {
+                    Log.Warn("Skipping invalid event " + currentEvent);
                     continue;
+                }
 
                 if (!dictIssueTrackerEvents.ContainsKey(currentEvent.When))
                     dictIssueTrackerEvents.Add(currentEvent.When, new LinkedList<IssueTrackerEvent>());

@@ -21,7 +21,7 @@
 
     internal class AlgorithmComparisonRunner
     {
-        private static readonly ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private static readonly ILog OutputLog = LogManager.GetLogger("ExpertiseExplorer.AlgorithmRunner.Output");
         private static readonly ILog PerformanceLog = LogManager.GetLogger("ExpertiseExplorer.AlgorithmRunner.Performance");
 
@@ -89,8 +89,7 @@
             Log.Info("Ending comparison");
         }
 
-        #region Private Methods
-
+        #region Handle an event
         /// <summary>
         /// Go through a list of issue tracker activities. For each first patch upload of a bug, calculate expertises at the time of review and store five
         /// computed reviewers. For reviews, remember the actual reviewers for later comparison and grant experience for review-based algorithms.
@@ -288,6 +287,6 @@
             foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
                 reviewAlgorithm.AddReviewScore(info.Reviewer, info.Filenames, info.When);
          }
-        #endregion
+        #endregion Handle an event
     }
 }
