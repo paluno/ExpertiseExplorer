@@ -441,10 +441,7 @@
         {
             using (var entities = new ExpertiseDBEntities())
             {
-                List<SimplifiedDeveloperExpertise> developers = await entities.GetDevelopersForArtifactsAndAlgorithm(artifactIds, AlgorithmId)
-                    .OrderByDescending(sde => sde.Expertise)
-                    .Take(5)
-                    .ToListAsync();
+                List<SimplifiedDeveloperExpertise> developers = (await entities.GetTop5DevelopersForArtifactsAndAlgorithm(artifactIds, AlgorithmId)).ToList();
 
                 while (developers.Count < 5)
                     developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, DeveloperName = string.Empty, Expertise = 0d });

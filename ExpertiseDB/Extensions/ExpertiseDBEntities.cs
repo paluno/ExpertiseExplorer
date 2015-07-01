@@ -9,6 +9,7 @@
     using ExpertiseExplorer.ExpertiseDB.Extensions;
     using System.Globalization;
     using System.Diagnostics;
+    using System.Threading.Tasks;
 
     public partial class ExpertiseDBEntities
     {
@@ -62,20 +63,41 @@
             return result;
         }
 
-        public IQueryable<SimplifiedDeveloperExpertise> GetDevelopersForArtifactsAndAlgorithm(IEnumerable<int> artifactIds, int algorithmId)
+        public async Task<IEnumerable<SimplifiedDeveloperExpertise>> GetTop5DevelopersForArtifactsAndAlgorithm(IEnumerable<int> artifactIds, int algorithmId)
         {
-            return DeveloperExpertiseValues
-                .Include(dev => dev.DeveloperExpertise.Developer).Include(de => de.DeveloperExpertise)
-                .Where(dev => artifactIds.Contains(dev.DeveloperExpertise.ArtifactId) && dev.AlgorithmId == algorithmId)
-                .AsNoTracking()
+            List<DeveloperExpertiseValue> lstAllResults = new List<DeveloperExpertiseValue>();
+            IEnumerable<Task<List<DeveloperExpertiseValue>>> queryTasks =
+                artifactIds
+                .Select(async artId =>
+                    await DeveloperExpertiseValues
+                        .Include(de => de.DeveloperExpertise)
+                        .Where(dev => dev.AlgorithmId == algorithmId && dev.DeveloperExpertise.ArtifactId == artId)
+                        .ToListAsync()
+                );   // this creates one SQL query for each artifact
+            foreach(Task<List<DeveloperExpertiseValue>> tskQuery in queryTasks)     
+                lstAllResults.AddRange(await tskQuery);
+
+            IEnumerable<SimplifiedDeveloperExpertise> top5Developers =
+                lstAllResults
+                //DeveloperExpertiseValues
+                //.Include(dev => dev.DeveloperExpertise.Developer).Include(de => de.DeveloperExpertise)
+                //.Where(dev => artifactIds.Contains(dev.DeveloperExpertise.ArtifactId) && dev.AlgorithmId == algorithmId)
+                //.AsNoTracking()
+
                 .GroupBy(
                     dev => dev.DeveloperExpertise.DeveloperId,
                     (devId, expertiseValues) => new SimplifiedDeveloperExpertise()
                         {
                             DeveloperId = devId,
-                            DeveloperName = expertiseValues.FirstOrDefault().DeveloperExpertise.Developer.Name,
                             Expertise = expertiseValues.Select(exValue => exValue.Value).Sum()
-                        });
+                        })
+                .OrderByDescending(sde => sde.Expertise)
+                .Take(5);
+
+            foreach(SimplifiedDeveloperExpertise sde in top5Developers)
+                sde.DeveloperName = Developers.Find(sde.DeveloperId).Name;
+
+            return top5Developers;
         }
 
         public List<Tuple<string, int, double>> GetArtifactsForDeveloper(int developerId)
