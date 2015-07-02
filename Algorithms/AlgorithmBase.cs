@@ -444,19 +444,19 @@
                 List<SimplifiedDeveloperExpertise> developers = (await entities.GetTop5DevelopersForArtifactsAndAlgorithm(artifactIds, AlgorithmId)).ToList();
 
                 while (developers.Count < 5)
-                    developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, DeveloperName = string.Empty, Expertise = 0d });
+                    developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, Expertise = 0d });
 
                 return new ComputedReviewer
                 {
-                    Expert1 = developers[0].DeveloperName,
+                    Expert1Id = developers[0].DeveloperId,
                     Expert1Value = developers[0].Expertise,
-                    Expert2 = developers[1].DeveloperName,
+                    Expert2Id = developers[1].DeveloperId,
                     Expert2Value = developers[1].Expertise,
-                    Expert3 = developers[2].DeveloperName,
+                    Expert3Id = developers[2].DeveloperId,
                     Expert3Value = developers[2].Expertise,
-                    Expert4 = developers[3].DeveloperName,
+                    Expert4Id = developers[3].DeveloperId,
                     Expert4Value = developers[3].Expertise,
-                    Expert5 = developers[4].DeveloperName,
+                    Expert5Id = developers[4].DeveloperId,
                     Expert5Value = developers[4].Expertise,
                     AlgorithmId = this.AlgorithmId
                 };

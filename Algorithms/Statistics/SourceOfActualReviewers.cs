@@ -52,12 +52,11 @@ namespace ExpertiseExplorer.Algorithms.Statistics
             if (null == reviewCache)
                 lock (lock4Reviewcache)
                     if (null == reviewCache)
-                        reviewCache = findReviewsInDatabase();
+                        reviewCache = findBugsInDatabase();
 
             return reviewCache;
         }
 
-        protected abstract IEnumerable<int> findReviewsInDatabase();
-        public abstract IDictionary<int, string> findReviewsWithReviewers();
+        public abstract IEnumerable<int> findBugsInDatabase();
     }
 }

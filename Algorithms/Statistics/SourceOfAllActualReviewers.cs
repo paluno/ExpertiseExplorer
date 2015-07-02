@@ -9,16 +9,10 @@ namespace ExpertiseExplorer.Algorithms.Statistics
 {
     class SourceOfAllActualReviewers : SourceOfActualReviewers
     {
-        protected override IEnumerable<int> findReviewsInDatabase()
+        public override IEnumerable<int> findBugsInDatabase()
         {
             using (var context = new ExpertiseDBEntities())
-                return context.ActualReviewers.Where(ar => ar.Bug.RepositoryId == RepositoryId).Select(ar => ar.ActualReviewerId).ToList();
-        }
-
-        public override IDictionary<int, string> findReviewsWithReviewers()
-        {
-            using (var context = new ExpertiseDBEntities())
-                return context.ActualReviewers.Where(ar => ar.Bug.RepositoryId == RepositoryId).ToDictionary(ar => ar.ActualReviewerId, ar => ar.Reviewer);
+                return context.Bugs.Where(bug => bug.RepositoryId == RepositoryId).Select(bug => bug.BugId).ToList();
         }
 
         public SourceOfAllActualReviewers(int repositoryId)

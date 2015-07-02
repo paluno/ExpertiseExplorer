@@ -77,27 +77,22 @@
             foreach(Task<List<DeveloperExpertiseValue>> tskQuery in queryTasks)     
                 lstAllResults.AddRange(await tskQuery);
 
-            IEnumerable<SimplifiedDeveloperExpertise> top5Developers =
+            return
                 lstAllResults
-                //DeveloperExpertiseValues
-                //.Include(dev => dev.DeveloperExpertise.Developer).Include(de => de.DeveloperExpertise)
-                //.Where(dev => artifactIds.Contains(dev.DeveloperExpertise.ArtifactId) && dev.AlgorithmId == algorithmId)
-                //.AsNoTracking()
+                    //DeveloperExpertiseValues
+                    //.Include(dev => dev.DeveloperExpertise.Developer).Include(de => de.DeveloperExpertise)
+                    //.Where(dev => artifactIds.Contains(dev.DeveloperExpertise.ArtifactId) && dev.AlgorithmId == algorithmId)
+                    //.AsNoTracking()
 
-                .GroupBy(
-                    dev => dev.DeveloperExpertise.DeveloperId,
-                    (devId, expertiseValues) => new SimplifiedDeveloperExpertise()
-                        {
-                            DeveloperId = devId,
-                            Expertise = expertiseValues.Select(exValue => exValue.Value).Sum()
-                        })
-                .OrderByDescending(sde => sde.Expertise)
-                .Take(5);
-
-            foreach(SimplifiedDeveloperExpertise sde in top5Developers)
-                sde.DeveloperName = Developers.Find(sde.DeveloperId).Name;
-
-            return top5Developers;
+                    .GroupBy(
+                        dev => dev.DeveloperExpertise.DeveloperId,
+                        (devId, expertiseValues) => new SimplifiedDeveloperExpertise()
+                            {
+                                DeveloperId = devId,
+                                Expertise = expertiseValues.Select(exValue => exValue.Value).Sum()
+                            })
+                    .OrderByDescending(sde => sde.Expertise)
+                    .Take(5);
         }
 
         public List<Tuple<string, int, double>> GetArtifactsForDeveloper(int developerId)

@@ -68,11 +68,11 @@
             if (!File.Exists(Path4ComputedReviewers))
                 using (var context = new ExpertiseDBEntities())
                 {
-                    List<string> uniqueReviewers = context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert1).Distinct().ToList();
-                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert2).Distinct());
-                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert3).Distinct());
-                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert4).Distinct());
-                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert5).Distinct());
+                    List<string> uniqueReviewers = context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert1.Name).Distinct().ToList();
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert2.Name).Distinct());
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert3.Name).Distinct());
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert4.Name).Distinct());
+                    uniqueReviewers.AddRange(context.ComputedReviewers.Where(cr => cr.Bug.RepositoryId == RepositoryId).Select(cr => cr.Expert5.Name).Distinct());
 
                     uniqueReviewers = uniqueReviewers.Distinct().OrderBy(cr => cr).ToList();
 
@@ -165,120 +165,122 @@
 
         public void AnalyzeActualReviews(SourceOfActualReviewers sourceOfActualReviewers)
         {
-            ReadUniqueActualReviewers();
-            ReadUniqueComputedReviewers();
+            throw new NotImplementedException("This method must be changed massively");
 
-            List<Author> actualReviewersAndAlternatives = Author.GetAuthorsFromFile(Path4ActualReviewers);
-            List<Author> computedReviewersAndAlternatives = Author.GetAuthorsFromFile(Path4ComputedReviewers);
+            //ReadUniqueActualReviewers();
+            //ReadUniqueComputedReviewers();
 
-            List<int> algorithmIds;
-            using (ExpertiseDBEntities context = new ExpertiseDBEntities())
-                algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
+            //List<Author> actualReviewersAndAlternatives = Author.GetAuthorsFromFile(Path4ActualReviewers);
+            //List<Author> computedReviewersAndAlternatives = Author.GetAuthorsFromFile(Path4ComputedReviewers);
 
-            var output = algorithmIds.ToDictionary(algorithmId => algorithmId, algorithmId => new List<StatisticsResult>());
+            //List<int> algorithmIds;
+            //using (ExpertiseDBEntities context = new ExpertiseDBEntities())
+            //    algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
 
-            IDictionary<int,string> actualReviewers = sourceOfActualReviewers.findReviewsWithReviewers();
-            int count = 0;
-            double elapsed = 0d;
-            int maxCount = actualReviewers.Count();
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            int errorCount = 0;
+            //var output = algorithmIds.ToDictionary(algorithmId => algorithmId, algorithmId => new List<StatisticsResult>());
 
-            foreach (int actualReviewerId in actualReviewers.Keys)
-            {
-                try
-                {
-                    if (count % 1000 == 0 && count > 0)
-                    {
-                        sw.Stop();
-                        elapsed += sw.Elapsed.TotalSeconds;
-                        double avg = elapsed / count;
-                        TimeSpan remaining = TimeSpan.FromSeconds(avg * (maxCount - count));
-                        log.DebugFormat("Now at: {0} - (act: {1} | avg: {2:N}s | remaining: {3})", count, sw.Elapsed, avg, remaining);
-                        sw.Restart();
-                    }
+            //IDictionary<int,string> actualReviewers = sourceOfActualReviewers.findReviewsWithReviewers();
+            //int count = 0;
+            //double elapsed = 0d;
+            //int maxCount = actualReviewers.Count();
+            //Stopwatch sw = new Stopwatch();
+            //sw.Start();
+            //int errorCount = 0;
 
-                    count++;
+            //foreach (int actualReviewerId in actualReviewers.Keys)
+            //{
+            //    try
+            //    {
+            //        if (count % 1000 == 0 && count > 0)
+            //        {
+            //            sw.Stop();
+            //            elapsed += sw.Elapsed.TotalSeconds;
+            //            double avg = elapsed / count;
+            //            TimeSpan remaining = TimeSpan.FromSeconds(avg * (maxCount - count));
+            //            log.DebugFormat("Now at: {0} - (act: {1} | avg: {2:N}s | remaining: {3})", count, sw.Elapsed, avg, remaining);
+            //            sw.Restart();
+            //        }
 
-                    string actualReviewerName = actualReviewers[actualReviewerId].ToLowerInvariant();
+            //        count++;
 
-                    IEnumerable<ComputedReviewer> computedReviewers = GetComputedReviewersForActualReviewerId(actualReviewerId);
+            //        string actualReviewerName = actualReviewers[actualReviewerId].ToLowerInvariant();
 
-                    Author alternativesForActualReviewer =
-                        actualReviewersAndAlternatives.Single(
-                            ar => ar.completeName.ToLowerInvariant() == actualReviewerName);
+            //        IEnumerable<ComputedReviewer> computedReviewers = GetComputedReviewersForActualReviewerId(actualReviewerId);
 
-                    foreach (ComputedReviewer computedReviewer in computedReviewers)
-                    {
-                        var computedReviewerNamesAndValues = new List<KeyValuePair<string, double>>
-                        {
-                            new KeyValuePair<string, double>(computedReviewer.Expert1, computedReviewer.Expert1Value),
-                            new KeyValuePair<string, double>(computedReviewer.Expert2, computedReviewer.Expert2Value),
-                            new KeyValuePair<string, double>(computedReviewer.Expert3, computedReviewer.Expert3Value),
-                            new KeyValuePair<string, double>(computedReviewer.Expert4, computedReviewer.Expert4Value),
-                            new KeyValuePair<string, double>(computedReviewer.Expert5, computedReviewer.Expert5Value)
-                        };
+            //        Author alternativesForActualReviewer =
+            //            actualReviewersAndAlternatives.Single(
+            //                ar => ar.completeName.ToLowerInvariant() == actualReviewerName);
 
-                        bool found = false;
-                        for (int i = 0; i < 5; i++) // 5 is the number of reviewers that may be recommended in ComputedReviewers
-                        {
-                            if (computedReviewerNamesAndValues[i].Key == string.Empty)
-                                break;
+            //        foreach (ComputedReviewer computedReviewer in computedReviewers)
+            //        {
+            //            var computedReviewerNamesAndValues = new List<KeyValuePair<string, double>>
+            //            {
+            //                new KeyValuePair<string, double>(computedReviewer.Expert1, computedReviewer.Expert1Value),
+            //                new KeyValuePair<string, double>(computedReviewer.Expert2, computedReviewer.Expert2Value),
+            //                new KeyValuePair<string, double>(computedReviewer.Expert3, computedReviewer.Expert3Value),
+            //                new KeyValuePair<string, double>(computedReviewer.Expert4, computedReviewer.Expert4Value),
+            //                new KeyValuePair<string, double>(computedReviewer.Expert5, computedReviewer.Expert5Value)
+            //            };
 
-                            Author alternativesForComputedReviewer =
-                            computedReviewersAndAlternatives.Single(
-                                cr => cr.completeName.ToLowerInvariant() == computedReviewerNamesAndValues[i].Key.ToLowerInvariant());
+            //            bool found = false;
+            //            for (int i = 0; i < 5; i++) // 5 is the number of reviewers that may be recommended in ComputedReviewers
+            //            {
+            //                if (computedReviewerNamesAndValues[i].Key == string.Empty)
+            //                    break;
 
-                            if (!alternativesForActualReviewer.IsMatching(alternativesForComputedReviewer))
-                                continue;
+            //                Author alternativesForComputedReviewer =
+            //                computedReviewersAndAlternatives.Single(
+            //                    cr => cr.completeName.ToLowerInvariant() == computedReviewerNamesAndValues[i].Key.ToLowerInvariant());
 
-                            output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId)
-                                {
-                                    AuthorWasExpertNo = i + 1,
-                                    ExpertiseValue = computedReviewerNamesAndValues[i].Value
-                                });
+            //                if (!alternativesForActualReviewer.IsMatching(alternativesForComputedReviewer))
+            //                    continue;
 
-                            found = true;
+            //                output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId)
+            //                    {
+            //                        AuthorWasExpertNo = i + 1,
+            //                        ExpertiseValue = computedReviewerNamesAndValues[i].Value
+            //                    });
 
-                            break;
-                        }
+            //                found = true;
 
-                        if (!found)
-                            output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (++errorCount > 10)
-                    {
-                        log.Fatal("10 errors while computing statistics, ActualReviewerId=" + actualReviewerId + ", giving up.", ex);
-                        throw new Exception("10 errors while computing statistics, giving up.", ex);
-                    }
+            //                break;
+            //            }
 
-                    log.Error("Error #" + errorCount + " on ActualReviewerId " + actualReviewerId, ex);
-                }
-            }
+            //            if (!found)
+            //                output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId));
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        if (++errorCount > 10)
+            //        {
+            //            log.Fatal("10 errors while computing statistics, ActualReviewerId=" + actualReviewerId + ", giving up.", ex);
+            //            throw new Exception("10 errors while computing statistics, giving up.", ex);
+            //        }
 
-            foreach (var algoStats in output)
-            {
-                var sb = new StringBuilder();
-                foreach (StatisticsResult statisticsResult in algoStats.Value)
-                {
-                    sb.AppendLine(statisticsResult.ToCSV());
-                }
+            //        log.Error("Error #" + errorCount + " on ActualReviewerId " + actualReviewerId, ex);
+            //    }
+            //}
 
-                File.WriteAllText(string.Format(basepath + "stats_{0}.txt", algoStats.Key), sb.ToString());
-            }
+            //foreach (var algoStats in output)
+            //{
+            //    var sb = new StringBuilder();
+            //    foreach (StatisticsResult statisticsResult in algoStats.Value)
+            //    {
+            //        sb.AppendLine(statisticsResult.ToCSV());
+            //    }
+
+            //    File.WriteAllText(string.Format(basepath + "stats_{0}.txt", algoStats.Key), sb.ToString());
+            //}
         }
 
-        private IEnumerable<ComputedReviewer> GetComputedReviewersForActualReviewerId(int id)
-        {
-            using (var context = new ExpertiseDBEntities())
-            {
-                return context.ComputedReviewers.Where(cr => cr.ActualReviewerId == id).ToList().AsReadOnly();
-            }
-        }
+        //private IEnumerable<ComputedReviewer> GetComputedReviewersForActualReviewerId(int id)
+        //{
+        //    using (var context = new ExpertiseDBEntities())
+        //    {
+        //        return context.ComputedReviewers.Where(cr => cr.ActualReviewerId == id).ToList().AsReadOnly();
+        //    }
+        //}
 
         public void ComputeStatisticsForAllAlgorithmsAndActualReviews(SourceOfActualReviewers source)
         {

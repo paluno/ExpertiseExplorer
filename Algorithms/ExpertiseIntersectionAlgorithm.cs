@@ -90,7 +90,7 @@
             using (var entities = new ExpertiseDBEntities())
             {
                 deValues = await entities.DeveloperExpertiseValues
-                    .Include(dev => dev.DeveloperExpertise.Developer).Include(de => de.DeveloperExpertise)
+                    .Include(de => de.DeveloperExpertise)
                     .Where(dev => artifactIds.Contains(dev.DeveloperExpertise.ArtifactId) && dev.AlgorithmId == AlgorithmId)
                     .AsNoTracking()
                     .GroupBy(
@@ -98,7 +98,6 @@
                         (devId, expertiseValues) => new SimplifiedDeveloperExpertise()
                         {
                             DeveloperId = devId,
-                            DeveloperName = expertiseValues.FirstOrDefault().DeveloperExpertise.Developer.Name,
                             Expertise = expertiseValues.Select(exValue => exValue.Value).Max()
                         })
                     .OrderByDescending(sde => sde.Expertise)
@@ -107,19 +106,19 @@
             }
 
             while (deValues.Count < 5)
-                deValues.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, DeveloperName = string.Empty, Expertise = 0d });
+                deValues.Add(new SimplifiedDeveloperExpertise { DeveloperId = null, Expertise = 0d });
 
             return new ComputedReviewer()
             {
-                Expert1 = deValues[0].DeveloperName,
+                Expert1Id = deValues[0].DeveloperId,
                 Expert1Value = deValues[0].Expertise,
-                Expert2 = deValues[1].DeveloperName,
+                Expert2Id = deValues[1].DeveloperId,
                 Expert2Value = deValues[1].Expertise,
-                Expert3 = deValues[2].DeveloperName,
+                Expert3Id = deValues[2].DeveloperId,
                 Expert3Value = deValues[2].Expertise,
-                Expert4 = deValues[3].DeveloperName,
+                Expert4Id = deValues[3].DeveloperId,
                 Expert4Value = deValues[3].Expertise,
-                Expert5 = deValues[4].DeveloperName,
+                Expert5Id = deValues[4].DeveloperId,
                 Expert5Value = deValues[4].Expertise,
                 AlgorithmId = this.AlgorithmId
             };
