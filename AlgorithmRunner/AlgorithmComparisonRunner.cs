@@ -166,7 +166,8 @@
                     }
                     catch (Exception ex)
                     {
-                        Log.Warn("Exception on event " + count + ": " + info);
+                        Log.Warn("Exception on event " + count + ": [" + info.GetType() + "] of " + info.When.ToUniversalTime().ToString("u") + " with ChangeID \"" 
+                            + info.ChangeId + "\" and " + info.Filenames.Count + " files");
                         if (++retryNumber <= NUMBER_OF_FAIL_RETRIES)
                         {        // try again, but wait a little, up to 50 * 20^2 = 20000 seconds = 5.5 hours
                             Log.Error(ex);
@@ -175,7 +176,7 @@
                         else
                         {
                             Log.Fatal("Error on handling an issue entry", ex);
-                            Log.Info("The current entry \"" + info.ChangeId + "\" involves " + info.Filenames.Count + " files. Its type is [" + info.GetType() + "]. You should resume on " + info.When);
+                            Log.Info("The current entry \"" + info.ChangeId + "\" involves " + info.Filenames.Count + " files. Its type is [" + info.GetType() + "]. You should resume on " + info.When.ToUniversalTime().ToString("u"));
                             throw;
                         }
                     }
