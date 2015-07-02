@@ -122,3 +122,88 @@ ALTER TABLE `ActualReviewers`
 	  ON UPDATE NO ACTION;
 
 UNLOCK TABLES;
+
+
+
+/* Now that all AlgorithmRunners write the RepositoryId to ActualReviewers and
+   all old NULL values are updated to the correct value, we can make RepositoryId a non-null column */
+
+LOCK TABLES ComputedReviewers WRITE;
+
+ALTER TABLE `asereviewer`.`ComputedReviewers` 
+ADD COLUMN `Expert1Id` INT NULL AFTER `Expert1`,
+ADD COLUMN `Expert2Id` INT NULL AFTER `Expert2`,
+ADD COLUMN `Expert3Id` INT NULL AFTER `Expert3`,
+ADD COLUMN `Expert4Id` INT NULL AFTER `Expert4`,
+ADD COLUMN `Expert5Id` INT NULL AFTER `Expert5`,
+ADD INDEX `FK_DeveloperExpert1_idx_idx` (`Expert1Id` ASC),
+ADD INDEX `FK_DeveloperExpert2_idx_idx` (`Expert2Id` ASC),
+ADD INDEX `FK_DeveloperExpert3_idx_idx` (`Expert3Id` ASC),
+ADD INDEX `FK_DeveloperExpert4_idx_idx` (`Expert4Id` ASC),
+ADD INDEX `FK_DeveloperExpert5_idx_idx` (`Expert5Id` ASC);
+ALTER TABLE `asereviewer`.`ComputedReviewers` 
+ADD CONSTRAINT `FK_DeveloperExpert1_idx`
+  FOREIGN KEY (`Expert1Id`)
+  REFERENCES `asereviewer`.`Developers` (`DeveloperId`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `FK_DeveloperExpert2_idx`
+  FOREIGN KEY (`Expert2Id`)
+  REFERENCES `asereviewer`.`Developers` (`DeveloperId`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `FK_DeveloperExpert3_idx`
+  FOREIGN KEY (`Expert3Id`)
+  REFERENCES `asereviewer`.`Developers` (`DeveloperId`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `FK_DeveloperExpert4_idx`
+  FOREIGN KEY (`Expert4Id`)
+  REFERENCES `asereviewer`.`Developers` (`DeveloperId`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION,
+ADD CONSTRAINT `FK_DeveloperExpert5_idx`
+  FOREIGN KEY (`Expert5Id`)
+  REFERENCES `asereviewer`.`Developers` (`DeveloperId`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+UPDATE ComputedReviewers
+INNER JOIN Bugs b ON b.BugId = ComputedReviewers.BugId
+INNER JOIN Developers devs ON devs.Name = ComputedReviewers.Expert1 AND devs.RepositoryId = b.RepositoryId
+SET ComputedReviewers.Expert1Id=devs.DeveloperId
+WHERE ComputedReviewers.Expert1<>'';
+
+UPDATE ComputedReviewers
+INNER JOIN Bugs b ON b.BugId = ComputedReviewers.BugId
+INNER JOIN Developers devs ON devs.Name = ComputedReviewers.Expert2 AND devs.RepositoryId = b.RepositoryId
+SET ComputedReviewers.Expert2Id=devs.DeveloperId
+WHERE ComputedReviewers.Expert2<>'';
+
+UPDATE ComputedReviewers
+INNER JOIN Bugs b ON b.BugId = ComputedReviewers.BugId
+INNER JOIN Developers devs ON devs.Name = ComputedReviewers.Expert3 AND devs.RepositoryId = b.RepositoryId
+SET ComputedReviewers.Expert3Id=devs.DeveloperId
+WHERE ComputedReviewers.Expert3<>'';
+
+UPDATE ComputedReviewers
+INNER JOIN Bugs b ON b.BugId = ComputedReviewers.BugId
+INNER JOIN Developers devs ON devs.Name = ComputedReviewers.Expert4 AND devs.RepositoryId = b.RepositoryId
+SET ComputedReviewers.Expert4Id=devs.DeveloperId
+WHERE ComputedReviewers.Expert4<>'';
+
+UPDATE ComputedReviewers
+INNER JOIN Bugs b ON b.BugId = ComputedReviewers.BugId
+INNER JOIN Developers devs ON devs.Name = ComputedReviewers.Expert5 AND devs.RepositoryId = b.RepositoryId
+SET ComputedReviewers.Expert5Id=devs.DeveloperId
+WHERE ComputedReviewers.Expert5<>'';
+
+ALTER TABLE `asereviewer`.`ComputedReviewers` 
+DROP COLUMN `Expert5`,
+DROP COLUMN `Expert4`,
+DROP COLUMN `Expert3`,
+DROP COLUMN `Expert2`,
+DROP COLUMN `Expert1`;
+
+UNLOCK TABLES;
+

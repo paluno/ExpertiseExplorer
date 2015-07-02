@@ -6,22 +6,22 @@
     <edmx:StorageModels>
     <Schema Namespace="ExpertiseDB.Store" Alias="Self" Provider="MySql.Data.MySqlClient" ProviderManifestToken="5.5" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
   <EntityContainer Name="ExpertiseDBStoreContainer">
-    <EntitySet Name="SourceRepositorys" EntityType="ExpertiseDB.Store.SourceRepositorys" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="Revisions" EntityType="ExpertiseDB.Store.Revisions" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="FileRevisions" EntityType="ExpertiseDB.Store.FileRevisions" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="Repositorys" EntityType="ExpertiseDB.Store.Repositorys" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="Developers" EntityType="ExpertiseDB.Store.Developers" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="Algorithms" EntityType="ExpertiseDB.Store.Algorithms" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="Artifacts" EntityType="ExpertiseDB.Store.Artifacts" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="ArtifactTypes" EntityType="ExpertiseDB.Store.ArtifactTypes" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="DeveloperExpertises" EntityType="ExpertiseDB.Store.DeveloperExpertises" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="DeveloperExpertiseValues" EntityType="ExpertiseDB.Store.DeveloperExpertiseValues" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="ActualReviewers" EntityType="ExpertiseDB.Store.ActualReviewers" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="ComputedReviewers" EntityType="ExpertiseDB.Store.ComputedReviewers" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="Filenames" EntityType="ExpertiseDB.Store.Filenames" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="Bugs" EntityType="ExpertiseDB.Store.Bugs" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="RepositoryAlgorithmRunStatus" EntityType="ExpertiseDB.Store.RepositoryAlgorithmRunStatus" store:Type="Tables" Schema="dbo" />
-    <EntitySet Name="ArtifactBugRelation" EntityType="ExpertiseDB.Store.ArtifactBugRelation" store:Type="Tables" Schema="dbo" />
+    <EntitySet Name="SourceRepositorys" EntityType="ExpertiseDB.Store.SourceRepositorys" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="Revisions" EntityType="ExpertiseDB.Store.Revisions" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="FileRevisions" EntityType="ExpertiseDB.Store.FileRevisions" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="Repositorys" EntityType="ExpertiseDB.Store.Repositorys" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="Developers" EntityType="ExpertiseDB.Store.Developers" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="Algorithms" EntityType="ExpertiseDB.Store.Algorithms" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="Artifacts" EntityType="ExpertiseDB.Store.Artifacts" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="ArtifactTypes" EntityType="ExpertiseDB.Store.ArtifactTypes" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="DeveloperExpertises" EntityType="ExpertiseDB.Store.DeveloperExpertises" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="DeveloperExpertiseValues" EntityType="ExpertiseDB.Store.DeveloperExpertiseValues" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="ActualReviewers" EntityType="ExpertiseDB.Store.ActualReviewers" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="ComputedReviewers" EntityType="ExpertiseDB.Store.ComputedReviewers" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="Filenames" EntityType="ExpertiseDB.Store.Filenames" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="Bugs" EntityType="ExpertiseDB.Store.Bugs" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="RepositoryAlgorithmRunStatus" EntityType="ExpertiseDB.Store.RepositoryAlgorithmRunStatus" store:Type="Tables" Schema="asereviewer" />
+    <EntitySet Name="ArtifactBugRelation" EntityType="ExpertiseDB.Store.ArtifactBugRelation" store:Type="Tables" Schema="asereviewer" />
     <AssociationSet Name="SourceRepositoryRevision" Association="ExpertiseDB.Store.SourceRepositoryRevision">
       <End Role="SourceRepository" EntitySet="SourceRepositorys" />
       <End Role="Revision" EntitySet="Revisions" />
@@ -102,6 +102,26 @@
       <End Role="Bug" EntitySet="Bugs" />
       <End Role="Repository" EntitySet="Repositorys" />
     </AssociationSet>
+	<AssociationSet Name="DeveloperExpert1" Association="ExpertiseDB.Store.DeveloperExpert1">
+	<End Role="Developer" EntitySet="Developers" />
+	<End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+	</AssociationSet>
+	<AssociationSet Name="DeveloperExpert2" Association="ExpertiseDB.Store.DeveloperExpert2">
+	<End Role="Developer" EntitySet="Developers" />
+	<End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+	</AssociationSet>
+	<AssociationSet Name="DeveloperExpert3" Association="ExpertiseDB.Store.DeveloperExpert3">
+	<End Role="Developer" EntitySet="Developers" />
+	<End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+	</AssociationSet>
+	<AssociationSet Name="DeveloperExpert4" Association="ExpertiseDB.Store.DeveloperExpert4">
+	<End Role="Developer" EntitySet="Developers" />
+	<End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+	</AssociationSet>
+	<AssociationSet Name="DeveloperExpert5" Association="ExpertiseDB.Store.DeveloperExpert5">
+	<End Role="Developer" EntitySet="Developers" />
+	<End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+	</AssociationSet>	
   </EntityContainer>
   <EntityType Name="SourceRepositorys">
     <Key>
@@ -214,17 +234,16 @@
       <PropertyRef Name="ComputedReviewerId" />
     </Key>
     <Property Name="ComputedReviewerId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-    <Property Name="Expert1" Type="longtext" Nullable="false" />
+    <Property Name="Expert1Id" Type="int" Nullable="true" />
     <Property Name="Expert1Value" Type="double" Nullable="false" />
-    <Property Name="Expert2" Type="longtext" Nullable="false" />
+    <Property Name="Expert2Id" Type="int" Nullable="true" />
     <Property Name="Expert2Value" Type="double" Nullable="false" />
-    <Property Name="Expert3" Type="longtext" Nullable="false" />
+    <Property Name="Expert3Id" Type="int" Nullable="true" />
     <Property Name="Expert3Value" Type="double" Nullable="false" />
-    <Property Name="Expert4" Type="longtext" Nullable="false" />
+    <Property Name="Expert4Id" Type="int" Nullable="true" />
     <Property Name="Expert4Value" Type="double" Nullable="false" />
-    <Property Name="Expert5" Type="longtext" Nullable="false" />
+    <Property Name="Expert5Id" Type="int" Nullable="true" />
     <Property Name="Expert5Value" Type="double" Nullable="false" />
-    <Property Name="ActualReviewerId" Type="int" Nullable="false" />
     <Property Name="AlgorithmId" Type="int" Nullable="false" />
     <Property Name="BugId" Type="int" Nullable="false" />
   </EntityType>
@@ -525,6 +544,66 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+	<Association Name="DeveloperExpert1">
+	<End Role="Developer" Type="ExpertiseDB.Store.Developers" Multiplicity="0..1" />
+	<End Role="ComputedReviewer" Type="ExpertiseDB.Store.ComputedReviewers" Multiplicity="*" />
+	<ReferentialConstraint>
+	<Principal Role="Developer">
+	  <PropertyRef Name="DeveloperId" />
+	</Principal>
+	<Dependent Role="ComputedReviewer">
+	  <PropertyRef Name="Expert1Id" />
+	</Dependent>
+	</ReferentialConstraint>
+	</Association>
+	<Association Name="DeveloperExpert2">
+	<End Type="ExpertiseDB.Store.Developers" Role="Developer" Multiplicity="0..1" />
+	<End Type="ExpertiseDB.Store.ComputedReviewers" Role="ComputedReviewer" Multiplicity="*" />
+	<ReferentialConstraint>
+	<Principal Role="Developer">
+	  <PropertyRef Name="DeveloperId" />
+	</Principal>
+	<Dependent Role="ComputedReviewer">
+	  <PropertyRef Name="Expert2Id" />
+	</Dependent>
+	</ReferentialConstraint>
+	</Association>
+	<Association Name="DeveloperExpert3">
+	<End Type="ExpertiseDB.Store.Developers" Role="Developer" Multiplicity="0..1" />
+	<End Type="ExpertiseDB.Store.ComputedReviewers" Role="ComputedReviewer" Multiplicity="*" />
+	<ReferentialConstraint>
+	<Principal Role="Developer">
+	  <PropertyRef Name="DeveloperId" />
+	</Principal>
+	<Dependent Role="ComputedReviewer">
+	  <PropertyRef Name="Expert3Id" />
+	</Dependent>
+	</ReferentialConstraint>
+	</Association>
+	<Association Name="DeveloperExpert4">
+	<End Type="ExpertiseDB.Store.Developers" Role="Developer" Multiplicity="0..1" />
+	<End Type="ExpertiseDB.Store.ComputedReviewers" Role="ComputedReviewer" Multiplicity="*" />
+	<ReferentialConstraint>
+	<Principal Role="Developer">
+	  <PropertyRef Name="DeveloperId" />
+	</Principal>
+	<Dependent Role="ComputedReviewer">
+	  <PropertyRef Name="Expert4Id" />
+	</Dependent>
+	</ReferentialConstraint>
+	</Association>
+	<Association Name="DeveloperExpert5">
+	<End Type="ExpertiseDB.Store.Developers" Role="Developer" Multiplicity="0..1" />
+	<End Type="ExpertiseDB.Store.ComputedReviewers" Role="ComputedReviewer" Multiplicity="*" />
+	<ReferentialConstraint>
+	<Principal Role="Developer">
+	  <PropertyRef Name="DeveloperId" />
+	</Principal>
+	<Dependent Role="ComputedReviewer">
+	  <PropertyRef Name="Expert5Id" />
+	</Dependent>
+	</ReferentialConstraint>
+	</Association>
 </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
@@ -620,6 +699,26 @@
           <AssociationSet Name="BugRepository" Association="ExpertiseDB.BugRepository">
             <End Role="Bug" EntitySet="Bugs" />
             <End Role="Repository" EntitySet="Repositorys" />
+          </AssociationSet>
+          <AssociationSet Name="DeveloperExpert1" Association="ExpertiseDB.DeveloperExpert1">
+            <End Role="Developer" EntitySet="Developers" />
+            <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+          </AssociationSet>
+          <AssociationSet Name="DeveloperExpert2" Association="ExpertiseDB.DeveloperExpert2">
+            <End Role="Developer" EntitySet="Developers" />
+            <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+          </AssociationSet>
+          <AssociationSet Name="DeveloperExpert3" Association="ExpertiseDB.DeveloperExpert3">
+            <End Role="Developer" EntitySet="Developers" />
+            <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+          </AssociationSet>
+          <AssociationSet Name="DeveloperExpert4" Association="ExpertiseDB.DeveloperExpert4">
+            <End Role="Developer" EntitySet="Developers" />
+            <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
+          </AssociationSet>
+          <AssociationSet Name="DeveloperExpert5" Association="ExpertiseDB.DeveloperExpert5">
+            <End Role="Developer" EntitySet="Developers" />
+            <End Role="ComputedReviewer" EntitySet="ComputedReviewers" />
           </AssociationSet>
         </EntityContainer>
         <EntityType Name="SourceRepository">
@@ -900,20 +999,24 @@
             <PropertyRef Name="ComputedReviewerId" />
           </Key>
           <Property Type="Int32" Name="ComputedReviewerId" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Type="String" Name="Expert1" Nullable="false" />
           <Property Type="Double" Name="Expert1Value" Nullable="false" />
-          <Property Type="String" Name="Expert2" Nullable="false" />
           <Property Type="Double" Name="Expert2Value" Nullable="false" />
-          <Property Type="String" Name="Expert3" Nullable="false" />
           <Property Type="Double" Name="Expert3Value" Nullable="false" />
-          <Property Type="String" Name="Expert4" Nullable="false" />
           <Property Type="Double" Name="Expert4Value" Nullable="false" />
-          <Property Type="String" Name="Expert5" Nullable="false" />
           <Property Type="Double" Name="Expert5Value" Nullable="false" />
-          <Property Type="Int32" Name="ActualReviewerId" Nullable="false" />
           <Property Type="Int32" Name="AlgorithmId" Nullable="false" />
           <NavigationProperty Name="Bug" Relationship="ExpertiseDB.BugComputedReviewerRelation" FromRole="ComputedReviewer" ToRole="Bug" />
           <Property Name="BugId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Expert1" Relationship="ExpertiseDB.DeveloperExpert1" FromRole="ComputedReviewer" ToRole="Developer" />
+          <Property Name="Expert1Id" Type="Int32" Nullable="true" />
+          <NavigationProperty Name="Expert2" Relationship="ExpertiseDB.DeveloperExpert2" FromRole="ComputedReviewer" ToRole="Developer" />
+          <Property Name="Expert2Id" Type="Int32" Nullable="true" />
+          <NavigationProperty Name="Expert3" Relationship="ExpertiseDB.DeveloperExpert3" FromRole="ComputedReviewer" ToRole="Developer" />
+          <Property Name="Expert3Id" Type="Int32" Nullable="true" />
+          <NavigationProperty Name="Expert4" Relationship="ExpertiseDB.DeveloperExpert4" FromRole="ComputedReviewer" ToRole="Developer" />
+          <Property Name="Expert4Id" Type="Int32" Nullable="true" />
+          <NavigationProperty Name="Expert5" Relationship="ExpertiseDB.DeveloperExpert5" FromRole="ComputedReviewer" ToRole="Developer" />
+          <Property Name="Expert5Id" Type="Int32" Nullable="true" />
         </EntityType>
         <EntityType Name="Filename">
           <Key>
@@ -1065,6 +1168,66 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="DeveloperExpert1">
+          <End Type="ExpertiseDB.Developer" Role="Developer" Multiplicity="0..1" />
+          <End Type="ExpertiseDB.ComputedReviewer" Role="ComputedReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Developer">
+              <PropertyRef Name="DeveloperId" />
+            </Principal>
+            <Dependent Role="ComputedReviewer">
+              <PropertyRef Name="Expert1Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="DeveloperExpert2">
+          <End Type="ExpertiseDB.Developer" Role="Developer" Multiplicity="0..1" />
+          <End Type="ExpertiseDB.ComputedReviewer" Role="ComputedReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Developer">
+              <PropertyRef Name="DeveloperId" />
+            </Principal>
+            <Dependent Role="ComputedReviewer">
+              <PropertyRef Name="Expert2Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="DeveloperExpert3">
+          <End Type="ExpertiseDB.Developer" Role="Developer" Multiplicity="0..1" />
+          <End Type="ExpertiseDB.ComputedReviewer" Role="ComputedReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Developer">
+              <PropertyRef Name="DeveloperId" />
+            </Principal>
+            <Dependent Role="ComputedReviewer">
+              <PropertyRef Name="Expert3Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="DeveloperExpert4">
+          <End Type="ExpertiseDB.Developer" Role="Developer" Multiplicity="0..1" />
+          <End Type="ExpertiseDB.ComputedReviewer" Role="ComputedReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Developer">
+              <PropertyRef Name="DeveloperId" />
+            </Principal>
+            <Dependent Role="ComputedReviewer">
+              <PropertyRef Name="Expert4Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="DeveloperExpert5">
+          <End Type="ExpertiseDB.Developer" Role="Developer" Multiplicity="0..1" />
+          <End Type="ExpertiseDB.ComputedReviewer" Role="ComputedReviewer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Developer">
+              <PropertyRef Name="DeveloperId" />
+            </Principal>
+            <Dependent Role="ComputedReviewer">
+              <PropertyRef Name="Expert5Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -1192,17 +1355,16 @@
       <EntityTypeMapping TypeName="IsTypeOf(ExpertiseDB.ComputedReviewer)">
         <MappingFragment StoreEntitySet="ComputedReviewers">
           <ScalarProperty Name="ComputedReviewerId" ColumnName="ComputedReviewerId" />
-          <ScalarProperty Name="Expert1" ColumnName="Expert1" />
           <ScalarProperty Name="Expert1Value" ColumnName="Expert1Value" />
-          <ScalarProperty Name="Expert2" ColumnName="Expert2" />
           <ScalarProperty Name="Expert2Value" ColumnName="Expert2Value" />
-          <ScalarProperty Name="Expert3" ColumnName="Expert3" />
           <ScalarProperty Name="Expert3Value" ColumnName="Expert3Value" />
-          <ScalarProperty Name="Expert4" ColumnName="Expert4" />
           <ScalarProperty Name="Expert4Value" ColumnName="Expert4Value" />
-          <ScalarProperty Name="Expert5" ColumnName="Expert5" />
           <ScalarProperty Name="Expert5Value" ColumnName="Expert5Value" />
-          <ScalarProperty Name="ActualReviewerId" ColumnName="ActualReviewerId" />
+          <ScalarProperty Name="Expert1Id" ColumnName="Expert1Id" />
+          <ScalarProperty Name="Expert2Id" ColumnName="Expert2Id" />
+          <ScalarProperty Name="Expert3Id" ColumnName="Expert3Id" />
+          <ScalarProperty Name="Expert4Id" ColumnName="Expert4Id" />
+          <ScalarProperty Name="Expert5Id" ColumnName="Expert5Id" />
           <ScalarProperty Name="AlgorithmId" ColumnName="AlgorithmId" />
           <ScalarProperty Name="BugId" ColumnName="BugId" />
         </MappingFragment>
@@ -1260,6 +1422,7 @@
         <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
         <DesignerProperty Name="DDLGenerationTemplate" Value="$(VSEFTools)\DBGen\SSDLToMySQL.tt" />
         <DesignerProperty Name="UseLegacyProvider" Value="True" />
+        <DesignerProperty Name="DefaultDatabaseSchema" Value="asereviewer" />
       </DesignerInfoPropertySet>
     </edmx:Options>
     <!-- Diagram content (shape and connector positions) -->

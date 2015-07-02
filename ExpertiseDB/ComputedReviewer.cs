@@ -20,35 +20,43 @@ public partial class ComputedReviewer
 
     public int ComputedReviewerId { get; set; }
 
-    public string Expert1 { get; set; }
-
     public double Expert1Value { get; set; }
-
-    public string Expert2 { get; set; }
 
     public double Expert2Value { get; set; }
 
-    public string Expert3 { get; set; }
-
     public double Expert3Value { get; set; }
-
-    public string Expert4 { get; set; }
 
     public double Expert4Value { get; set; }
 
-    public string Expert5 { get; set; }
-
     public double Expert5Value { get; set; }
-
-    public int ActualReviewerId { get; set; }
 
     public int AlgorithmId { get; set; }
 
     public int BugId { get; set; }
 
+    public Nullable<int> Expert1Id { get; set; }
+
+    public Nullable<int> Expert2Id { get; set; }
+
+    public Nullable<int> Expert3Id { get; set; }
+
+    public Nullable<int> Expert4Id { get; set; }
+
+    public Nullable<int> Expert5Id { get; set; }
+
 
 
     public virtual Bug Bug { get; set; }
+
+    public virtual Developer Expert1 { get; set; }
+
+    public virtual Developer Expert2 { get; set; }
+
+    public virtual Developer Expert3 { get; set; }
+
+    public virtual Developer Expert4 { get; set; }
+
+    public virtual Developer Expert5 { get; set; }
 
 }
 
