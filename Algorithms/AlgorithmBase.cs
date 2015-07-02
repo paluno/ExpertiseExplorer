@@ -437,11 +437,16 @@
             return dev;
         }
 
-        public virtual async Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds)
+        public virtual Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds)
+        {
+            return GetDevelopersForArtifactsAsync(artifactIds, expertises => expertises.Sum());
+        }
+
+        public async Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds, Func<IEnumerable<double>, double> aggregateResults)
         {
             using (var entities = new ExpertiseDBEntities())
             {
-                List<SimplifiedDeveloperExpertise> developers = (await entities.GetTop5DevelopersForArtifactsAndAlgorithm(artifactIds, AlgorithmId)).ToList();
+                List<SimplifiedDeveloperExpertise> developers = (await entities.GetTop5DevelopersForArtifactsAndAlgorithm(artifactIds, AlgorithmId, aggregateResults)).ToList();
 
                 while (developers.Count < 5)
                     developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, Expertise = 0d });

@@ -63,7 +63,7 @@
             return result;
         }
 
-        public async Task<IEnumerable<SimplifiedDeveloperExpertise>> GetTop5DevelopersForArtifactsAndAlgorithm(IEnumerable<int> artifactIds, int algorithmId)
+        public async Task<IEnumerable<SimplifiedDeveloperExpertise>> GetTop5DevelopersForArtifactsAndAlgorithm(IEnumerable<int> artifactIds, int algorithmId, Func<IEnumerable<double>,double> aggregateResults)
         {
             List<DeveloperExpertiseValue> lstAllResults = new List<DeveloperExpertiseValue>();
             IEnumerable<Task<List<DeveloperExpertiseValue>>> queryTasks =
@@ -89,7 +89,7 @@
                         (devId, expertiseValues) => new SimplifiedDeveloperExpertise()
                             {
                                 DeveloperId = devId,
-                                Expertise = expertiseValues.Select(exValue => exValue.Value).Sum()
+                                Expertise = aggregateResults(expertiseValues.Select(exValue => exValue.Value))
                             })
                     .OrderByDescending(sde => sde.Expertise)
                     .Take(5);

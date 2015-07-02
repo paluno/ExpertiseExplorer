@@ -84,44 +84,9 @@
             }
         }
 
-        public override async Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds)
+        public override Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds)
         {
-            List<SimplifiedDeveloperExpertise> deValues;
-            using (var entities = new ExpertiseDBEntities())
-            {
-                deValues = await entities.DeveloperExpertiseValues
-                    .Include(de => de.DeveloperExpertise)
-                    .Where(dev => artifactIds.Contains(dev.DeveloperExpertise.ArtifactId) && dev.AlgorithmId == AlgorithmId)
-                    .AsNoTracking()
-                    .GroupBy(
-                        dev => dev.DeveloperExpertise.DeveloperId,
-                        (devId, expertiseValues) => new SimplifiedDeveloperExpertise()
-                        {
-                            DeveloperId = devId,
-                            Expertise = expertiseValues.Select(exValue => exValue.Value).Max()
-                        })
-                    .OrderByDescending(sde => sde.Expertise)
-                    .Take(5)
-                    .ToListAsync();
-            }
-
-            while (deValues.Count < 5)
-                deValues.Add(new SimplifiedDeveloperExpertise { DeveloperId = null, Expertise = 0d });
-
-            return new ComputedReviewer()
-            {
-                Expert1Id = deValues[0].DeveloperId,
-                Expert1Value = deValues[0].Expertise,
-                Expert2Id = deValues[1].DeveloperId,
-                Expert2Value = deValues[1].Expertise,
-                Expert3Id = deValues[2].DeveloperId,
-                Expert3Value = deValues[2].Expertise,
-                Expert4Id = deValues[3].DeveloperId,
-                Expert4Value = deValues[3].Expertise,
-                Expert5Id = deValues[4].DeveloperId,
-                Expert5Value = deValues[4].Expertise,
-                AlgorithmId = this.AlgorithmId
-            };
+            return GetDevelopersForArtifactsAsync(artifactIds, expertises => expertises.Max());
         }
 
     }
