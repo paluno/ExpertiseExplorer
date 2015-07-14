@@ -449,7 +449,7 @@
                 List<SimplifiedDeveloperExpertise> developers = (await entities.GetTop5DevelopersForArtifactsAndAlgorithm(artifactIds, AlgorithmId, aggregateResults)).ToList();
 
                 while (developers.Count < 5)
-                    developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = 0, Expertise = 0d });
+                    developers.Add(new SimplifiedDeveloperExpertise { DeveloperId = null, Expertise = 0d });
 
                 return new ComputedReviewer
                 {
