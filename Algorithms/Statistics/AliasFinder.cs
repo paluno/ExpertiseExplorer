@@ -165,10 +165,12 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         {
             return name.Replace("plus ", string.Empty)
                         .Replace("and the rest of the Xiph.Org Foundation", string.Empty)
-                        .Replace(" and ", ",")
-                        .Replace(" / ", ",")
-                        .Replace(" & ", ",");
+                        .Replace(" and ", ", ")
+                        .Replace(" / ", ", ")
+                        .Replace(" & ", ", ");
         }
+
+        readonly static string[] NAME_SEPARATOR_STRINGS = new string[] { ", " };
 
         /// <summary>
         /// Checks a name for aliases. If aliases exist, the primary alias is returned, otherwise the unmodified name. If the name contains multiple names actually,
@@ -179,7 +181,8 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         public IEnumerable<string> DeanonymizeAuthor(string obfuscatedName)
         {
             return prefilterAuthorName(obfuscatedName)
-                .Split(',')
+                .Split(NAME_SEPARATOR_STRINGS, StringSplitOptions.RemoveEmptyEntries)
+                .Where(nameCandidate => !string.IsNullOrWhiteSpace(nameCandidate))
                 .Select(oneName => oneName.Trim())
                 .Select(delegate (string oneName)
                     {
