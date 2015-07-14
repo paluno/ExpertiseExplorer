@@ -62,10 +62,12 @@
                 }
 
                     // cleanup author list
+                        // deanonymize
                 authors = authors
                     .SelectMany(oneOfTheLastUsers => Deduplicator.DeanonymizeAuthor(oneOfTheLastUsers.User)
                         .Select(clearName => new DeveloperWithEditTime() { User = clearName, Time = oneOfTheLastUsers.Time }))
                     .OrderByDescending(dev => dev.Time);
+                        // deduplicate deanonymized names
                 ISet<string> includedAuthors = new HashSet<string>();
                 IList<DeveloperWithEditTime> deduplicatedAuthors = new List<DeveloperWithEditTime>();
                 foreach(DeveloperWithEditTime dev in authors)
