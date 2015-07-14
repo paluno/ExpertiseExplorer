@@ -69,7 +69,7 @@
                 ISet<string> includedAuthors = new HashSet<string>();
                 IList<DeveloperWithEditTime> deduplicatedAuthors = new List<DeveloperWithEditTime>();
                 foreach(DeveloperWithEditTime dev in authors)
-                    if (!includedAuthors.Contains(dev.User))
+                    if (includedAuthors.Add(dev.User))
                         deduplicatedAuthors.Add(dev);
 
                 foreach (DeveloperWithEditTime experiencedDeveloper in deduplicatedAuthors)
