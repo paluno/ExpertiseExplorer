@@ -41,7 +41,7 @@
                 case "algorithm":
                     var forceOverwrite = false;
                     var noComp = false;
-                    DateTime resumeTime = DateTime.MinValue;
+                    DateTime? resumeTime = DateTime.MinValue;
                     DateTime maxTime = DateTime.MaxValue;
                     string algoSelectString = "1cdaoif";    // the default: All algorithms
 
@@ -75,15 +75,24 @@
                                         Console.WriteLine("Error: resume argument is missing the parameter.");
                                         return;
                                     }
-                                    long timeOfLastComparison;
-                                    if (long.TryParse(args[i], out timeOfLastComparison))
-                                        resumeTime = timeOfLastComparison.UnixTime2UTCDateTime() - new TimeSpan(0, 0, 0, 1);
-                                    else if (!DateTime.TryParse(args[i], out resumeTime))
+
+                                    if (string.Equals(args[i], "AUTO", StringComparison.OrdinalIgnoreCase))
+                                        resumeTime = null;
+                                    else
                                     {
-                                        Console.WriteLine("Error: Unable to parse {0} as int or DateTime.", args[i]);
-                                        return;
+                                        DateTime utcTimeOfLastComparison;
+                                        long unixTimeOfLastComparison;
+                                        if (long.TryParse(args[i], out unixTimeOfLastComparison))
+                                            resumeTime = unixTimeOfLastComparison.UnixTime2UTCDateTime() - new TimeSpan(0, 0, 0, 1);
+                                        else if (DateTime.TryParse(args[i], out utcTimeOfLastComparison))
+                                            resumeTime = utcTimeOfLastComparison;
+                                        else
+                                        {
+                                            Console.WriteLine("Error: Unable to parse {0} as int or DateTime.", args[i]);
+                                            return;
+                                        }
+                                        resumeTime = resumeTime.Value.ToUniversalTime();
                                     }
-                                    resumeTime = resumeTime.ToUniversalTime();
 
                                     break;
                                 case "m":

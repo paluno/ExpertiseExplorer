@@ -40,6 +40,11 @@
 
         public AliasFinder NameConsolidator { get; set; }
 
+        /// <summary>
+        /// A list of issues for which reviewers have already been computed.
+        /// </summary>
+        protected ISet<string> PredictedIssues { get; private set; }
+
         public AlgorithmComparisonRunner(string sourceUrl, string basepath)
             : this(
                 sourceUrl,
@@ -58,6 +63,7 @@
 
         public AlgorithmComparisonRunner(string sourceUrl, string basepath, IList<AlgorithmBase> algorithmsToEvaluate)
         {
+            PredictedIssues = new HashSet<string>();
             Algorithms = algorithmsToEvaluate;
 
             SourceManager = new SourceRepositoryConnector();
@@ -85,7 +91,7 @@
                 algo.RepositoryId = SourceManager.RepositoryId;
         }
 
-        public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
+        public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime? resumeFrom, DateTime continueUntil, bool noComparison = false)
         {
             Log.Info("Starting comparison");
             IEnumerable<IssueTrackerEvent> list = factory.parseIssueTrackerEvents();
@@ -98,8 +104,10 @@
         /// Go through a list of issue tracker activities. For each first patch upload of a bug, calculate expertises at the time of review and store five
         /// computed reviewers. For reviews, remember the actual reviewers for later comparison and grant experience for review-based algorithms.
         /// </summary>
-        private void HandleIssueTrackerEventList(IEnumerable<IssueTrackerEvent> issueTrackerEventList, DateTime resumeFrom, DateTime continueUntil, bool noComparison)
+        private void HandleIssueTrackerEventList(IEnumerable<IssueTrackerEvent> issueTrackerEventList, DateTime? resumeFrom, DateTime continueUntil, bool noComparison)
         {
+            DateTime minimumDate = resumeFrom ?? SourceManager.Watermark;
+
             DateTime timeAfterOneK = DateTime.Now;
 
             bool fComparisonHasBegun = false;
@@ -116,8 +124,11 @@
 
                 if (info.When > continueUntil)
                     return;
-                if (info.When < resumeFrom)
+                if (info.When < minimumDate)
+                {
+                    PredictedIssues.Add(info.ChangeId); // these do not have to be predicted anymore
                     continue;
+                }
                 if (!fComparisonHasBegun)
                 {
                     fComparisonHasBegun = true;
@@ -200,15 +211,9 @@
         private void ProcessPatchUpload(IssueTrackerEvent info, bool noComparison)
         {
             // 1. Check whether this is the first upload for this bug (maybe not necessary)
+            if (PredictedIssues.Contains(info.ChangeId))
+                return;     // this is not the first item for this bug. We don't need another prediction.
 
-            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
-            {
-                Bug currentBug = repository.Bugs.SingleOrDefault(bug => bug.ChangeId == info.ChangeId);
-                if (null != currentBug)
-                    // Revisit: maybe the bug exists, but not the ComputedReviewers for the given algorithms.
-                    return;
-            }
-            
             // 2. Calculate algorithm values for the files in the bug
 
             DateTime end = info.When;
@@ -238,12 +243,22 @@
 
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
             {
-                Bug currentBug = new Bug()
+                    // Revisit: maybe the bug exists, but not the ComputedReviewers for the given algorithms.
+                    return;
+            }
+
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+            {
+                Bug currentBug = repository.Bugs.SingleOrDefault(bug => bug.ChangeId == info.ChangeId);
+                if (null == currentBug)
                 {
-                    ChangeId = info.ChangeId,
-                    RepositoryId = this.RepositoryId
-                };
-                repository.Bugs.Add(currentBug);
+                    currentBug = new Bug()
+                    {
+                        ChangeId = info.ChangeId,
+                        RepositoryId = this.RepositoryId
+                    };
+                    repository.Bugs.Add(currentBug);
+                }
 
                 foreach (Task<ComputedReviewer> task in computedReviewerTasks)
                 {
@@ -252,6 +267,7 @@
 
                 repository.SaveChanges();
             }
+            PredictedIssues.Add(info.ChangeId);
         }
 
         /// <summary>

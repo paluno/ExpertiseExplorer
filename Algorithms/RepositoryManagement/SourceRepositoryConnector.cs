@@ -23,7 +23,7 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
         /// <summary>
         /// This is the DateTime until which the data from the SourceRepository was transferred to the Repository
         /// </summary>
-        private DateTime Watermark { get; set; }
+        public DateTime Watermark { get; private set; }
 
         public SourceRepositoryConnector()
         {
