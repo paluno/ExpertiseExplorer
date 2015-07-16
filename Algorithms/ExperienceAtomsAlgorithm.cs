@@ -18,7 +18,8 @@
 
         public override void UpdateFromSourceUntil(DateTime end)
         {
-            MaxDateTime = SourceRepositoryManager.BuildConnectionsForSourceRepositoryUntil(end);
+            SourceRepositoryManager.BuildConnectionsForSourceRepositoryUntil(end);
+            base.UpdateFromSourceUntil(end);
         }
 
         public override void CalculateExpertiseForFile(string filename)

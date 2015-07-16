@@ -20,10 +20,16 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
         
         public AliasFinder Deduplicator { get; set; }
 
+        /// <summary>
+        /// This is the DateTime until which the data from the SourceRepository was transferred to the Repository
+        /// </summary>
+        private DateTime Watermark { get; set; }
+
         public SourceRepositoryConnector()
         {
             RepositoryId = -1;
             SourceRepositoryId = -1;
+            Watermark = DateTime.MinValue;
 
             this.Deduplicator = new AliasFinder();
         }
@@ -53,6 +59,7 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
                     if (failIfAlreadyExists) throw new Exception("Already exists!");
 
                 RepositoryId = repository.RepositoryId;
+                Watermark = repository.LastUpdate ?? DateTime.MinValue;
                 SourceRepositoryId = sourceRepository.SourceRepositoryId;
             }
         }
@@ -77,53 +84,56 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
         /// correct number of Deliveries and Acceptances. The method is idempotent and the watermark can only rise and never fall.
         /// </summary>
         /// <param name="end">Until which time (exclusive) shall the VCS data be transferred?</param>
-        /// <returns>Until which time (inclusive) has the VCS data actually been updated? This is lower or equal than the input parameter "end" and depends
-        /// on actual activity in the source repository. It can only be equal</returns>
-        public virtual DateTime BuildConnectionsForSourceRepositoryUntil(DateTime end)
+        public virtual void BuildConnectionsForSourceRepositoryUntil(DateTime end)
         {
             Debug.Assert(RepositoryId != -1, "Set RepositoryId first!");
+
+            if (end < Watermark)
+                throw new InvalidOperationException("Watermark cannot fall; Repository has already been updated until " + Watermark + ", but an update is requested until " + end);
+            if (end == Watermark)
+                return;         // we are already done.
+
+            // rise Watermark to end, so find all revisions in the meantime that have to be transferred from SourceRepository to Repository
 
             List<Revision> revisions;
             using (var entities = new ExpertiseDBEntities())
             {
-                var lastUpdate = entities.Repositorys.Single(r => r.RepositoryId == RepositoryId).LastUpdate;
+                DateTime? lastUpdate = entities.Repositorys.Single(r => r.RepositoryId == RepositoryId).LastUpdate;
                 if (lastUpdate.HasValue)
                 {
-                    if (lastUpdate.Value >= end)
-                        return lastUpdate.Value;
+                    Debug.Assert(Watermark >= lastUpdate.Value);    // Watermark is exclusive though, and lastUpdate.Value is inclusive
 
                     revisions = entities.Revisions.Where(r => r.SourceRepositoryId == SourceRepositoryId && r.Time > lastUpdate.Value && r.Time < end).ToList();
-                    if (revisions.Count == 0)
-                        return lastUpdate.Value;
                 }
                 else
-                {
-                    revisions = entities.Revisions.Where(r => r.SourceRepositoryId == SourceRepositoryId && r.Time < end).ToList();
-
-                    if (revisions.Count == 0)
-                        return DateTime.MinValue;   // no activity yet
-                }
+                    revisions = entities.Revisions.Where(r => r.SourceRepositoryId == SourceRepositoryId && r.Time < end).ToList();     // First transfer
             }
 
-            return BuildConnectionsFromRevisions(revisions);
+            if (revisions.Count == 0)
+            {
+                Watermark = end;
+                return;
+            }
+
+            BuildConnectionsFromRevisions(revisions);
+            Debug.Assert(Watermark < end);  // because Watermark rises with DB Updates, but they area all before end
+            Watermark = end;
         }
 
         /// <returns>The time of the last revision</returns>
-        public DateTime BuildConnectionsFromRevisions(List<Revision> revisions)
+        public void BuildConnectionsFromRevisions(List<Revision> revisions)
         {
             DateTime lastestUpdate = DateTime.MinValue;
 
             foreach (var revision in revisions.OrderBy(r => r.Time))
             {
                 HandleRevision(revision);
-                if (revision.Time > lastestUpdate)      // should almost always been the case, since revisions are ordered by revision.Time
+                if (revision.Time > lastestUpdate)      // only prevents updates if two succeeding revisions have the same time
                 {
                     SetLastUpdated(revision.Time);
                     lastestUpdate = revision.Time;
                 }
             }
-
-            return lastestUpdate;
         }
 
         private void SetLastUpdated(DateTime updateTime)
@@ -134,6 +144,9 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
                 repo.LastUpdate = updateTime;
                 repository.SaveChanges();
             }
+
+            if (Watermark < updateTime)
+                Watermark = updateTime;
         }
 
         private void HandleRevision(Revision revision)
