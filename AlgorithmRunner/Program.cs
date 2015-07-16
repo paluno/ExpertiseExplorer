@@ -28,6 +28,7 @@
             ReviewSourceType reviewSourceType = (ReviewSourceType)Enum.Parse(typeof(ReviewSourceType), args[1], true);
             string basepath = args[2];
             string mode = args[3].ToLower();
+            bool fRecalculateMode = false;
 
             switch (mode)
             {
@@ -65,6 +66,10 @@
                                 case "n":
                                 case "nocomp":
                                     noComp = true;
+                                    break;
+
+                                case "recalculate":
+                                    fRecalculateMode = true;
                                     break;
 
                                 case "r":
@@ -143,7 +148,7 @@
                     factory.PrepareInput(basepath + "input.txt", forceOverwrite);
 
                     AlgorithmComparisonRunner comparisonRunner = new AlgorithmComparisonRunner(sourceUrlIdentifier, basepath, selectAlgorithmsFromString(algoSelectString));
-                    comparisonRunner.StartComparisonFromFile(factory, resumeTime, maxTime, noComp);
+                    comparisonRunner.StartComparisonFromFile(factory, resumeTime, maxTime, noComp, fRecalculateMode);
 
                     return;
 
@@ -202,6 +207,7 @@
             Console.WriteLine("\t\t f - File-Path-Similarity (Review-based algorithm)");
             Console.WriteLine("\t additional argument: f or force for forcing an existing prepared input to be overwritten (optional)");
             Console.WriteLine("\t additional argument: n or nocomp for only creating expertise values from revision, skipping the comparison (optional)");
+            Console.WriteLine("\t additional argument: recalculate to add ComputedReviewers to existing Bugs in order to support additional algorithms (optional)");
             Console.WriteLine("\t additional argument: r or resume arg for resuming the computation from arg datetime, arg can be in unix time (optional)");
             Console.WriteLine("\t \t Useful for resuming the calculations after an error. Use repository.lastUpdate as the value for arg\n");
             Console.WriteLine("\t additional argument: m or max to compute expertises only up to arg datetime, arg has to be in unix time (optional)");

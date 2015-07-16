@@ -91,11 +91,11 @@
                 algo.RepositoryId = SourceManager.RepositoryId;
         }
 
-        public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime? resumeFrom, DateTime continueUntil, bool noComparison = false)
+        public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime? resumeFrom, DateTime continueUntil, bool noComparison, bool fRecalculateMode)
         {
             Log.Info("Starting comparison");
             IEnumerable<IssueTrackerEvent> list = factory.parseIssueTrackerEvents();
-            HandleIssueTrackerEventList(list, resumeFrom, continueUntil, noComparison);
+            HandleIssueTrackerEventList(list, resumeFrom, continueUntil, noComparison, fRecalculateMode);
             Log.Info("Ending comparison");
         }
 
@@ -104,7 +104,7 @@
         /// Go through a list of issue tracker activities. For each first patch upload of a bug, calculate expertises at the time of review and store five
         /// computed reviewers. For reviews, remember the actual reviewers for later comparison and grant experience for review-based algorithms.
         /// </summary>
-        private void HandleIssueTrackerEventList(IEnumerable<IssueTrackerEvent> issueTrackerEventList, DateTime? resumeFrom, DateTime continueUntil, bool noComparison)
+        private void HandleIssueTrackerEventList(IEnumerable<IssueTrackerEvent> issueTrackerEventList, DateTime? resumeFrom, DateTime continueUntil, bool noComparison, bool fRecalculateMode)
         {
             DateTime minimumDate = resumeFrom ?? SourceManager.Watermark;
 
@@ -169,12 +169,12 @@
                         }
 
                         ReviewInfo ri = info as ReviewInfo;
-                        if (null != ri)
+                        if (null != ri && !fRecalculateMode)        // in recalculate mode, additional reviewers do not need to be added, as they already exist
                             ProcessReviewInfo(ri, noComparison);
 
                         PatchUpload pu = info as PatchUpload;
                         if (null != pu && !noComparison)
-                            ProcessPatchUpload(pu, noComparison);
+                            ProcessPatchUpload(pu, noComparison, fRecalculateMode);
 
                         fSuccess = true;
                     }
@@ -208,7 +208,7 @@
         /// 2. Calculate algorithm values for the files in the bug
         /// 3. Calculate reviewers for the bug
         /// </summary>
-        private void ProcessPatchUpload(IssueTrackerEvent info, bool noComparison)
+        private void ProcessPatchUpload(IssueTrackerEvent info, bool noComparison, bool fRecalculateMode)
         {
             // 1. Check whether this is the first upload for this bug (maybe not necessary)
             if (PredictedIssues.Contains(info.ChangeId))
@@ -243,14 +243,11 @@
 
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
             {
-                    // Revisit: maybe the bug exists, but not the ComputedReviewers for the given algorithms.
-                    return;
-            }
-
-            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
-            {
-                Bug currentBug = repository.Bugs.SingleOrDefault(bug => bug.ChangeId == info.ChangeId);
-                if (null == currentBug)
+                Bug currentBug = null;
+                
+                if (fRecalculateMode)
+                    currentBug = repository.Bugs.SingleOrDefault(bug => bug.ChangeId == info.ChangeId);
+                else
                 {
                     currentBug = new Bug()
                     {
