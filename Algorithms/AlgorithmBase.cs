@@ -176,7 +176,7 @@
         }
 
 #region Updating Repository from SourceRepository
-        public virtual void BuildConnectionsForSourceRepositoryBetween(DateTime start, DateTime end)
+        public virtual void BuildConnectionsForSourceRepositoryBetween(DateTime end)
         {
             Debug.Assert(RepositoryId != -1, "Set RepositoryId first!");
 
@@ -192,9 +192,7 @@
                         return;
                     }
 
-                    if (start < lastUpdate.Value) start = lastUpdate.Value;
-
-                    revisions = entities.GetRevisionsFromSourceRepositoryBetween(SourceRepositoryId, start, end);
+                    revisions = entities.Revisions.Where(r => r.SourceRepositoryId == SourceRepositoryId && r.Time > lastUpdate.Value && r.Time < end).ToList();
                     if (revisions.Count == 0)
                     {
                         MaxDateTime = lastUpdate.Value;
@@ -202,15 +200,13 @@
                     }
                 }
                 else
-                    revisions = entities.GetRevisionsFromSourceRepositoryBetween(SourceRepositoryId, start, end);
-                if (revisions.Count == 0)
-                {
-                    MaxDateTime = end;
-                    return;
-                }
+                    revisions = entities.Revisions.Where(r => r.SourceRepositoryId == SourceRepositoryId && r.Time < end).ToList();
             }
 
-            BuildConnectionsFromRevisions(revisions);
+            if (revisions.Count == 0)
+                MaxDateTime = end;
+            else
+                BuildConnectionsFromRevisions(revisions);
         }
 
         public void BuildConnectionsFromRevisions(List<Revision> revisions)
@@ -223,17 +219,6 @@
                 HandleRevision(revision);
                 SetLastUpdated(revision.Time);
             }
-        }
-
-        private List<Revision> GetRevisionsFromSourceRepository()
-        {
-            List<Revision> revisions;
-            using (var repository = new ExpertiseDBEntities())
-            {
-                revisions = repository.Revisions.Where(r => r.SourceRepositoryId == SourceRepositoryId).ToList();
-            }
-
-            return revisions;
         }
 
         private void SetLastUpdated(DateTime updateTime)

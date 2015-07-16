@@ -22,7 +22,7 @@ namespace ExpertiseExplorer.Algorithms
             // Nothing to do here, it's all done in AddReviewScore
         }
 
-        public override void BuildConnectionsForSourceRepositoryBetween(DateTime start, DateTime end)
+        public override void BuildConnectionsForSourceRepositoryBetween(DateTime end)
         {
             // Nothing to be done here. Review algorithms build the connections on their own.
         }

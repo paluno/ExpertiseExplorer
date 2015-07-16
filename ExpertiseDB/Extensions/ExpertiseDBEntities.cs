@@ -141,11 +141,6 @@
                 .Select(artifact => new Tuple<string, int>(artifact.Name, artifact.ArtifactId)).ToList();
         }
 
-        public List<Revision> GetRevisionsFromSourceRepositoryBetween(int sourceRepositoryId, DateTime start, DateTime end)
-        {
-            return Revisions.Where(r => r.SourceRepositoryId == sourceRepositoryId && r.Time >= start && r.Time < end).ToList();
-        }
-
         public DeveloperWithEditTime GetUserForLastRevisionOfBefore(int filenameId, DateTime before)
         {
             var sqlFormattedDate = before.ToString("yyyy-MM-dd HH:mm:ss");

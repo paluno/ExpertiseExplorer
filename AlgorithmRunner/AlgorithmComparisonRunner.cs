@@ -98,7 +98,6 @@
         {
             DateTime timeAfterOneK = DateTime.Now;
 
-            DateTime repositoryWatermark = DateTime.MinValue;   // Until which date are the number of deliveries, modifications, and so on counted?
             bool fComparisonHasBegun = false;
             int count = 0;
             foreach (IssueTrackerEvent info in issueTrackerEventList)
@@ -160,7 +159,7 @@
 
                         PatchUpload pu = info as PatchUpload;
                         if (null != pu && !noComparison)
-                            ProcessPatchUpload(pu, noComparison, ref repositoryWatermark);
+                            ProcessPatchUpload(pu, noComparison);
 
                         fSuccess = true;
                     }
@@ -194,7 +193,7 @@
         /// 2. Calculate algorithm values for the files in the bug
         /// 3. Calculate reviewers for the bug
         /// </summary>
-        private void ProcessPatchUpload(IssueTrackerEvent info, bool noComparison, ref DateTime repositoryWatermark)
+        private void ProcessPatchUpload(IssueTrackerEvent info, bool noComparison)
         {
             // 1. Check whether this is the first upload for this bug (maybe not necessary)
 
@@ -209,8 +208,8 @@
             // 2. Calculate algorithm values for the files in the bug
 
             DateTime end = info.When;
-            Algorithms[0].BuildConnectionsForSourceRepositoryBetween(repositoryWatermark, end);
-            repositoryWatermark = end;
+            foreach (AlgorithmBase algo in Algorithms)
+                algo.BuildConnectionsForSourceRepositoryBetween(end);
 
             IList<string> involvedFiles = info.Filenames;
 
