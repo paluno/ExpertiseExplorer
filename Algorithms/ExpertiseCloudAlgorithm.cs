@@ -17,13 +17,17 @@
             Guid = new Guid("f2fd950d-3b01-4db0-88a9-8a38f34ae0c4");
             Init();
         }
+        public override void UpdateFromSourceUntil(DateTime end)
+        {
+            MaxDateTime = SourceRepositoryManager.BuildConnectionsForSourceRepositoryUntil(end);
+        }
 
         public override void CalculateExpertiseForFile(string filename)
         {
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
-            Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
+            Debug.Assert(SourceRepositoryManager != null, "Initialize SourceRepositoryManager first");
 
-            int artifactId = FindOrCreateFileArtifactId(filename);
+            int artifactId = SourceRepositoryManager.FindOrCreateFileArtifactId(filename);
 
             var path = Path.GetDirectoryName(filename);
             if (path == null)

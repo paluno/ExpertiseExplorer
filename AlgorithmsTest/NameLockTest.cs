@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ExpertiseExplorer.Algorithms;
 using System.Threading;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ExpertiseExplorer.Algorithms.RepositoryManagement;
 
 namespace ExpertiseExplorer.Algorithms.Test
 {

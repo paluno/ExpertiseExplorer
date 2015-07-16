@@ -1,4 +1,4 @@
-namespace ExpertiseExplorer.Algorithms.Statistics
+namespace ExpertiseExplorer.Algorithms.RepositoryManagement
 {
     using System.Collections.Generic;
     using System.IO;

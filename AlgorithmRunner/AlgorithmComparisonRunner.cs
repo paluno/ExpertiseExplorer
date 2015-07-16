@@ -18,6 +18,7 @@
     using ExpertiseExplorer.Common;
     using ExpertiseExplorer.Algorithms.Statistics;
     using log4net;
+    using ExpertiseExplorer.Algorithms.RepositoryManagement;
 
     internal class AlgorithmComparisonRunner
     {
@@ -32,6 +33,8 @@
                 return Algorithms[0].RepositoryId;
             }
         }
+
+        public SourceRepositoryConnector SourceManager { get; set; }
 
         public IList<AlgorithmBase> Algorithms { get; set; }
 
@@ -57,28 +60,29 @@
         {
             Algorithms = algorithmsToEvaluate;
 
+            SourceManager = new SourceRepositoryConnector();
             NameConsolidator = new AliasFinder();
             string authorMappingPath = basepath + "authors_consolidated.txt";
             if (File.Exists(authorMappingPath))
             {
                 NameConsolidator.InitializeMappingFromAuthorList(File.ReadAllLines(authorMappingPath));
+                SourceManager.Deduplicator = NameConsolidator;
                 foreach (AlgorithmBase algo in algorithmsToEvaluate)
                     algo.Deduplicator = NameConsolidator;
             }
+
+            foreach (AlgorithmBase algo in algorithmsToEvaluate)
+                algo.SourceRepositoryManager = SourceManager;
 
             InitAlgorithms(sourceUrl);
         }
 
         protected void InitAlgorithms(string sourceUrl)
         {
-            // Load Ids from DB for first algorithm
-            Algorithms[0].InitIdsFromDbForSourceUrl(sourceUrl, false);
+            SourceManager.InitIdsFromDbForSourceUrl(sourceUrl, false);
 
             foreach (AlgorithmBase algo in Algorithms.Skip(1))
-            {
-                algo.SourceRepositoryId = Algorithms[0].SourceRepositoryId;
-                algo.RepositoryId = Algorithms[0].RepositoryId;
-            }
+                algo.RepositoryId = SourceManager.RepositoryId;
         }
 
         public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime resumeFrom, DateTime continueUntil, bool noComparison = false)
@@ -209,23 +213,13 @@
 
             DateTime end = info.When;
             foreach (AlgorithmBase algo in Algorithms)
-                algo.BuildConnectionsForSourceRepositoryBetween(end);
+                algo.UpdateFromSourceUntil(end);
 
             IList<string> involvedFiles = info.Filenames;
 
-            DateTime maxDateTime = Algorithms[0].MaxDateTime;
-            int repositoryId = Algorithms[0].RepositoryId;
-            int sourceRepositoryId = Algorithms[0].SourceRepositoryId;
-
             List<Task> tasks = new List<Task>();
             foreach (AlgorithmBase algorithm in Algorithms)
-            {
-                algorithm.MaxDateTime = maxDateTime;
-                algorithm.RepositoryId = repositoryId;
-                algorithm.SourceRepositoryId = sourceRepositoryId;
-
                 tasks.Add(algorithm.CalculateExpertiseForFilesAsync(involvedFiles));
-            }
 
             Task.WaitAll(tasks.ToArray());
 
@@ -235,7 +229,7 @@
             // 3. Calculate reviewers for the bug
 
             IEnumerable<int> artifactIds = involvedFiles
-                .Select(fileName => Algorithms[0].FindOrCreateFileArtifactId(fileName));
+                .Select(fileName => SourceManager.FindOrCreateFileArtifactId(fileName));
 
             // Create a list of tasks, one for each algorithm, that compute reviewers for the artifact
             IEnumerable<Task<ComputedReviewer>> computedReviewerTasks = Algorithms.Select(algorithm => algorithm.GetDevelopersForArtifactsAsync(artifactIds)).ToList();

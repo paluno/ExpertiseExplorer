@@ -17,15 +17,20 @@
             Init();
         }
 
+        public override void UpdateFromSourceUntil(DateTime end)
+        {
+            MaxDateTime = SourceRepositoryManager.BuildConnectionsForSourceRepositoryUntil(end);
+        }
+
         public override void CalculateExpertiseForFile(string filename)
         {
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
-            Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
+            Debug.Assert(SourceRepositoryManager != null, "Initialize SourceRepositoryManager first");
 
             int filenameId;
             try
             {
-                filenameId = GetFilenameIdFromFilenameApproximation(filename);
+                filenameId = SourceRepositoryManager.GetFilenameIdFromFilenameApproximation(filename);
             }
             catch(ArgumentException ae)
             {
@@ -65,7 +70,7 @@
             computedsize = Math.Abs(minsize);
 
             // second pass to compute the actual ownership
-            int artifactId = FindOrCreateFileArtifactId(filename);
+            int artifactId = SourceRepositoryManager.FindOrCreateFileArtifactId(filename);
 
             var developerLookup = new Dictionary<string, DeveloperExpertiseValue>();
             using (var repository = new ExpertiseDBEntities())

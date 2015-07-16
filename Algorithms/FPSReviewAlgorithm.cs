@@ -15,10 +15,8 @@ namespace ExpertiseExplorer.Algorithms
     /// </summary>
     public class FPSReviewAlgorithm : AlgorithmBase
     {
-
         private FPS.RootDirectory FpsTree { get; set; }
-
-
+        
         public FPSReviewAlgorithm(FPS.RootDirectory fpsTree)
         {
             Guid = new Guid("F1C17EA9-81E8-4F2B-A08D-A2DBC056F36D");

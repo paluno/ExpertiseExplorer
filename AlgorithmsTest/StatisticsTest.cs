@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ExpertiseExplorer.Algorithms.Statistics;
 using System.Linq;
 using System.Collections.Generic;
+using ExpertiseExplorer.Algorithms.RepositoryManagement;
 
 namespace ExpertiseExplorer.Algorithms.Test
 {

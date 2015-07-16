@@ -34,12 +34,12 @@
         public override void CalculateExpertiseForFile(string filename)
         {
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
-            Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
+            Debug.Assert(SourceRepositoryManager != null, "Initialize SourceRepositoryManager first");
 
             int filenameId;
             try
             {
-                filenameId = GetFilenameIdFromFilenameApproximation(filename);
+                filenameId = SourceRepositoryManager.GetFilenameIdFromFilenameApproximation(filename);
             }
             catch (ArgumentException ae)
             {
@@ -49,7 +49,7 @@
                 return;
             }
 
-            int artifactId = FindOrCreateFileArtifactId(filename);
+            int artifactId = SourceRepositoryManager.FindOrCreateFileArtifactId(filename);
 
             using (var repository = new ExpertiseDBEntities())
             {

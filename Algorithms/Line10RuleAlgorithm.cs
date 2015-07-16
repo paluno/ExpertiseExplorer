@@ -23,12 +23,12 @@
         public override void CalculateExpertiseForFile(string filename)
         {
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
-            Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
+            Debug.Assert(SourceRepositoryManager != null, "Initialize SourceRepositoryManager first");
 
             int filenameId;
             try
             {
-                filenameId = GetFilenameIdFromFilenameApproximation(filename);
+                filenameId = SourceRepositoryManager.GetFilenameIdFromFilenameApproximation(filename);
             }
             catch (ArgumentException ae)
             {
@@ -58,7 +58,7 @@
 
                 foreach (int oneOfTheLastDevelopers in lastDeveloperIds)
                 {
-                    DeveloperExpertise developerExpertise = FindDeveloperExpertiseWithArtifactName(entities, oneOfTheLastDevelopers, filename);
+                    DeveloperExpertise developerExpertise = SourceRepositoryManager.FindDeveloperExpertiseWithArtifactName(entities, oneOfTheLastDevelopers, filename);
                     var expertiseValue = FindOrCreateDeveloperExpertiseValue(developerExpertise);
                     expertiseValue.Value = lastUser.Time.UTCDateTime2unixTime();
                 }

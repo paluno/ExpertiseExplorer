@@ -16,9 +16,14 @@
             Init();
         }
 
+        public override void UpdateFromSourceUntil(DateTime end)
+        {
+            MaxDateTime = SourceRepositoryManager.BuildConnectionsForSourceRepositoryUntil(end);
+        }
+
         public override void CalculateExpertiseForFile(string filename)
         {
-            int artifactId = FindOrCreateFileArtifactId(filename);
+            int artifactId = SourceRepositoryManager.FindOrCreateFileArtifactId(filename);
 
             using (var repository = new ExpertiseDBEntities())
             {
