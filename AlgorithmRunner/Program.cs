@@ -107,7 +107,7 @@
                                         Console.WriteLine("Error: max argument is missing the parameter.");
                                         return;
                                     }
-
+                                    
                                     long timeOfMaxComparison;
                                     if (long.TryParse(args[i], out timeOfMaxComparison))
                                         maxTime = timeOfMaxComparison.UnixTime2UTCDateTime();
@@ -116,6 +116,7 @@
                                         Console.WriteLine("Error: Unable to parse {0} as int.", args[i]);
                                         return;
                                     }
+                                    maxTime = maxTime.ToUniversalTime();
 
                                     break;
                                 default:
@@ -210,7 +211,7 @@
             Console.WriteLine("\t additional argument: recalculate to add ComputedReviewers to existing Bugs in order to support additional algorithms (optional)");
             Console.WriteLine("\t additional argument: r or resume arg for resuming the computation from arg datetime, arg can be in unix time (optional)");
             Console.WriteLine("\t \t Useful for resuming the calculations after an error. Use repository.lastUpdate as the value for arg\n");
-            Console.WriteLine("\t additional argument: m or max to compute expertises only up to arg datetime, arg has to be in unix time (optional)");
+            Console.WriteLine("\t additional argument: m or max to compute expertises only up to arg datetime, arg can be in unix time (optional)");
             Console.WriteLine("\t Example of usage:");
             Console.WriteLine("\t AlgorithmRunner.exe Firefox Bugzilla C:\\ExpertiseExplorerOutput\\ a f r 1353412846\n");
         }
