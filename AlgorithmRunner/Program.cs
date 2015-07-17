@@ -179,7 +179,7 @@
             if (algoSelectUpperCase.Contains("F"))
             {
                 RootDirectory fpsTree = new RootDirectory();
-                WeighedReviewCountAlgorithm wrcAlgo = new WeighedReviewCountAlgorithm(fpsTree);
+                WeightedReviewCountAlgorithm wrcAlgo = new WeightedReviewCountAlgorithm(fpsTree);
                 wrcAlgo.LoadReviewScoresFromDB();
                 algorithms.Add(wrcAlgo);
                 algorithms.Add(new FPSReviewAlgorithm(fpsTree));

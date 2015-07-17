@@ -76,7 +76,7 @@
     <Compile Include="Statistics\SourceOfAllActualReviewers.cs" />
     <Compile Include="Statistics\Statistics.cs" />
     <Compile Include="Statistics\StatisticsResult.cs" />
-    <Compile Include="WeighedReviewCountAlgorithm.cs" />
+    <Compile Include="WeightedReviewCountAlgorithm.cs" />
     <Compile Include="LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Line10RuleAlgorithm.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
