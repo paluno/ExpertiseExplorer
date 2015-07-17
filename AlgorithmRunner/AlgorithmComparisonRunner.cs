@@ -30,7 +30,7 @@
         {
             get
             {
-                return Algorithms[0].RepositoryId;
+                return SourceManager.RepositoryId;
             }
         }
 
@@ -123,7 +123,10 @@
                 }
 
                 if (info.When > continueUntil)
+                {
+                    Log.Warn("Stopping comparison at date " + info.When.ToUniversalTime().ToString("u") + " (#" + count + "), since the specified maximum issue was reached.");
                     return;
+                }
                 if (info.When < minimumDate)
                 {
                     PredictedIssues.Add(info.ChangeId); // these do not have to be predicted anymore
