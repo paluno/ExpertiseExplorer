@@ -87,7 +87,7 @@
         {
             SourceManager.InitIdsFromDbForSourceUrl(sourceUrl, false);
 
-            foreach (AlgorithmBase algo in Algorithms.Skip(1))
+            foreach (AlgorithmBase algo in Algorithms)
                 algo.RepositoryId = SourceManager.RepositoryId;
         }
 
