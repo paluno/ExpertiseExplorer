@@ -163,3 +163,10 @@ ADD INDEX IX_ArtifactName USING BTREE (Name ASC);
 -- -----------------------------------------------------
 ALTER TABLE FileNames
 ADD INDEX IX_FileNamesName USING BTREE (Name ASC);
+
+
+-- -----------------------------------------------------
+-- ChangeIDs must be unique for Bugs in one repository. Adding the constraint does not work, though :-(
+-- -----------------------------------------------------
+ALTER TABLE Bugs
+ADD CONSTRAINT uc_identityChangeIDRepository UNIQUE (ChangeId(16),RepositoryId);
