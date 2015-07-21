@@ -169,12 +169,16 @@
         /// </summary>
         public void AnalyzeActualReviews(SourceOfActualReviewers sourceOfActualReviewers)
         {
+            IEnumerable<int> allBugIds = sourceOfActualReviewers.findBugs();
+
+            int someRandomBugId = allBugIds.First();
             List<int> algorithmIds;
             using (ExpertiseDBEntities context = new ExpertiseDBEntities())
-                algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
-            IDictionary<int,List<StatisticsResult>> output = algorithmIds.ToDictionary(algorithmId => algorithmId, algorithmId => new List<StatisticsResult>());
+                algorithmIds = context.Algorithms
+                    .Select(a => a.AlgorithmId)
+                    .Where(algoId => context.ComputedReviewers.Any(cr => cr.BugId == someRandomBugId && cr.AlgorithmId == algoId))    // filter algorithms for which no calculation has been done
+                    .ToList();
 
-            IEnumerable<int> allBugIds = sourceOfActualReviewers.findBugs();
 
             int count = 0;
             int errorCount = 0;
@@ -183,6 +187,7 @@
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
+            IDictionary<int, List<StatisticsResult>> output = algorithmIds.ToDictionary(algorithmId => algorithmId, algorithmId => new List<StatisticsResult>());
             foreach (int bugId in allBugIds)
             {
                 if (++count % 1000 == 0 && count > 0)
@@ -201,7 +206,7 @@
                     using (ExpertiseDBEntities context = new ExpertiseDBEntities())
                         actualReviewerIds = context.ActualReviewers
                             .Where(ar => ar.BugId == bugId)
-                            .Select(ar => context.Developers.Single(dev => dev.Name == ar.Reviewer && dev.RepositoryId == RepositoryId).DeveloperId)
+                            .Select(ar => context.Developers.FirstOrDefault(dev => dev.Name == ar.Reviewer && dev.RepositoryId == RepositoryId).DeveloperId)
                             .ToList();
 
                     Debug.Assert(actualReviewerIds.Count > 0);  // All bugs must have reviewers
