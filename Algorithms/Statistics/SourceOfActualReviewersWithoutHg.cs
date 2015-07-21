@@ -18,7 +18,7 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         /// filters Mozilla's original import "author" hg@mozilla.com
         /// </summary>
         /// <returns>Ids of Bugs that do not contain any reference to hg@mozilla.com</returns>
-        public override IEnumerable<int> findBugsInDatabase()
+        protected override IEnumerable<int> findBugsInDatabase()
         {
             using (var context = new ExpertiseDBEntities())
             {

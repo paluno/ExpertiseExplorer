@@ -9,7 +9,7 @@ namespace ExpertiseExplorer.Algorithms.Statistics
 {
     class SourceOfAllActualReviewers : SourceOfActualReviewers
     {
-        public override IEnumerable<int> findBugsInDatabase()
+        protected override IEnumerable<int> findBugsInDatabase()
         {
             using (var context = new ExpertiseDBEntities())
                 return context.Bugs.Where(bug => bug.RepositoryId == RepositoryId).Select(bug => bug.BugId).ToList();
