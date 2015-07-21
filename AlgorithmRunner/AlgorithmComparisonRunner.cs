@@ -172,8 +172,8 @@
                         }
 
                         ReviewInfo ri = info as ReviewInfo;
-                        if (null != ri && !fRecalculateMode)        // in recalculate mode, additional reviewers do not need to be added, as they already exist
-                            ProcessReviewInfo(ri, noComparison);
+                        if (null != ri)
+                            ProcessReviewInfo(ri, noComparison || fRecalculateMode);    // in recalculate mode, additional reviewers do not need to be added, as they already exist
 
                         PatchUpload pu = info as PatchUpload;
                         if (null != pu && !noComparison)
