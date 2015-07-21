@@ -163,125 +163,99 @@
         }
 #endregion Find Missing Reviewers
 
+        /// <summary>
+        /// Iterates through the list of bugs and checks for each bug which algorithms suggested correct reviewers and which did not.
+        /// Results are written to stats_x.txt: A CSV with bugId and correctly predicted reviewers in each entry (StatisticsResult strings)
+        /// </summary>
         public void AnalyzeActualReviews(SourceOfActualReviewers sourceOfActualReviewers)
         {
-            throw new NotImplementedException("This method must be changed massively");
+            List<int> algorithmIds;
+            using (ExpertiseDBEntities context = new ExpertiseDBEntities())
+                algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
+            IDictionary<int,List<StatisticsResult>> output = algorithmIds.ToDictionary(algorithmId => algorithmId, algorithmId => new List<StatisticsResult>());
 
-            //ReadUniqueActualReviewers();
-            //ReadUniqueComputedReviewers();
+            IEnumerable<int> allBugIds = sourceOfActualReviewers.findBugs()
 
-            //List<Author> actualReviewersAndAlternatives = Author.GetAuthorsFromFile(Path4ActualReviewers);
-            //List<Author> computedReviewersAndAlternatives = Author.GetAuthorsFromFile(Path4ComputedReviewers);
+            int count = 0;
+            int errorCount = 0;
+            double elapsed = 0d;
+            int maxCount = allBugIds.Count();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
-            //List<int> algorithmIds;
-            //using (ExpertiseDBEntities context = new ExpertiseDBEntities())
-            //    algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
+            foreach (int bugId in allBugIds)
+            {
+                if (++count % 1000 == 0 && count > 0)
+                {
+                    sw.Stop();
+                    elapsed += sw.Elapsed.TotalSeconds;
+                    double avg = elapsed / count;
+                    TimeSpan remaining = TimeSpan.FromSeconds(avg * (maxCount - count));
+                    log.DebugFormat("Now at: {0} - (act: {1} | avg: {2:N}s | remaining: {3})", count, sw.Elapsed, avg, remaining);
+                    sw.Restart();
+                }
 
-            //var output = algorithmIds.ToDictionary(algorithmId => algorithmId, algorithmId => new List<StatisticsResult>());
+                try
+                {
+                    List<int> actualReviewerIds;
+                    using (ExpertiseDBEntities context = new ExpertiseDBEntities())
+                        actualReviewerIds = context.ActualReviewers
+                            .Where(ar => ar.BugId == bugId)
+                            .Select(ar => context.Developers.Single(dev => dev.Name == ar.Reviewer && dev.RepositoryId == RepositoryId).DeveloperId)
+                            .ToList();
 
-            //IDictionary<int,string> actualReviewers = sourceOfActualReviewers.findReviewsWithReviewers();
-            //int count = 0;
-            //double elapsed = 0d;
-            //int maxCount = actualReviewers.Count();
-            //Stopwatch sw = new Stopwatch();
-            //sw.Start();
-            //int errorCount = 0;
+                    Debug.Assert(actualReviewerIds.Count > 0);  // All bugs must have reviewers
 
-            //foreach (int actualReviewerId in actualReviewers.Keys)
-            //{
-            //    try
-            //    {
-            //        if (count % 1000 == 0 && count > 0)
-            //        {
-            //            sw.Stop();
-            //            elapsed += sw.Elapsed.TotalSeconds;
-            //            double avg = elapsed / count;
-            //            TimeSpan remaining = TimeSpan.FromSeconds(avg * (maxCount - count));
-            //            log.DebugFormat("Now at: {0} - (act: {1} | avg: {2:N}s | remaining: {3})", count, sw.Elapsed, avg, remaining);
-            //            sw.Restart();
-            //        }
+                    foreach (int algorithmId in algorithmIds)
+                        output[algorithmId].Add(CalculateResultForOneAlgorithmAndBug(algorithmId, bugId, actualReviewerIds));
+                }
+                catch (Exception ex)
+                {
+                    if (++errorCount > 10)
+                    {
+                        log.Fatal("10 errors while computing statistics, BugID=" + bugId + ", giving up.", ex);
+                        throw new Exception("10 errors while computing statistics, giving up.", ex);
+                    }
 
-            //        count++;
+                    log.Error("Error #" + errorCount + " on BugID " + bugId, ex);
+                }
+            }
 
-            //        string actualReviewerName = actualReviewers[actualReviewerId].ToLowerInvariant();
+            foreach (int algorithmId in output.Keys)
+            {
+                List<StatisticsResult> algoStats = output[algorithmId];
+                var sb = new StringBuilder();
+                foreach (StatisticsResult statisticsResult in algoStats)
+                {
+                    sb.AppendLine(statisticsResult.ToCSV());
+                }
 
-            //        IEnumerable<ComputedReviewer> computedReviewers = GetComputedReviewersForActualReviewerId(actualReviewerId);
-
-            //        Author alternativesForActualReviewer =
-            //            actualReviewersAndAlternatives.Single(
-            //                ar => ar.completeName.ToLowerInvariant() == actualReviewerName);
-
-            //        foreach (ComputedReviewer computedReviewer in computedReviewers)
-            //        {
-            //            var computedReviewerNamesAndValues = new List<KeyValuePair<string, double>>
-            //            {
-            //                new KeyValuePair<string, double>(computedReviewer.Expert1, computedReviewer.Expert1Value),
-            //                new KeyValuePair<string, double>(computedReviewer.Expert2, computedReviewer.Expert2Value),
-            //                new KeyValuePair<string, double>(computedReviewer.Expert3, computedReviewer.Expert3Value),
-            //                new KeyValuePair<string, double>(computedReviewer.Expert4, computedReviewer.Expert4Value),
-            //                new KeyValuePair<string, double>(computedReviewer.Expert5, computedReviewer.Expert5Value)
-            //            };
-
-            //            bool found = false;
-            //            for (int i = 0; i < 5; i++) // 5 is the number of reviewers that may be recommended in ComputedReviewers
-            //            {
-            //                if (computedReviewerNamesAndValues[i].Key == string.Empty)
-            //                    break;
-
-            //                Author alternativesForComputedReviewer =
-            //                computedReviewersAndAlternatives.Single(
-            //                    cr => cr.completeName.ToLowerInvariant() == computedReviewerNamesAndValues[i].Key.ToLowerInvariant());
-
-            //                if (!alternativesForActualReviewer.IsMatching(alternativesForComputedReviewer))
-            //                    continue;
-
-            //                output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId)
-            //                    {
-            //                        AuthorWasExpertNo = i + 1,
-            //                        ExpertiseValue = computedReviewerNamesAndValues[i].Value
-            //                    });
-
-            //                found = true;
-
-            //                break;
-            //            }
-
-            //            if (!found)
-            //                output[computedReviewer.AlgorithmId].Add(new StatisticsResult(actualReviewerId));
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        if (++errorCount > 10)
-            //        {
-            //            log.Fatal("10 errors while computing statistics, ActualReviewerId=" + actualReviewerId + ", giving up.", ex);
-            //            throw new Exception("10 errors while computing statistics, giving up.", ex);
-            //        }
-
-            //        log.Error("Error #" + errorCount + " on ActualReviewerId " + actualReviewerId, ex);
-            //    }
-            //}
-
-            //foreach (var algoStats in output)
-            //{
-            //    var sb = new StringBuilder();
-            //    foreach (StatisticsResult statisticsResult in algoStats.Value)
-            //    {
-            //        sb.AppendLine(statisticsResult.ToCSV());
-            //    }
-
-            //    File.WriteAllText(string.Format(basepath + "stats_{0}.txt", algoStats.Key), sb.ToString());
-            //}
+                File.WriteAllText(string.Format(basepath + "stats_{0}.txt", algorithmId), sb.ToString());
+            }
         }
 
-        //private IEnumerable<ComputedReviewer> GetComputedReviewersForActualReviewerId(int id)
-        //{
-        //    using (var context = new ExpertiseDBEntities())
-        //    {
-        //        return context.ComputedReviewers.Where(cr => cr.ActualReviewerId == id).ToList().AsReadOnly();
-        //    }
-        //}
+        private StatisticsResult CalculateResultForOneAlgorithmAndBug(int algorithmId, int bugId, List<int> actualReviewerIds)
+        {
+            StatisticsResult sr = new StatisticsResult(bugId);
+            ComputedReviewer currentReviewerSet;
+            using (ExpertiseDBEntities context = new ExpertiseDBEntities())
+            {
+                currentReviewerSet = context.ComputedReviewers.Single(cr => cr.AlgorithmId == algorithmId && cr.BugId == bugId);
+            }
 
+            sr.Matches[0] = actualReviewerIds.Contains(currentReviewerSet.Expert1Id ?? -1); // the magic "-1" never matches
+            sr.Matches[1] = actualReviewerIds.Contains(currentReviewerSet.Expert2Id ?? -1);
+            sr.Matches[2] = actualReviewerIds.Contains(currentReviewerSet.Expert3Id ?? -1);
+            sr.Matches[3] = actualReviewerIds.Contains(currentReviewerSet.Expert4Id ?? -1);
+            sr.Matches[4] = actualReviewerIds.Contains(currentReviewerSet.Expert5Id ?? -1);
+
+            return sr;
+        }
+
+        /// <summary>
+        /// Expects stats_x.txt entries for all algorithms. It then counts the hits and misses and computes
+        /// the fraction of hits. Results are written to stats_x_analyzedPOSTFIX.txt.
+        /// </summary>
         public void ComputeStatisticsForAllAlgorithmsAndActualReviews(SourceOfActualReviewers source)
         {
             List<int> algorithmIds;
@@ -295,9 +269,9 @@
         {
             string[] originalData = File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId));
             List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine)
-                .Where(tmp => source.findReviews().Contains(tmp.ActualReviewerId)).ToList();
+                .Where(tmp => source.findBugs().Contains(tmp.ActualReviewerId)).ToList();
 
-            int count = source.findReviews().Count();
+            int count = source.findBugs().Count();
             int foundNo = workingSet.Count(sr => sr.AuthorWasFound);
             int[] expertPlacements = new int[5];
 
@@ -319,7 +293,7 @@
         /// </summary>
         public void FindIntersectingEntriesForActualReviewerIds(SourceOfActualReviewers source)
         {
-            IEnumerable<int> actualReviewerIds = source.findReviews();
+            IEnumerable<int> actualReviewerIds = source.findBugs();
 
             List<int> algorithmIds;
             using (var context = new ExpertiseDBEntities())
@@ -352,7 +326,7 @@
         /// </summary>
         public void FindIntersectingEntriesPairwiseForActualReviewerIds(SourceOfActualReviewers source)
         {
-            IEnumerable<int> actualReviewerIds = source.findReviews();
+            IEnumerable<int> actualReviewerIds = source.findBugs();
             List<int> algorithmIds;
             using (var context = new ExpertiseDBEntities())
                 algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
