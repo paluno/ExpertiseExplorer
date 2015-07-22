@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -30,7 +31,7 @@ namespace ExpertiseExplorer.Algorithms.Statistics
 
             int bugId = int.Parse(tmp[0]);
             IEnumerable<int> matchedNumbers = tmp[1]
-                .Split(',')
+                .Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(matchString => int.Parse(matchString));
 
             StatisticsResult sr = new StatisticsResult(bugId);

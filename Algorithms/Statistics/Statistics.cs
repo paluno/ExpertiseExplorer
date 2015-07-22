@@ -265,34 +265,35 @@
         {
             List<int> algorithmIds;
             using (var context = new ExpertiseDBEntities())
-                algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
+                algorithmIds = context.Algorithms
+                    .Select(a => a.AlgorithmId).ToList()        // perform the SQL query
+                    .Where(algoID => File.Exists($"{basepath}stats_{algoID}.txt")).ToList();    // check whether the file exists on disk
+            Debug.Assert(algorithmIds.Any());
 
             Parallel.ForEach(algorithmIds, algorithmId => ComputeStatisticsForAlgorithmAndActualReviews(algorithmId, source));
         }
 
         private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithmId, SourceOfActualReviewers source)
         {
-            throw new NotImplementedException("This must be reimplemented to reflect the changes to StatisticsResult");
+            string[] originalData = File.ReadAllLines($"{basepath}stats_{algorithmId}.txt");
+            List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine)
+                .Where(sr => source.findBugs().Contains(sr.BugId)).ToList();
 
-            //string[] originalData = File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId));
-            //List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine)
-            //    .Where(tmp => source.findBugs().Contains(tmp.ActualReviewerId)).ToList();
+            int count = workingSet.Count();
+            int foundNo = workingSet.Count(sr => sr.IsMatch);
+            int[] expertPlacements = new int[StatisticsResult.NUMBER_OF_EXPERTS];
 
-            //int count = source.findBugs().Count();
-            //int foundNo = workingSet.Count(sr => sr.AuthorWasFound);
-            //int[] expertPlacements = new int[5];
+            for (int i = 0; i < StatisticsResult.NUMBER_OF_EXPERTS; i++)
+            {
+                expertPlacements[i] = workingSet.Count(sr => sr.Matches[i]);
+            }
 
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    expertPlacements[i] = workingSet.Count(sr => sr.AuthorWasExpertNo == (i + 1));
-            //}
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Expert was found: {foundNo} / {count} ({(double)foundNo / count:P})");
+            for (int i = 0; i < StatisticsResult.NUMBER_OF_EXPERTS; i++)
+                sb.AppendLine($"Expert was No {i+1}:  {expertPlacements[i]} / {count} ({(double)expertPlacements[i] / (double)count:P})");
 
-            //StringBuilder sb = new StringBuilder();
-            //sb.AppendLine(string.Format("Expert was found: {0} / {1} ({2:P})", foundNo, count, (double)foundNo / count));
-            //for (int i = 0; i < 5; i++)
-            //    sb.AppendLine(string.Format("Expert was No {0}:  {1} / {2} ({3:P})", i + 1, expertPlacements[i], count, (double)expertPlacements[i] / (double)count));
-
-            //File.WriteAllText(string.Format(basepath + "stats_{0}_analyzed{1}.txt", algorithmId, source.Postfix), sb.ToString());
+            File.WriteAllText($"{basepath}stats_{algorithmId}_analyzed{source.Postfix}.txt", sb.ToString());
         }
 
         /// <summary>
