@@ -190,8 +190,8 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
         #endregion Updating the Repository from SourceRepository
 
         #region DeveloperExpertises and Artifacts
-        private static NameLockFactory artifactLocks = new NameLockFactory();
-        private static NameLockFactory developerExpertiseLocksOnArtifacts = new NameLockFactory();
+        private static NameLockFactory artifactLocks = new NameLockFactory(false);
+        private static NameLockFactory developerExpertiseLocksOnArtifacts = new NameLockFactory(false);
 
         public DeveloperExpertise FindDeveloperExpertiseWithArtifactName(ExpertiseDBEntities repository, int developerId, string filename)
         {

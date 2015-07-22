@@ -12,16 +12,25 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
     /// </summary>
     public class NameLockFactory
     {
+        public bool IsCaseSensitive { get; }
+
+        public NameLockFactory(bool isCaseSensitive = true)
+        {
+            this.IsCaseSensitive = isCaseSensitive;
+        }
+
         /// <summary>
         /// Stores locks for each artifact by artifact name. A counter exists for every artifact and the dicitionary empties itself again if 
         /// the locks are not needed anymore. Access only through acquireArtifactLock and releaseArtifactLock!
         /// </summary>
         protected readonly ConcurrentDictionary<string, Tuple<int, object>> dictLocks = new ConcurrentDictionary<string, Tuple<int, object>>();
 
-        public object acquireLock(string lockName)
+        public object acquireLock(string nameOfLock)
         {
+            string caseRespectingLockName = IsCaseSensitive ? nameOfLock : nameOfLock.ToUpperInvariant();
+
             Tuple<int, object> lockWithCounter = dictLocks.AddOrUpdate(
-                lockName,
+                caseRespectingLockName,
                 new Tuple<int, object>(1, new object()),     // this is a new lock pair
                 delegate(string theName, Tuple<int, object> lockPair)
                 {
@@ -36,7 +45,7 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
                 lock (dictLocks)
                 {
                     lockWithCounter = dictLocks.AddOrUpdate(
-                        lockName,
+                        caseRespectingLockName,
                         new Tuple<int, object>(1, new object()),     // this is a new lock pair, the old one was deleted already
                         (theName, lockPair) => new Tuple<int, object>(lockPair.Item1 + 1, lockPair.Item2)   // it's okay even to increase a zero counter because "release" will check before deletion if at all
                     );
@@ -45,10 +54,12 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
             return lockWithCounter.Item2;
         }
 
-        public void releaseLock(string lockName)
+        public void releaseLock(string nameOfLock)
         {
+            string caseRespectingLockName = IsCaseSensitive ? nameOfLock : nameOfLock.ToUpperInvariant();
+
             Tuple<int, object> remainingLock = dictLocks.AddOrUpdate(
-                lockName,
+                caseRespectingLockName,
                 delegate(string theName) { throw new InvalidOperationException("A lock was released more often than retrieved"); },
                 (theName, lockPair) => new Tuple<int, object>(lockPair.Item1 - 1, lockPair.Item2)   // decrease counter
             );
@@ -56,11 +67,11 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
             if (0 == remainingLock.Item1)    // nobody uses the lock anymore, we can delete it
                 lock (dictLocks)
                 {
-                    if (dictLocks[lockName].Item1 > 0)
+                    if (dictLocks[caseRespectingLockName].Item1 > 0)
                         return;     // the lock was recreated in between and must not be released
 
                     Tuple<int, object> dummy;
-                    dictLocks.TryRemove(lockName, out dummy);   // this always succeeds
+                    dictLocks.TryRemove(caseRespectingLockName, out dummy);   // this always succeeds
                 }
         }
     }
