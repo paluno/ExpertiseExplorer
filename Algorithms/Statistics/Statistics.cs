@@ -358,7 +358,7 @@
             using (var context = new ExpertiseDBEntities())
                 algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
 
-            log.Debug("Setting up");
+            log.Debug("Setting up"); // TODO könnte man in eine eigene Methode auslagern -> setup oder init
             var sb = new StringBuilder();
             List<List<StatisticsResult>> allStatistics = algorithmIds
                 .Select(algorithmId => File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId)))

@@ -35,6 +35,7 @@
             }
             catch(ArgumentException ae)
             {
+                // TODO finde es ungeschickt über das catch herauszufinden, ob die File existiert bezüglich Lesbarkeit und Laufzeit
                 if (ae.ParamName != "filename")
                     throw;
                 ClearExpertiseForAllDevelopers(filename);   // the file does not exist in the repository, so nobody has experience

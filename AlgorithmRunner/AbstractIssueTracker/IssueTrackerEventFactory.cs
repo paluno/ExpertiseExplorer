@@ -31,6 +31,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
         public void PrepareInput(string pathToRawInputFile, bool overwrite = false)
         {
             if (!overwrite && File.Exists(InputFilePath))
+                // TODO log-Ausgabe. Nichts gemacht
                 return;
 
             PrefilterRawInput(pathToRawInputFile);
