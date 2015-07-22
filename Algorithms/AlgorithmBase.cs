@@ -80,7 +80,7 @@
                         rars.RunUntil = value;
                     else
                         return;
-
+                    // TODO sind die saveChanges-Aufrufe notwendig? Hier wird es gemacht. Eine Methode darüber nicht
                     entities.SaveChanges();
                 }
             }
@@ -129,14 +129,14 @@
                 foreach (DeveloperExpertise expertise in artifact.DeveloperExpertises)
                 {
                     IEnumerator<DeveloperExpertiseValue> iteratorOnValuesToClear = expertise.DeveloperExpertiseValues.Where(dev => dev.AlgorithmId == AlgorithmId).GetEnumerator();
-                    while(iteratorOnValuesToClear.MoveNext())
+                    while (iteratorOnValuesToClear.MoveNext())
                         expertise.DeveloperExpertiseValues.Remove(iteratorOnValuesToClear.Current);
                 }
                 entities.SaveChanges();
             }
         }
 
-       protected void Init()
+        protected void Init()
         {
             using (var repository = new ExpertiseDBEntities())
             {
@@ -182,7 +182,7 @@
                 repository.SaveChanges();
             }
         }
-        
+
         protected DeveloperExpertiseValue FindOrCreateDeveloperExpertiseValue(DeveloperExpertise developerExpertise)
         {
             DeveloperExpertiseValue dev = developerExpertise.DeveloperExpertiseValues.SingleOrDefault(

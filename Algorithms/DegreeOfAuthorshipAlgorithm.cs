@@ -16,15 +16,16 @@
         /// <summary>
         /// Which weightings should be used for the formula?
         /// </summary>
-        public enum WeightingType { 
+        public enum WeightingType
+        {
             /// <summary>
             /// This selects the weightings from the original ICSE'10 paper "A Degree-of-Knowledge Model to Capture Source Code Familiarity"
             /// </summary>
-            Original, 
+            Original,
             /// <summary>
             /// This value represents the weightings from the 2014 TOSEM article "Degree-of-knowledge: Modeling a Developer's Knowledge of Code", Sec. 8.2
             /// </summary>
-            UniversalTOSEM 
+            UniversalTOSEM
         }
 
         private readonly double firstAuthorWeighting;
@@ -35,7 +36,7 @@
         public DegreeOfAuthorshipAlgorithm(WeightingType sourceOfWeightings)
         {
             Name += "-" + sourceOfWeightings.ToString();
-            switch(sourceOfWeightings)
+            switch (sourceOfWeightings)
             {
                 case WeightingType.Original:
                     Guid = new Guid("59a9d58a-8382-43b1-a438-ddb9a154dda9");
@@ -71,12 +72,13 @@
             {
                 allExpertiseIDs = repository.DeveloperExpertises.Include(de => de.Artifact)
                     .Where(de => de.Artifact.RepositoryId == RepositoryId && de.Artifact.ArtifactId == artifactId
-                        && de.Inferred == false && (de.DeliveriesCount>0 || de.IsFirstAuthor))  // this filters reset DeveloperExpertises with no direct expertise
+                        && de.Inferred == false && (de.DeliveriesCount > 0 || de.IsFirstAuthor))  // this filters reset DeveloperExpertises with no direct expertise
                     .Select(de => de.DeveloperExpertiseId).ToList();
             }
 
             foreach (var developerExpertiseId in allExpertiseIDs)
             {
+                // TODO das using könnte vor die foreach Schleife
                 using (var repository = new ExpertiseDBEntities())
                 {
                     DeveloperExpertise developerExpertise = repository.DeveloperExpertises.Include(de => de.Artifact).Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperExpertiseId == developerExpertiseId);

@@ -12,7 +12,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
     class BugzillaReviewFactory : IssueTrackerEventFactory
     {
         protected BugzillaAttachmentFactory AttachmentFactory { get; private set; }
-        
+
         /// <summary>
         /// Attachments without date
         /// </summary>
@@ -32,13 +32,13 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
 
         public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
         {
-                // First get the patch uploads
+            // First get the patch uploads
             IEnumerable<BugzillaAttachmentInfo> attachmentList = (IEnumerable<BugzillaAttachmentInfo>)AttachmentFactory.parseIssueTrackerEvents();
-            
-                // Lookup table to add file names to BugzillaReviews
+
+            // Lookup table to add file names to BugzillaReviews
             Dictionary<UInt64, IList<string>> dictAttachments = attachmentList.ToDictionary(bai => bai.AttachmentId, bai => bai.Filenames);
-                
-                // Second, get reviews
+
+            // Second, get reviews
             IEnumerable<BugzillaReview> reviewList = GetActivityInfoFromFile(InputFilePath, dictAttachments);
 
             HashSet<int> setOfAllUsedBugIds = new HashSet<int>(reviewList.Select(review => review.BugId));
@@ -100,6 +100,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
             Debug.WriteLine("Starting ordering at: " + DateTime.Now);
         }
 
+        // TODO könnten wir das nicht in eine eigene Klasse auslagern mit Hinweis der Quelle?
         #region Code from svick posted on https://stackoverflow.com/questions/7717871/how-to-perform-merge-sort-using-linq
         /// <summary>
         /// Merge-Sort-style ordered union of two sequences

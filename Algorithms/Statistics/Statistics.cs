@@ -22,7 +22,7 @@
         private string Path4ComputedReviewers { get { return basepath + "reviewers_computed.txt"; } }
         private string Path4MissingReviewers { get { return basepath + "reviewers_missing.txt"; } }
 
-        private int _RepositoryId = int.MinValue;
+        private int _RepositoryId = int.MinValue; // TODO könnte man hier auch mit Null arbeiten?
         public int RepositoryId
         {
             get
@@ -161,10 +161,11 @@
 
             File.WriteAllText(Path4MissingReviewers, sb.ToString());
         }
-#endregion Find Missing Reviewers
+        #endregion Find Missing Reviewers
 
         public void AnalyzeActualReviews(SourceOfActualReviewers sourceOfActualReviewers)
         {
+            // TODO müssen wir da noch was machen?
             throw new NotImplementedException("This method must be changed massively");
 
             //ReadUniqueActualReviewers();
@@ -327,9 +328,9 @@
 
             log.Debug("Setting up");
             List<List<StatisticsResult>> allStatistics = algorithmIds
-                    // read statistics for every algorithm
+                // read statistics for every algorithm
                 .Select(algorithmId => File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId)))
-                    // map the string[] with the statistics of each algorithm to a List<StatisticResult> for each algorithm
+                // map the string[] with the statistics of each algorithm to a List<StatisticResult> for each algorithm
                 .Select(originalData => originalData.Select(StatisticsResult.FromCSVLine).ToList()).ToList();
 
             List<StatisticsResult> workingSet = allStatistics[1]    // Why 1??? Maybe skip Line 10 rule, because it has at most one entry?
@@ -370,7 +371,7 @@
             for (int i = 0; i < algorithmIds.Count; i++)
             {
                 List<StatisticsResult> workingSet = allStatistics[i].Where(tmp => actualReviewerIds.Contains(tmp.ActualReviewerId) && tmp.AuthorWasFound).ToList();
-                
+
                 int count = workingSet.Count;
                 for (int j = 0; j < algorithmIds.Count; j++)
                 {
@@ -390,12 +391,12 @@
         {
             ReadUniqueActualReviewers();
             IEnumerable<string> actualReviewers = af.Consolidate(File.ReadAllLines(Path4ActualReviewers))
-                 .Select(reviewerList => string.Join(",",reviewerList))     // put each reviewer in one string
+                 .Select(reviewerList => string.Join(",", reviewerList))     // put each reviewer in one string
                  .OrderBy(x => x);                                          // sort the resulting reviewers
             using (TextWriter writerActualReviewers = new StreamWriter(Path4ActualReviewers))
                 foreach (string oneReviewer in actualReviewers)
                     writerActualReviewers.WriteLine(oneReviewer);
-            
+
             ReadUniqueComputedReviewers();
             IEnumerable<string> computedReviewers = af.Consolidate(File.ReadAllLines(Path4ComputedReviewers))
                  .Select(reviewerList => string.Join(",", reviewerList))     // put each reviewer in one string

@@ -24,7 +24,7 @@ namespace ExpertiseExplorer.Algorithms.Statistics
 
         public static StatisticsResult FromCSVLine(string csvline)
         {
-            var tmp = csvline.Split(';');
+            var tmp = csvline.Split(';');  // TODO name tmp verwirrend
             var actualReviewerId = int.Parse(tmp[0]);
             var authorWasExpertNo = int.Parse(tmp[1]);
             var expertiseValue = double.Parse(tmp[2]);

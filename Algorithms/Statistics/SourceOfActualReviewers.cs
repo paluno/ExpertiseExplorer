@@ -11,7 +11,7 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         public enum StatisticsSource
         {
             All = 0,
-            WithoutHg = 1
+            WithoutHg = 1 // TODO hg steht für den Author. Vielleicht ist der Enum schlecht benannt
         }
 
         public int RepositoryId { get; private set; }
@@ -25,9 +25,9 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         /// <summary>
         /// Factory Method for Sources
         /// </summary>
-       public static SourceOfActualReviewers createSourceFromParameter(StatisticsSource typeOfSource, int repositoryId)
+        public static SourceOfActualReviewers createSourceFromParameter(StatisticsSource typeOfSource, int repositoryId)
         {
-            switch(typeOfSource)
+            switch (typeOfSource)
             {
                 case StatisticsSource.All:
                     return new SourceOfAllActualReviewers(repositoryId);

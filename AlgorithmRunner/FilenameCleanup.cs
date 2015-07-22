@@ -5,6 +5,8 @@
     using System.Linq;
     using System.Text;
 
+    // TODO das müsste in den Bugzilla-Ordner
+    // Verstehe aber auch nicht ganz die Funktion der Klasse
     internal class FilenameCleanup
     {
         public void StartCleanup(string inFile, string outFile)
@@ -26,7 +28,7 @@
                 if (!(IsMailRelated(files) || IsSuiteRelated(files) || IsWebtoolsRelated(files) || IsWalletRelated(files) || IsCaminoRelated(files) || IsCalendarRelated(files) || IsBugzillaRelated(files)))
                 {
                     attachment.Filenames = files;
-                }   
+                }
 
                 attachments.Add(attachment);
             }

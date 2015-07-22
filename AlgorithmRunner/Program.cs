@@ -14,6 +14,7 @@
     {
         public enum ReviewSourceType { Bugzilla, Gerrit };
 
+        // TODO Methode ist sehr schwer zu lesen
         public static void Main(string[] args)
         {
             log4net.Config.XmlConfigurator.Configure();
@@ -107,7 +108,7 @@
                                         Console.WriteLine("Error: max argument is missing the parameter.");
                                         return;
                                     }
-                                    
+
                                     long timeOfMaxComparison;
                                     if (long.TryParse(args[i], out timeOfMaxComparison))
                                         maxTime = timeOfMaxComparison.UnixTime2UTCDateTime();

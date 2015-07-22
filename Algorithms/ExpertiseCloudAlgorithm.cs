@@ -32,7 +32,7 @@
 
             var path = Path.GetDirectoryName(filename);
             if (path == null)
-                throw new NullReferenceException("path");
+                throw new NullReferenceException("path");       // TODO Meldung sehr kurz :)
 
             List<DeveloperForPath> developersForPath;
             if (path == string.Empty)
@@ -49,12 +49,12 @@
 
                 using (var repository = new ExpertiseDBEntities())
                 {
-                    developersForPath = repository.GetDeveloperForPath(RepositoryId,path);
+                    developersForPath = repository.GetDeveloperForPath(RepositoryId, path);
                 }
             }
 
             IEnumerable<DeveloperWithExpertise> experiencedDevelopers = developersForPath
-                .Select(dev4path => new DeveloperWithExpertise(dev4path.DeveloperId,dev4path.DeliveriesCount + dev4path.IsFirstAuthorCount));
+                .Select(dev4path => new DeveloperWithExpertise(dev4path.DeveloperId, dev4path.DeliveriesCount + dev4path.IsFirstAuthorCount));
             storeDeveloperExpertiseValues(filename, experiencedDevelopers);
         }
     }

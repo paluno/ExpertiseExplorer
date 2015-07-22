@@ -29,7 +29,7 @@
             using (var repository = new ExpertiseDBEntities())
             {
                 var developers = repository.DeveloperExpertises
-                    .Where(de => de.ArtifactId == artifactId && de.Inferred == false && (de.DeliveriesCount>0 || de.IsFirstAuthor))
+                    .Where(de => de.ArtifactId == artifactId && de.Inferred == false && (de.DeliveriesCount > 0 || de.IsFirstAuthor))
                     .Select(de => de.DeveloperId)
                     .Distinct().ToList();
 
@@ -42,7 +42,7 @@
                     expertiseValue.Value = developerExpertise.DeliveriesCount + (developerExpertise.IsFirstAuthor ? 1f : 0f);
                 }
 
-                repository.SaveChanges();
+                repository.SaveChanges();   // TODO kann wieder weg?
             }
         }
     }

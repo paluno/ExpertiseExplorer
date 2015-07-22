@@ -68,6 +68,7 @@
 
             SourceManager = new SourceRepositoryConnector();
             NameConsolidator = new AliasFinder();
+            // TODO static final string für den Namen
             string authorMappingPath = basepath + "authors_consolidated.txt";
             if (File.Exists(authorMappingPath))
             {
@@ -76,7 +77,9 @@
                 foreach (AlgorithmBase algo in algorithmsToEvaluate)
                     algo.Deduplicator = NameConsolidator;
             }
+            // TODO log falls keine Datei vorhanden ist
 
+            // TODO könnte man das nicht in initalgorithms machen und sich eine foreach sparen?
             foreach (AlgorithmBase algo in algorithmsToEvaluate)
                 algo.SourceRepositoryManager = SourceManager;
 
@@ -94,7 +97,7 @@
         public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime? resumeFrom, DateTime continueUntil, bool noComparison, bool fRecalculateMode)
         {
             Log.Info("Starting comparison");
-            IEnumerable<IssueTrackerEvent> list = factory.parseIssueTrackerEvents();
+            IEnumerable<IssueTrackerEvent> list = factory.parseIssueTrackerEvents(); // TODO Die Liste ist nach info.when sortiert? Kann man das kenntlich machen?
             HandleIssueTrackerEventList(list, resumeFrom, continueUntil, noComparison, fRecalculateMode);
             Log.Info("Ending comparison");
         }
@@ -114,6 +117,9 @@
             int count = 0;
             foreach (IssueTrackerEvent info in issueTrackerEventList)
             {
+                // TODO in HandleIssueTrackerEvent auslagern
+                
+                // TODO Log Methodik in eigene Methode
                 ++count;
                 if (count % 1000 == 0)
                 {
@@ -132,6 +138,8 @@
                     PredictedIssues.Add(info.ChangeId); // these do not have to be predicted anymore
                     continue;
                 }
+
+                // TODO kann man das nicht aus der Schleife vor der Schleife setzen?
                 if (!fComparisonHasBegun)
                 {
                     fComparisonHasBegun = true;
@@ -147,6 +155,7 @@
                 {
                     try
                     {
+                        // TODO Consolenteil in eigene Methode
                         if (Console.KeyAvailable)
                         {
                             ConsoleKeyInfo keypressed = Console.ReadKey(true);
@@ -275,6 +284,8 @@
         ///  - Store in DB that the reviewer is a possible reviewer in this bug/change.
         ///  - Grant the reviewer review experience for the review.
         /// </summary>
+        // TODO sollte man vielleicht in zwei Methoden splitten
+        // Die erste wird dann nur aufgerufen, wenn Comparison gesetzt ist
         protected void ProcessReviewInfo(ReviewInfo info, bool noComparison)
         {
             // Store in DB that the reviewer is a possible reviewer in this bug/change.
