@@ -42,7 +42,7 @@
                     expertiseValue.Value = developerExpertise.DeliveriesCount + (developerExpertise.IsFirstAuthor ? 1f : 0f);
                 }
 
-                repository.SaveChanges();   // TODO kann wieder weg?
+                repository.SaveChanges();
             }
         }
     }

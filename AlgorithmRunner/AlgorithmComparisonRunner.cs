@@ -139,7 +139,6 @@
                     continue;
                 }
 
-                // TODO kann man das nicht aus der Schleife vor der Schleife setzen?
                 if (!fComparisonHasBegun)
                 {
                     fComparisonHasBegun = true;
