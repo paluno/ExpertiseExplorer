@@ -404,5 +404,20 @@
             af.InitializeMappingFromAuthorList(File.ReadAllLines(path2AuthorFile));
             FindAliases(af);
         }
+
+        public void FindAliasesInAuthors(string path2AuthorFile)
+        {
+            string[] authors = File.ReadAllLines(path2AuthorFile);
+
+            AliasFinder af = new AliasFinder();
+            af.InitializeMappingFromAuthorList(authors);
+            IEnumerable<string> reviewers = af.Consolidate(authors)
+                .Select(reviewerList => string.Join(",", reviewerList))     // put each reviewer in one string
+                .OrderBy(x => x);                                           // sort the resulting reviewers
+
+            using (TextWriter writerForReviewers = new StreamWriter(path2AuthorFile + "-concise.txt"))
+                foreach (string oneReviewer in reviewers)
+                    writerForReviewers.WriteLine(oneReviewer);
+        }
     }
 }

@@ -8,6 +8,7 @@
         FindIntersectingEntriesForAllAlgorithms = 3,
         FindIntersectingEntriesForAllAlgorithmsPairwise = 4,
         FindAliasesFromNames = 5,
-        FindAliasesFromAuthors = 6
+        FindAliasesFromAuthors = 6,
+        FindAliasesInAuthors = 7
     }
 }

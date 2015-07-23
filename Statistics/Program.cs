@@ -41,6 +41,7 @@ namespace ExpertiseExplorer.Statistics
                     return;
                 case StatisticsOperation.FindAliasesFromNames:
                 case StatisticsOperation.FindAliasesFromAuthors:
+                case StatisticsOperation.FindAliasesInAuthors:
                     if (args.Length != 4)
                         throw new ArgumentException($"FindAliases expects exactly one additional argument instead of {args.Length-3}");
 
@@ -51,11 +52,20 @@ namespace ExpertiseExplorer.Statistics
                         return;
                     }
 
-                    if (StatisticsOperation.FindAliasesFromNames == statisticsOperation)
-                        statistics.FindAliasesFromNames(path2MappingFile);
-                    else
-                        statistics.FindAliasesFromAuthors(path2MappingFile);
-                    return;
+                    switch (statisticsOperation)
+                    {
+                        case StatisticsOperation.FindAliasesFromNames:
+                            statistics.FindAliasesFromNames(path2MappingFile);
+                            return;
+                        case StatisticsOperation.FindAliasesFromAuthors:
+                            statistics.FindAliasesFromAuthors(path2MappingFile);
+                            return;
+                        case StatisticsOperation.FindAliasesInAuthors:
+                            statistics.FindAliasesInAuthors(path2MappingFile);
+                            return;
+                        default:
+                            throw new NotImplementedException($"Unexpected alias operation \"{statisticsOperation}\"");
+                    }
                 case StatisticsOperation.AnalyzeActualReviews:
                 case StatisticsOperation.ComputeStatisticsForAllAlgorithmsAndActualReviews:
                 case StatisticsOperation.FindIntersectingEntriesForAllAlgorithms:
@@ -106,12 +116,13 @@ namespace ExpertiseExplorer.Statistics
             Console.WriteLine("\t 4 - FindIntersectingEntriesForAllAlgorithmsPairwise");
             Console.WriteLine("\t 5 - FindAliasesFromNames (this operation needs a special source argument)");
             Console.WriteLine("\t 6 - FindAliasesFromAuthors (this operation needs a special source argument)");
+            Console.WriteLine("\t 7 - FindAliasesInAuthors (this operation needs a special source argument)");
             Console.WriteLine("Source: source data and restrictions");
             Console.WriteLine("\t Possible options:");
             Console.WriteLine("\t 0 - All data (unfiltered)");
             Console.WriteLine("\t 1 - Use only reviews where 'hg@mozilla.com' is not identified as an expert");
             Console.WriteLine("\t 2 ID - Use only reviews of bugs with a database BugID of at least ID");
-            Console.WriteLine("\t path - Only for FindAliasesFromX: Path to names/authors file");
+            Console.WriteLine("\t path - Only for FindAliasesX: Path to names/authors file");
         }
     }
 }
