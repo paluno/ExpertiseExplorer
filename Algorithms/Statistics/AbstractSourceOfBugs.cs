@@ -11,7 +11,8 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         public enum StatisticsSource
         {
             All = 0,
-            WithoutHg = 1
+            WithoutHg = 1,
+            MinimumId = 2
         }
 
         public int RepositoryId { get; private set; }
@@ -25,14 +26,22 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         /// <summary>
         /// Factory Method for Sources
         /// </summary>
-       public static AbstractSourceOfBugs createSourceFromParameter(StatisticsSource typeOfSource, int repositoryId)
+       public static AbstractSourceOfBugs createSourceFromParameter(StatisticsSource typeOfSource, int repositoryId, string[] additionalParameters)
         {
             switch(typeOfSource)
             {
                 case StatisticsSource.All:
+                    if (additionalParameters != null && additionalParameters.Length > 0)
+                        throw new ArgumentException("No additional parameters expected, but those were present", "additionalParameters");
                     return new SourceOfAllBugs(repositoryId);
                 case StatisticsSource.WithoutHg:
+                    if (additionalParameters != null && additionalParameters.Length > 0)
+                        throw new ArgumentException("No additional parameters expected, but those were present", "additionalParameters");
                     return new SourceOfBugsWithoutSpecificReviewer(repositoryId);
+                case StatisticsSource.MinimumId:
+                    if (additionalParameters.Length != 1)
+                        throw new ArgumentException("Exactly one additional parameters expected, but this was not the case", "additionalParameters");
+                    return new SourceOfBugsWithMinID(repositoryId, int.Parse(additionalParameters[0]));
                 default:
                     throw new NotImplementedException("The type \"" + typeOfSource + "\" is unknown");
             }
