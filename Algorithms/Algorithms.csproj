@@ -71,9 +71,10 @@
     <Compile Include="RepositoryManagement\AliasFinder.cs" />
     <Compile Include="RepositoryManagement\SourceRepositoryConnector.cs" />
     <Compile Include="RepositoryManagement\Author.cs" />
-    <Compile Include="Statistics\SourceOfActualReviewers.cs" />
-    <Compile Include="Statistics\SourceOfActualReviewersWithoutHg.cs" />
-    <Compile Include="Statistics\SourceOfAllActualReviewers.cs" />
+    <Compile Include="Statistics\AbstractSourceOfBugs.cs" />
+    <Compile Include="Statistics\SourceOfBugsWithoutSpecificReviewer.cs" />
+    <Compile Include="Statistics\SourceOfAllBugs.cs" />
+    <Compile Include="Statistics\SourceOfBugsWithMinID.cs" />
     <Compile Include="Statistics\Statistics.cs" />
     <Compile Include="Statistics\StatisticsResult.cs" />
     <Compile Include="WeightedReviewCountAlgorithm.cs" />

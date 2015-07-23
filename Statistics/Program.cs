@@ -42,7 +42,7 @@ namespace ExpertiseExplorer.Statistics
 
                     statistics.FindMissingReviewers();
 
-                    break;
+                    return;
 
                 case 4:
                     if (StatisticsOperation.FindAliasesFromNames == statisticsOperation
@@ -62,8 +62,8 @@ namespace ExpertiseExplorer.Statistics
                     }
                     else
                     {
-                        SourceOfActualReviewers.StatisticsSource statisticsSource = (SourceOfActualReviewers.StatisticsSource)Enum.Parse(typeof(SourceOfActualReviewers.StatisticsSource), args[3]);
-                        SourceOfActualReviewers sourceOfActualReviews = SourceOfActualReviewers.createSourceFromParameter(statisticsSource, statistics.RepositoryId);
+                        AbstractSourceOfBugs.StatisticsSource statisticsSource = (AbstractSourceOfBugs.StatisticsSource)Enum.Parse(typeof(AbstractSourceOfBugs.StatisticsSource), args[3]);
+                        AbstractSourceOfBugs sourceOfActualReviews = AbstractSourceOfBugs.createSourceFromParameter(statisticsSource, statistics.RepositoryId);
 
                         switch (statisticsOperation)
                         {
@@ -109,6 +109,7 @@ namespace ExpertiseExplorer.Statistics
             Console.WriteLine("\t Possible options:");
             Console.WriteLine("\t 0 - All data (unfiltered)");
             Console.WriteLine("\t 1 - Use only reviews where 'hg@mozilla.com' is not identified as an expert");
+            Console.WriteLine("\t 2 ID - Use only reviews of bugs with a database BugID of at least ID");
             Console.WriteLine("\t path - Only for FindAliasesFromX: Path to names/authors file");
         }
     }

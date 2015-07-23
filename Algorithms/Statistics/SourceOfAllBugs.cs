@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ExpertiseExplorer.Algorithms.Statistics
 {
-    class SourceOfAllActualReviewers : SourceOfActualReviewers
+    class SourceOfAllBugs : AbstractSourceOfBugs
     {
         protected override IEnumerable<int> findBugsInDatabase()
         {
@@ -15,7 +15,7 @@ namespace ExpertiseExplorer.Algorithms.Statistics
                 return context.Bugs.Where(bug => bug.RepositoryId == RepositoryId).Select(bug => bug.BugId).ToList();
         }
 
-        public SourceOfAllActualReviewers(int repositoryId)
+        public SourceOfAllBugs(int repositoryId)
             : base(repositoryId)
         {
         }

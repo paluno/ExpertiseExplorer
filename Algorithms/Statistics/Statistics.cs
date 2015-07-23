@@ -167,7 +167,7 @@
         /// Iterates through the list of bugs and checks for each bug which algorithms suggested correct reviewers and which did not.
         /// Results are written to stats_x.txt: A CSV with bugId and correctly predicted reviewers in each entry (StatisticsResult strings)
         /// </summary>
-        public void AnalyzeActualReviews(SourceOfActualReviewers sourceOfActualReviewers)
+        public void AnalyzeActualReviews(AbstractSourceOfBugs sourceOfActualReviewers)
         {
             IEnumerable<int> allBugIds = sourceOfActualReviewers.findBugs();
 
@@ -261,7 +261,7 @@
         /// Expects stats_x.txt entries for all algorithms. It then counts the hits and misses and computes
         /// the fraction of hits. Results are written to stats_x_analyzedPOSTFIX.txt.
         /// </summary>
-        public void ComputeStatisticsForAllAlgorithmsAndActualReviews(SourceOfActualReviewers source)
+        public void ComputeStatisticsForAllAlgorithmsAndActualReviews(AbstractSourceOfBugs source)
         {
             List<int> algorithmIds;
             using (var context = new ExpertiseDBEntities())
@@ -273,7 +273,7 @@
             Parallel.ForEach(algorithmIds, algorithmId => ComputeStatisticsForAlgorithmAndActualReviews(algorithmId, source));
         }
 
-        private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithmId, SourceOfActualReviewers source)
+        private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithmId, AbstractSourceOfBugs source)
         {
             string[] originalData = File.ReadAllLines($"{basepath}stats_{algorithmId}.txt");
             List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine)
@@ -299,7 +299,7 @@
         /// <summary>
         /// computes the size of the set of entries that have the actual reviewer within the top 5 computed reviewers and is shared between all algorithms
         /// </summary>
-        public void FindIntersectingEntriesForActualReviewerIds(SourceOfActualReviewers source)
+        public void FindIntersectingEntriesForActualReviewerIds(AbstractSourceOfBugs source)
         {
             throw new NotImplementedException("This must be reimplemented to reflect the changes to StatisticsResult");
 
@@ -334,7 +334,7 @@
         /// <summary>
         /// computes the size of the set of entries that have the actual reviewer within the top 5 computed reviewers and is shared between two algorithms by pairwise comparison
         /// </summary>
-        public void FindIntersectingEntriesPairwiseForActualReviewerIds(SourceOfActualReviewers source)
+        public void FindIntersectingEntriesPairwiseForActualReviewerIds(AbstractSourceOfBugs source)
         {
             throw new NotImplementedException("This must be reimplemented to reflect the changes to StatisticsResult");
 

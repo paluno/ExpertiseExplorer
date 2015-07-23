@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ExpertiseExplorer.Algorithms.Statistics
 {
-    public abstract class SourceOfActualReviewers
+    public abstract class AbstractSourceOfBugs
     {
         public enum StatisticsSource
         {
@@ -17,7 +17,7 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         public int RepositoryId { get; private set; }
 
         #region construction
-        public SourceOfActualReviewers(int repositoryId)
+        public AbstractSourceOfBugs(int repositoryId)
         {
             this.RepositoryId = repositoryId;
         }
@@ -25,14 +25,14 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         /// <summary>
         /// Factory Method for Sources
         /// </summary>
-       public static SourceOfActualReviewers createSourceFromParameter(StatisticsSource typeOfSource, int repositoryId)
+       public static AbstractSourceOfBugs createSourceFromParameter(StatisticsSource typeOfSource, int repositoryId)
         {
             switch(typeOfSource)
             {
                 case StatisticsSource.All:
-                    return new SourceOfAllActualReviewers(repositoryId);
+                    return new SourceOfAllBugs(repositoryId);
                 case StatisticsSource.WithoutHg:
-                    return new SourceOfActualReviewersWithoutHg(repositoryId);
+                    return new SourceOfBugsWithoutSpecificReviewer(repositoryId);
                 default:
                     throw new NotImplementedException("The type \"" + typeOfSource + "\" is unknown");
             }
