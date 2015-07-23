@@ -81,23 +81,11 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
 
         protected override void PrefilterRawInput(string pathToRawInputFile)
         {
-            var input = new StreamReader(pathToRawInputFile);
             string filteredInput;
-            Debug.WriteLine("Starting parsing at: " + DateTime.Now);
-            try
-            {
+            using (StreamReader input = new StreamReader(pathToRawInputFile))
                 filteredInput = BugzillaReview.ParseAndFilterInput(input);
-            }
-            finally
-            {
-                input.Close();
-            }
-
-            Debug.WriteLine("Finished parsing at: " + DateTime.Now);
 
             File.WriteAllText(InputFilePath, filteredInput);
-
-            Debug.WriteLine("Starting ordering at: " + DateTime.Now);
         }
 
         #region Code from svick posted on https://stackoverflow.com/questions/7717871/how-to-perform-merge-sort-using-linq
