@@ -20,6 +20,9 @@ namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
 
         abstract public IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents();
 
+        abstract protected IEnumerable<IssueTrackerEvent> PrefilterRawInput(string pathToRawInputFile);
+
+
         protected IssueTrackerEventFactory(string inputFilePath)
         {
             this.InputFilePath = inputFilePath;
@@ -33,9 +36,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
             if (!overwrite && File.Exists(InputFilePath))
                 return;
 
-            PrefilterRawInput(pathToRawInputFile);
-
-            IEnumerable<IssueTrackerEvent> list = parseIssueTrackerEvents();
+            IEnumerable<IssueTrackerEvent> list = PrefilterRawInput(pathToRawInputFile);
 
             // ordering of & another filter pass on the reviews
             IDictionary<DateTime, ICollection<IssueTrackerEvent>> dictIssueTrackerEvents = new Dictionary<DateTime, ICollection<IssueTrackerEvent>>(20000);
@@ -61,11 +62,6 @@ namespace ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker
             Debug.WriteLine("Finished ordering at: " + DateTime.Now);
 
             File.WriteAllText(InputFilePath, sb.ToString());
-        }
-
-        protected virtual void PrefilterRawInput(string pathToRawInputFile)
-        {
-            File.Copy(pathToRawInputFile, InputFilePath, true);
         }
     }
 }

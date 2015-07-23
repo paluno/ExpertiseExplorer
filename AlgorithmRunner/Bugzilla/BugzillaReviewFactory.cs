@@ -1,4 +1,5 @@
 ﻿using ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker;
+using ExpertiseExplorer.ExpertiseDB;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -63,7 +64,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
 
                     if (attachmentId != null)
                     {
-                        activityInfo.Filenames = attachments[(UInt64)attachmentId];
+                        activityInfo.Filenames = attachments?[(UInt64)attachmentId];
                     }
 
                     result.Add(activityInfo);
@@ -79,13 +80,30 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
             return result;
         }
 
-        protected override void PrefilterRawInput(string pathToRawInputFile)
+        protected override IEnumerable<IssueTrackerEvent> PrefilterRawInput(string pathToRawInputFile)
         {
             string filteredInput;
             using (StreamReader input = new StreamReader(pathToRawInputFile))
                 filteredInput = BugzillaReview.ParseAndFilterInput(input);
 
             File.WriteAllText(InputFilePath, filteredInput);
+
+            // check whether all names are complete. If not, load complete names from Bugzilla DB
+            IEnumerable<BugzillaReview> rawReviews = GetActivityInfoFromFile(InputFilePath, null);
+            TimeZoneInfo pacificTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");    // Bugzilla stores times in PST
+
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+            {
+                foreach (BugzillaReview br in rawReviews.Where(br => br.GetAttachmentId().HasValue && !br.Reviewer.Contains('@')))
+                    br.Reviewer =
+                        repository.Database.SqlQuery<string>("SELECT login_name FROM profiles p INNER JOIN bugs_activity ba ON p.userid=ba.who WHERE attach_id={0} AND bug_id={1} AND bug_when={2} AND fieldid=69",  // these are tables directly from the Bugzilla Database. fieldid 69 are Flags
+                            br.GetAttachmentId(),
+                            br.BugId,
+                            TimeZoneInfo.ConvertTimeFromUtc(br.When, pacificTimeZone)
+                        ).SingleOrDefault() ?? br.Reviewer;
+            }
+
+            return rawReviews;
         }
 
         #region Code from svick posted on https://stackoverflow.com/questions/7717871/how-to-perform-merge-sort-using-linq
