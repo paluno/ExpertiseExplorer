@@ -47,7 +47,7 @@ namespace ExpertiseExplorer.Algorithms.Statistics
         private IEnumerable<int> reviewCache;
         private object lock4Reviewcache = new object();
 
-        public IEnumerable<int> findReviews()
+        public IEnumerable<int> findBugs()
         {
             if (null == reviewCache)
                 lock (lock4Reviewcache)
@@ -57,6 +57,6 @@ namespace ExpertiseExplorer.Algorithms.Statistics
             return reviewCache;
         }
 
-        public abstract IEnumerable<int> findBugsInDatabase();
+        protected abstract IEnumerable<int> findBugsInDatabase();
     }
 }
