@@ -293,7 +293,7 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
             return foundAliases;
         }
 
-        private static readonly string[] commonNames = new string[] { "chris", "philipp", "raymond", "robert", "stephen", "thomas", "anton", "bernd", "benjamin", "brandon", "marco", "martin", "steve",
+        private static readonly string[] commonNames = new string[] { "chris", "philipp", "raymond", "robert", "stephen", "thomas", "anton", "bernd", "benjamin", "brandon", "marco", "martin", "steve", "daniel",
             //"adam", "ben", "ian", "jan", "jeff", "matt", "paul", "neil",
             //"me", 
             "bugzilla", "mozilla", "bugmail" };
