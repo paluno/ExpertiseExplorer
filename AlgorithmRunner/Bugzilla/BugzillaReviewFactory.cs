@@ -64,7 +64,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
 
                     if (attachmentId != null)
                     {
-                        activityInfo.Filenames = attachments?[(UInt64)attachmentId];
+                        activityInfo.Filenames = attachments[(UInt64)attachmentId];
                     }
 
                     result.Add(activityInfo);
@@ -89,7 +89,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
             File.WriteAllText(InputFilePath, filteredInput);
 
             // check whether all names are complete. If not, load complete names from Bugzilla DB
-            IEnumerable<BugzillaReview> rawReviews = GetActivityInfoFromFile(InputFilePath, null);
+            IEnumerable<BugzillaReview> rawReviews = parseIssueTrackerEvents().OfType<BugzillaReview>();
             TimeZoneInfo pacificTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");    // Bugzilla stores times in PST
 
             using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
