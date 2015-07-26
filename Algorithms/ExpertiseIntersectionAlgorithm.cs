@@ -36,20 +36,13 @@
             Debug.Assert(MaxDateTime != DateTime.MinValue, "Initialize MaxDateTime first");
             Debug.Assert(SourceRepositoryManager != null, "Initialize SourceRepositoryManager first");
 
-            int filenameId;
-            try
+            if (!SourceRepositoryManager.FileExists(filename))
             {
-                filenameId = SourceRepositoryManager.GetFilenameIdFromFilenameApproximation(filename);
-            }
-            catch (ArgumentException ae)
-            {
-                // TODO Auswertung von ae 
-                if (ae.ParamName != "filename")
-                    throw;
                 ClearExpertiseForAllDevelopers(filename);   // the file does not exist in the repository, so nobody has experience
                 return;
             }
 
+            int filenameId = SourceRepositoryManager.GetFilenameIdFromFilenameApproximation(filename);
             int artifactId = SourceRepositoryManager.FindOrCreateFileArtifactId(filename);
 
             using (var repository = new ExpertiseDBEntities())

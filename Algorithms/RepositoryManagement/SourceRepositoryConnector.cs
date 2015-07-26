@@ -17,7 +17,7 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
         public int SourceRepositoryId { get; set; }
 
         public int RepositoryId { get; set; }
-        
+
         public AliasFinder Deduplicator { get; set; }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
                 SourceRepositoryId = sourceRepository.SourceRepositoryId;
             }
         }
-        
+
         public int GetFilenameIdFromFilenameApproximation(string filename)
         {
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
@@ -75,6 +75,17 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
                     throw new ArgumentException("The file \"" + filename + "\" does not exist in the repository.", "filename");
 
                 return file.FilenameId;
+            }
+        }
+
+        public Boolean FileExists(string filename)
+        {
+            using (var repository = new ExpertiseDBEntities())
+            {
+                var file = repository.Filenames.SingleOrDefault(f => f.Name == filename && f.SourceRepositoryId == SourceRepositoryId);
+                if (file == null)
+                    return false;
+                return true;
             }
         }
 

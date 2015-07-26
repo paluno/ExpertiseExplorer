@@ -32,7 +32,7 @@
 
             var path = Path.GetDirectoryName(filename);
             if (path == null)
-                throw new NullReferenceException("path");       // TODO Meldung sehr kurz :)
+                throw new NullReferenceException("path from file " + filename + " is null");
 
             List<DeveloperForPath> developersForPath;
             if (path == string.Empty)

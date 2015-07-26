@@ -46,7 +46,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
             AttachmentFactory.IncludeAttachmentsFilter = (attachment) => setOfAllUsedBugIds.Contains(attachment.BugId);
             attachmentList = (IEnumerable<BugzillaAttachmentInfo>)AttachmentFactory.parseIssueTrackerEvents();  // re-read the list
 
-            return Merge<IssueTrackerEvent>(attachmentList, reviewList, (patch, review) => patch.When <= review.When);
+            return MergeUtils.Merge<IssueTrackerEvent>(attachmentList, reviewList, (patch, review) => patch.When <= review.When);
         }
 
         private static IEnumerable<BugzillaReview> GetActivityInfoFromFile(string pathToInputFile, Dictionary<UInt64, IList<string>> attachments)
@@ -105,51 +105,5 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
 
             return rawReviews;
         }
-
-        // TODO könnten wir das nicht in eine eigene Klasse auslagern mit Hinweis der Quelle?
-        #region Code from svick posted on https://stackoverflow.com/questions/7717871/how-to-perform-merge-sort-using-linq
-        /// <summary>
-        /// Merge-Sort-style ordered union of two sequences
-        /// </summary>
-        static IEnumerable<T> Merge<T>(IEnumerable<T> first,
-                               IEnumerable<T> second,
-                               Func<T, T, bool> predicate)
-        {
-            // validation ommited
-
-            using (var firstEnumerator = first.GetEnumerator())
-            using (var secondEnumerator = second.GetEnumerator())
-            {
-                bool firstCond = firstEnumerator.MoveNext();
-                bool secondCond = secondEnumerator.MoveNext();
-
-                while (firstCond && secondCond)
-                {
-                    if (predicate(firstEnumerator.Current, secondEnumerator.Current))
-                    {
-                        yield return firstEnumerator.Current;
-                        firstCond = firstEnumerator.MoveNext();
-                    }
-                    else
-                    {
-                        yield return secondEnumerator.Current;
-                        secondCond = secondEnumerator.MoveNext();
-                    }
-                }
-
-                while (firstCond)
-                {
-                    yield return firstEnumerator.Current;
-                    firstCond = firstEnumerator.MoveNext();
-                }
-
-                while (secondCond)
-                {
-                    yield return secondEnumerator.Current;
-                    secondCond = secondEnumerator.MoveNext();
-                }
-            }
-        }
-        #endregion Code from svick posted on https://stackoverflow.com/questions/7717871/how-to-perform-merge-sort-using-linq
     }
 }

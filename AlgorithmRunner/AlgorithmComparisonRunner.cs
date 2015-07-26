@@ -25,6 +25,7 @@
         private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private static readonly ILog OutputLog = LogManager.GetLogger("ExpertiseExplorer.AlgorithmRunner.Output");
         private static readonly ILog PerformanceLog = LogManager.GetLogger("ExpertiseExplorer.AlgorithmRunner.Performance");
+        private static readonly string authorsConsolidated = "authors_consolidated.txt";
 
         public int RepositoryId
         {
@@ -68,8 +69,7 @@
 
             SourceManager = new SourceRepositoryConnector();
             NameConsolidator = new AliasFinder();
-            // TODO static final string für den Namen
-            string authorMappingPath = basepath + "authors_consolidated.txt";
+            string authorMappingPath = basepath + authorsConsolidated;
             if (File.Exists(authorMappingPath))
             {
                 NameConsolidator.InitializeMappingFromAuthorList(File.ReadAllLines(authorMappingPath));
@@ -77,12 +77,10 @@
                 foreach (AlgorithmBase algo in algorithmsToEvaluate)
                     algo.Deduplicator = NameConsolidator;
             }
-            // TODO log falls keine Datei vorhanden ist
-
-            // TODO könnte man das nicht in initalgorithms machen und sich eine foreach sparen?
-            foreach (AlgorithmBase algo in algorithmsToEvaluate)
-                algo.SourceRepositoryManager = SourceManager;
-
+            else
+            {
+                Log.Warn("No file exists for " + authorMappingPath);
+            }
             InitAlgorithms(sourceUrl);
         }
 
@@ -91,13 +89,16 @@
             SourceManager.InitIdsFromDbForSourceUrl(sourceUrl, false);
 
             foreach (AlgorithmBase algo in Algorithms)
+            {
+                algo.SourceRepositoryManager = SourceManager;
                 algo.RepositoryId = SourceManager.RepositoryId;
+            }
         }
 
         public void StartComparisonFromFile(IssueTrackerEventFactory factory, DateTime? resumeFrom, DateTime continueUntil, bool noComparison, bool fRecalculateMode)
         {
             Log.Info("Starting comparison");
-            IEnumerable<IssueTrackerEvent> list = factory.parseIssueTrackerEvents(); // TODO Die Liste ist nach info.when sortiert? Kann man das kenntlich machen?
+            IEnumerable<IssueTrackerEvent> list = factory.parseIssueTrackerEvents(); 
             HandleIssueTrackerEventList(list, resumeFrom, continueUntil, noComparison, fRecalculateMode);
             Log.Info("Ending comparison");
         }
@@ -107,6 +108,8 @@
         /// Go through a list of issue tracker activities. For each first patch upload of a bug, calculate expertises at the time of review and store five
         /// computed reviewers. For reviews, remember the actual reviewers for later comparison and grant experience for review-based algorithms.
         /// </summary>
+        private const int NUMBER_OF_FAIL_RETRIES = 20;
+
         private void HandleIssueTrackerEventList(IEnumerable<IssueTrackerEvent> issueTrackerEventList, DateTime? resumeFrom, DateTime continueUntil, bool noComparison, bool fRecalculateMode)
         {
             DateTime minimumDate = resumeFrom ?? SourceManager.Watermark;
@@ -117,16 +120,7 @@
             int count = 0;
             foreach (IssueTrackerEvent info in issueTrackerEventList)
             {
-                // TODO in HandleIssueTrackerEvent auslagern
-                
-                // TODO Log Methodik in eigene Methode
-                ++count;
-                if (count % 1000 == 0)
-                {
-                    Console.WriteLine("Now at: " + count);
-                    PerformanceLog.Info(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
-                    timeAfterOneK = DateTime.Now;
-                }
+                LogEvent(ref timeAfterOneK, ref count);
 
                 if (info.When > continueUntil)
                 {
@@ -147,14 +141,12 @@
 
                 Log.Debug("Evaluating [" + info.GetType() + "]: " + info);
 
-                const int NUMBER_OF_FAIL_RETRIES = 20;
                 int retryNumber = 0;
                 bool fSuccess = false;
                 do
                 {
                     try
                     {
-                        // TODO Consolenteil in eigene Methode
                         if (Console.KeyAvailable)
                         {
                             ConsoleKeyInfo keypressed = Console.ReadKey(true);
@@ -181,8 +173,10 @@
 
                         ReviewInfo ri = info as ReviewInfo;
                         if (null != ri)
+                        {
                             ProcessReviewInfo(ri, noComparison || fRecalculateMode);    // in recalculate mode, additional reviewers do not need to be added, as they already exist
-
+                            GrantReviewerExperience(ri);
+                        }
                         PatchUpload pu = info as PatchUpload;
                         if (null != pu && !noComparison)
                             ProcessPatchUpload(pu, noComparison, fRecalculateMode);
@@ -191,7 +185,7 @@
                     }
                     catch (Exception ex)
                     {
-                        Log.Warn("Exception on event " + count + ": [" + info.GetType() + "] of " + info.When.ToUniversalTime().ToString("u") + " with ChangeID \"" 
+                        Log.Warn("Exception on event " + count + ": [" + info.GetType() + "] of " + info.When.ToUniversalTime().ToString("u") + " with ChangeID \""
                             + info.ChangeId + "\" and " + info.Filenames.Count + " files");
                         if (++retryNumber <= NUMBER_OF_FAIL_RETRIES)
                         {        // try again, but wait a little, up to 50 * 20^2 = 20000 seconds = 5.5 hours
@@ -211,6 +205,17 @@
                 if (retryNumber > 0)
                     Log.Warn("Recovered from exception and continuing after event " + count);
                 OutputLog.Info(info);
+            }
+        }
+
+        private static void LogEvent(ref DateTime timeAfterOneK, ref int count)
+        {
+            ++count;
+            if (count % 1000 == 0)
+            {
+                Console.WriteLine("Now at: " + count);
+                PerformanceLog.Info(count + ";" + (DateTime.Now - timeAfterOneK).TotalMinutes);
+                timeAfterOneK = DateTime.Now;
             }
         }
 
@@ -283,7 +288,6 @@
         ///  - Store in DB that the reviewer is a possible reviewer in this bug/change.
         ///  - Grant the reviewer review experience for the review.
         /// </summary>
-        // TODO sollte man vielleicht in zwei Methoden splitten
         // Die erste wird dann nur aufgerufen, wenn Comparison gesetzt ist
         protected void ProcessReviewInfo(ReviewInfo info, bool noComparison)
         {
@@ -300,22 +304,27 @@
                             continue;     //  the reviewer is already in the list
 
                         theBug.ActualReviewers.Add(new ActualReviewer()
-                            {
-                                ActivityId = info.ActivityId,
-                                Bug = theBug,
-                                Reviewer = primaryName
-                            });
+                        {
+                            ActivityId = info.ActivityId,
+                            Bug = theBug,
+                            Reviewer = primaryName
+                        });
                         fBugDirty = true;
                     }
 
                     if (fBugDirty)
                         repository.SaveChanges();
                 }
+        }
 
-            // Grant the reviewer review experience for the review
+        /// <summary>
+        /// Grant the reviewer review experience for the review
+        /// </summary>
+        private void GrantReviewerExperience(ReviewInfo info)
+        {
             foreach (ReviewAlgorithmBase reviewAlgorithm in Algorithms.OfType<ReviewAlgorithmBase>())
                 reviewAlgorithm.AddReviewScore(info.Reviewer, info.Filenames, info.When);
-         }
+        }
         #endregion Handle an event
     }
 }

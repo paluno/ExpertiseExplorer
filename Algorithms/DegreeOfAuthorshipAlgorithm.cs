@@ -76,10 +76,9 @@
                     .Select(de => de.DeveloperExpertiseId).ToList();
             }
 
-            foreach (var developerExpertiseId in allExpertiseIDs)
+            using (var repository = new ExpertiseDBEntities())
             {
-                // TODO das using könnte vor die foreach Schleife
-                using (var repository = new ExpertiseDBEntities())
+                foreach (var developerExpertiseId in allExpertiseIDs)
                 {
                     DeveloperExpertise developerExpertise = repository.DeveloperExpertises.Include(de => de.Artifact).Include(de => de.DeveloperExpertiseValues).Single(de => de.DeveloperExpertiseId == developerExpertiseId);
 
