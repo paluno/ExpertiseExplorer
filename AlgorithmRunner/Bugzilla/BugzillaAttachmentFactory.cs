@@ -41,7 +41,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
         /// Reads the missing upload dates of all attachments from a copy of the Bugzilla DB and saves the result as InputFilePath
         /// </summary>
         /// <param name="pathToRawInputFile">Attachment data without upload dates</param>
-        protected override void PrefilterRawInput(string pathToRawInputFile)
+        protected override IEnumerable<IssueTrackerEvent> PrefilterRawInput(string pathToRawInputFile)
         {
             IEnumerable<BugzillaAttachmentInfo> rawAttachments = parseIssueTrackerEvents(pathToRawInputFile).ToList();
             TimeZoneInfo pacificTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");    // Bugzilla stores times in PST
@@ -56,9 +56,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
                         pacificTimeZone);
             }
 
-            File.WriteAllLines(InputFilePath,
-                rawAttachments.Select(bai => bai.ToString())
-                );
+            return rawAttachments;
         }
     }
 }

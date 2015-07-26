@@ -1,4 +1,5 @@
 ﻿using ExpertiseExplorer.AlgorithmRunner.AbstractIssueTracker;
+using ExpertiseExplorer.ExpertiseDB;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -79,25 +80,30 @@ namespace ExpertiseExplorer.AlgorithmRunner.Bugzilla
             return result;
         }
 
-        protected override void PrefilterRawInput(string pathToRawInputFile)
+        protected override IEnumerable<IssueTrackerEvent> PrefilterRawInput(string pathToRawInputFile)
         {
-            var input = new StreamReader(pathToRawInputFile);
             string filteredInput;
-            Debug.WriteLine("Starting parsing at: " + DateTime.Now);
-            try
-            {
+            using (StreamReader input = new StreamReader(pathToRawInputFile))
                 filteredInput = BugzillaReview.ParseAndFilterInput(input);
-            }
-            finally
-            {
-                input.Close();
-            }
-
-            Debug.WriteLine("Finished parsing at: " + DateTime.Now);
 
             File.WriteAllText(InputFilePath, filteredInput);
 
-            Debug.WriteLine("Starting ordering at: " + DateTime.Now);
+            // check whether all names are complete. If not, load complete names from Bugzilla DB
+            IEnumerable<BugzillaReview> rawReviews = parseIssueTrackerEvents().OfType<BugzillaReview>();
+            TimeZoneInfo pacificTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");    // Bugzilla stores times in PST
+
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+            {
+                foreach (BugzillaReview br in rawReviews.Where(br => br.GetAttachmentId().HasValue && !br.Reviewer.Contains('@')))
+                    br.Reviewer =
+                        repository.Database.SqlQuery<string>("SELECT login_name FROM profiles p INNER JOIN bugs_activity ba ON p.userid=ba.who WHERE attach_id={0} AND bug_id={1} AND bug_when={2} AND fieldid=69",  // these are tables directly from the Bugzilla Database. fieldid 69 are Flags
+                            br.GetAttachmentId(),
+                            br.BugId,
+                            TimeZoneInfo.ConvertTimeFromUtc(br.When, pacificTimeZone)
+                        ).SingleOrDefault() ?? br.Reviewer;
+            }
+
+            return rawReviews;
         }
 
         // TODO könnten wir das nicht in eine eigene Klasse auslagern mit Hinweis der Quelle?

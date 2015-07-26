@@ -167,7 +167,7 @@
         /// Iterates through the list of bugs and checks for each bug which algorithms suggested correct reviewers and which did not.
         /// Results are written to stats_x.txt: A CSV with bugId and correctly predicted reviewers in each entry (StatisticsResult strings)
         /// </summary>
-        public void AnalyzeActualReviews(SourceOfActualReviewers sourceOfActualReviewers)
+        public void AnalyzeActualReviews(AbstractSourceOfBugs sourceOfActualReviewers)
         {
             IEnumerable<int> allBugIds = sourceOfActualReviewers.findBugs();
 
@@ -261,44 +261,45 @@
         /// Expects stats_x.txt entries for all algorithms. It then counts the hits and misses and computes
         /// the fraction of hits. Results are written to stats_x_analyzedPOSTFIX.txt.
         /// </summary>
-        public void ComputeStatisticsForAllAlgorithmsAndActualReviews(SourceOfActualReviewers source)
+        public void ComputeStatisticsForAllAlgorithmsAndActualReviews(AbstractSourceOfBugs source)
         {
             List<int> algorithmIds;
             using (var context = new ExpertiseDBEntities())
-                algorithmIds = context.Algorithms.Select(a => a.AlgorithmId).ToList();
+                algorithmIds = context.Algorithms
+                    .Select(a => a.AlgorithmId).ToList()        // perform the SQL query
+                    .Where(algoID => File.Exists($"{basepath}stats_{algoID}.txt")).ToList();    // check whether the file exists on disk
+            Debug.Assert(algorithmIds.Any());
 
             Parallel.ForEach(algorithmIds, algorithmId => ComputeStatisticsForAlgorithmAndActualReviews(algorithmId, source));
         }
 
-        private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithmId, SourceOfActualReviewers source)
+        private void ComputeStatisticsForAlgorithmAndActualReviews(int algorithmId, AbstractSourceOfBugs source)
         {
-            throw new NotImplementedException("This must be reimplemented to reflect the changes to StatisticsResult");
+            string[] originalData = File.ReadAllLines($"{basepath}stats_{algorithmId}.txt");
+            List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine)
+                .Where(sr => source.findBugs().Contains(sr.BugId)).ToList();
 
-            //string[] originalData = File.ReadAllLines(string.Format(basepath + "stats_{0}.txt", algorithmId));
-            //List<StatisticsResult> workingSet = originalData.Select(StatisticsResult.FromCSVLine)
-            //    .Where(tmp => source.findBugs().Contains(tmp.ActualReviewerId)).ToList();
+            int count = workingSet.Count();
+            int foundNo = workingSet.Count(sr => sr.IsMatch);
+            int[] expertPlacements = new int[StatisticsResult.NUMBER_OF_EXPERTS];
 
-            //int count = source.findBugs().Count();
-            //int foundNo = workingSet.Count(sr => sr.AuthorWasFound);
-            //int[] expertPlacements = new int[5];
+            for (int i = 0; i < StatisticsResult.NUMBER_OF_EXPERTS; i++)
+            {
+                expertPlacements[i] = workingSet.Count(sr => sr.Matches[i]);
+            }
 
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    expertPlacements[i] = workingSet.Count(sr => sr.AuthorWasExpertNo == (i + 1));
-            //}
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Expert was found: {foundNo} / {count} ({(double)foundNo / count:P})");
+            for (int i = 0; i < StatisticsResult.NUMBER_OF_EXPERTS; i++)
+                sb.AppendLine($"Expert was No {i+1}:  {expertPlacements[i]} / {count} ({(double)expertPlacements[i] / (double)count:P})");
 
-            //StringBuilder sb = new StringBuilder();
-            //sb.AppendLine(string.Format("Expert was found: {0} / {1} ({2:P})", foundNo, count, (double)foundNo / count));
-            //for (int i = 0; i < 5; i++)
-            //    sb.AppendLine(string.Format("Expert was No {0}:  {1} / {2} ({3:P})", i + 1, expertPlacements[i], count, (double)expertPlacements[i] / (double)count));
-
-            //File.WriteAllText(string.Format(basepath + "stats_{0}_analyzed{1}.txt", algorithmId, source.Postfix), sb.ToString());
+            File.WriteAllText($"{basepath}stats_{algorithmId}_analyzed{source.Postfix}.txt", sb.ToString());
         }
 
         /// <summary>
         /// computes the size of the set of entries that have the actual reviewer within the top 5 computed reviewers and is shared between all algorithms
         /// </summary>
-        public void FindIntersectingEntriesForActualReviewerIds(SourceOfActualReviewers source)
+        public void FindIntersectingEntriesForActualReviewerIds(AbstractSourceOfBugs source)
         {
             throw new NotImplementedException("This must be reimplemented to reflect the changes to StatisticsResult");
 
@@ -333,7 +334,7 @@
         /// <summary>
         /// computes the size of the set of entries that have the actual reviewer within the top 5 computed reviewers and is shared between two algorithms by pairwise comparison
         /// </summary>
-        public void FindIntersectingEntriesPairwiseForActualReviewerIds(SourceOfActualReviewers source)
+        public void FindIntersectingEntriesPairwiseForActualReviewerIds(AbstractSourceOfBugs source)
         {
             throw new NotImplementedException("This must be reimplemented to reflect the changes to StatisticsResult");
 
@@ -402,6 +403,21 @@
             AliasFinder af = new AliasFinder();
             af.InitializeMappingFromAuthorList(File.ReadAllLines(path2AuthorFile));
             FindAliases(af);
+        }
+
+        public void FindAliasesInAuthors(string path2AuthorFile)
+        {
+            string[] authors = File.ReadAllLines(path2AuthorFile);
+
+            AliasFinder af = new AliasFinder();
+            af.InitializeMappingFromAuthorList(authors);
+            IEnumerable<string> reviewers = af.Consolidate(authors)
+                .Select(reviewerList => string.Join(",", reviewerList))     // put each reviewer in one string
+                .OrderBy(x => x);                                           // sort the resulting reviewers
+
+            using (TextWriter writerForReviewers = new StreamWriter(path2AuthorFile + "-concise.txt"))
+                foreach (string oneReviewer in reviewers)
+                    writerForReviewers.WriteLine(oneReviewer);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ExpertiseExplorer.Algorithms.Statistics;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace ExpertiseExplorer.Statistics
 {
@@ -31,60 +32,70 @@ namespace ExpertiseExplorer.Statistics
                 return;
             }
 
-            switch (args.Length)
+            switch(statisticsOperation)
             {
-                case 3:
-                    if (statisticsOperation != StatisticsOperation.FindMissingReviewers)
+                case StatisticsOperation.FindMissingReviewers:
+                    if (args.Length != 3)
+                        throw new ArgumentException("FindMissingReviewers does not expect additional arguments");
+                    statistics.FindMissingReviewers();
+                    return;
+                case StatisticsOperation.FindAliasesFromNames:
+                case StatisticsOperation.FindAliasesFromAuthors:
+                case StatisticsOperation.FindAliasesInAuthors:
+                    if (args.Length != 4)
+                        throw new ArgumentException($"FindAliases expects exactly one additional argument instead of {args.Length-3}");
+
+                    string path2MappingFile = args[3];
+                    if (!File.Exists(path2MappingFile))
                     {
-                        Console.WriteLine("Error: source argument is missing");
+                        Console.WriteLine("Error: the source argument must specify a path to the names file for operation FindAliasesFromX");
                         return;
                     }
 
-                    statistics.FindMissingReviewers();
-
-                    break;
-
-                case 4:
-                    if (StatisticsOperation.FindAliasesFromNames == statisticsOperation
-                        || StatisticsOperation.FindAliasesFromAuthors == statisticsOperation)
+                    switch (statisticsOperation)
                     {
-                        string path2MappingFile = args[3];
-                        if (!File.Exists(path2MappingFile))
-                        {
-                            Console.WriteLine("Error: the source argument must specify a path to the names file for operation FindAliasesFromX");
-                            return;
-                        }
-
-                        if (StatisticsOperation.FindAliasesFromNames == statisticsOperation)
+                        case StatisticsOperation.FindAliasesFromNames:
                             statistics.FindAliasesFromNames(path2MappingFile);
-                        else
+                            return;
+                        case StatisticsOperation.FindAliasesFromAuthors:
                             statistics.FindAliasesFromAuthors(path2MappingFile);
+                            return;
+                        case StatisticsOperation.FindAliasesInAuthors:
+                            statistics.FindAliasesInAuthors(path2MappingFile);
+                            return;
+                        default:
+                            throw new NotImplementedException($"Unexpected alias operation \"{statisticsOperation}\"");
                     }
-                    else
+                case StatisticsOperation.AnalyzeActualReviews:
+                case StatisticsOperation.ComputeStatisticsForAllAlgorithmsAndActualReviews:
+                case StatisticsOperation.FindIntersectingEntriesForAllAlgorithms:
+                case StatisticsOperation.FindIntersectingEntriesForAllAlgorithmsPairwise:
+                    if (args.Length < 4)
+                        throw new ArgumentException("There must be additional arguments!");
+
+                    AbstractSourceOfBugs.StatisticsSource statisticsSource = (AbstractSourceOfBugs.StatisticsSource)Enum.Parse(typeof(AbstractSourceOfBugs.StatisticsSource), args[3]);
+                    AbstractSourceOfBugs sourceOfActualReviews = AbstractSourceOfBugs.createSourceFromParameter(statisticsSource, statistics.RepositoryId, args.Skip(4).ToArray());
+
+                    switch (statisticsOperation)
                     {
-                        SourceOfActualReviewers.StatisticsSource statisticsSource = (SourceOfActualReviewers.StatisticsSource)Enum.Parse(typeof(SourceOfActualReviewers.StatisticsSource), args[3]);
-                        SourceOfActualReviewers sourceOfActualReviews = SourceOfActualReviewers.createSourceFromParameter(statisticsSource, statistics.RepositoryId);
-
-                        switch (statisticsOperation)
-                        {
-                            case StatisticsOperation.AnalyzeActualReviews:
-                                statistics.AnalyzeActualReviews(sourceOfActualReviews);
-                                break;
-                            case StatisticsOperation.ComputeStatisticsForAllAlgorithmsAndActualReviews:
-                                statistics.ComputeStatisticsForAllAlgorithmsAndActualReviews(sourceOfActualReviews);
-                                break;
-                            case StatisticsOperation.FindIntersectingEntriesForAllAlgorithms:
-                                statistics.FindIntersectingEntriesForActualReviewerIds(sourceOfActualReviews);
-                                break;
-                            case StatisticsOperation.FindIntersectingEntriesForAllAlgorithmsPairwise:
-                                statistics.FindIntersectingEntriesPairwiseForActualReviewerIds(sourceOfActualReviews);
-                                break;
-                            default:
-                                throw new NotImplementedException("The operation \"" + statisticsOperation + "\" has not been implemented");
-                        }
+                        case StatisticsOperation.AnalyzeActualReviews:
+                            statistics.AnalyzeActualReviews(sourceOfActualReviews);
+                            break;
+                        case StatisticsOperation.ComputeStatisticsForAllAlgorithmsAndActualReviews:
+                            statistics.ComputeStatisticsForAllAlgorithmsAndActualReviews(sourceOfActualReviews);
+                            break;
+                        case StatisticsOperation.FindIntersectingEntriesForAllAlgorithms:
+                            statistics.FindIntersectingEntriesForActualReviewerIds(sourceOfActualReviews);
+                            break;
+                        case StatisticsOperation.FindIntersectingEntriesForAllAlgorithmsPairwise:
+                            statistics.FindIntersectingEntriesPairwiseForActualReviewerIds(sourceOfActualReviews);
+                            break;
+                        default:
+                            throw new NotImplementedException("The operation \"" + statisticsOperation + "\" has not been implemented");
                     }
 
-                    break;
+                    return;
+                
                 default:
                     ShowHelp();
                     return;
@@ -105,11 +116,13 @@ namespace ExpertiseExplorer.Statistics
             Console.WriteLine("\t 4 - FindIntersectingEntriesForAllAlgorithmsPairwise");
             Console.WriteLine("\t 5 - FindAliasesFromNames (this operation needs a special source argument)");
             Console.WriteLine("\t 6 - FindAliasesFromAuthors (this operation needs a special source argument)");
+            Console.WriteLine("\t 7 - FindAliasesInAuthors (this operation needs a special source argument)");
             Console.WriteLine("Source: source data and restrictions");
             Console.WriteLine("\t Possible options:");
             Console.WriteLine("\t 0 - All data (unfiltered)");
             Console.WriteLine("\t 1 - Use only reviews where 'hg@mozilla.com' is not identified as an expert");
-            Console.WriteLine("\t path - Only for FindAliasesFromX: Path to names/authors file");
+            Console.WriteLine("\t 2 ID - Use only reviews of bugs with a database BugID of at least ID");
+            Console.WriteLine("\t path - Only for FindAliasesX: Path to names/authors file");
         }
     }
 }

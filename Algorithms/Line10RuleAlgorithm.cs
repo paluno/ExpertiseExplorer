@@ -39,10 +39,6 @@
                 return;
             }
 
-            //int artifactId = FindOrCreateFileArtifactId(filename);
-            //if (artifactId < 0)
-            //    throw new FileNotFoundException(string.Format("Artifact {0} not found", filename));
-
             using (var entities = new ExpertiseDBEntities())
             {
                 DeveloperWithEditTime lastUser = entities.GetUserForLastRevisionOfBefore(filenameId, MaxDateTime);
@@ -54,14 +50,13 @@
 
                 IEnumerable<DeveloperWithEditTime> listOfLastDevelopers = Deduplicator.DeanonymizeAuthor(lastUser.User)
                     .Select(clearName => new DeveloperWithEditTime() { User = clearName, Time = lastUser.Time });   // probably just one, but maybe more
-
-                IEnumerable<int> lastDeveloperIds = entities.Developers.Where(d => d.Name == lastUser.User && d.RepositoryId == RepositoryId).Select(d => d.DeveloperId).ToList();
-
-                foreach (int oneOfTheLastDevelopers in lastDeveloperIds)
+                
+                foreach (DeveloperWithEditTime oneOfTheLastDevelopers in listOfLastDevelopers)
                 {
-                    DeveloperExpertise developerExpertise = SourceRepositoryManager.FindDeveloperExpertiseWithArtifactName(entities, oneOfTheLastDevelopers, filename);
+                    int developerId = entities.Developers.Single(d => d.Name == oneOfTheLastDevelopers.User && d.RepositoryId == RepositoryId).DeveloperId;
+                    DeveloperExpertise developerExpertise = SourceRepositoryManager.FindDeveloperExpertiseWithArtifactName(entities, developerId, filename);
                     var expertiseValue = FindOrCreateDeveloperExpertiseValue(developerExpertise);
-                    expertiseValue.Value = lastUser.Time.UTCDateTime2unixTime();
+                    expertiseValue.Value = oneOfTheLastDevelopers.Time.UTCDateTime2unixTime();
                 }
                 entities.SaveChanges();
             }

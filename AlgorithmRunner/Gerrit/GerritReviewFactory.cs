@@ -18,7 +18,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Gerrit
         {
         }
 
-        public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
+        protected override IEnumerable<IssueTrackerEvent> PrefilterRawInput(string pathToRawInputFile)
         {
             List<IssueTrackerEvent> result = new List<IssueTrackerEvent>();
             string[] lines = File.ReadAllLines(InputFilePath);
@@ -51,6 +51,11 @@ namespace ExpertiseExplorer.AlgorithmRunner.Gerrit
             }
             else
                 return result;
+        }
+
+        public override IEnumerable<IssueTrackerEvent> parseIssueTrackerEvents()
+        {
+            return PrefilterRawInput(InputFilePath);
         }
 
         public static TSource MinBy<TSource, TKey>(IEnumerable<TSource> source, Func<TSource, TKey> selector)
