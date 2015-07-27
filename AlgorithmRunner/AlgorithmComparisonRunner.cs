@@ -297,7 +297,7 @@
                     bool fBugDirty = false;
                     foreach (string primaryName in NameConsolidator.DeanonymizeAuthor(info.Reviewer))   // this is usually just one
                     {
-                        if (theBug.ActualReviewers.Any(reviewer => reviewer.Reviewer == primaryName))
+                        if (theBug.ActualReviewers.Any(reviewer => string.Equals(reviewer.Reviewer,primaryName, StringComparison.InvariantCultureIgnoreCase)))
                             continue;     //  the reviewer is already in the list
 
                         theBug.ActualReviewers.Add(new ActualReviewer()
