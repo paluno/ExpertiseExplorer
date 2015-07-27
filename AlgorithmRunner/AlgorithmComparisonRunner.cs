@@ -284,11 +284,8 @@
         }
 
         /// <summary>
-        /// Handles a review by doing two things:
-        ///  - Store in DB that the reviewer is a possible reviewer in this bug/change.
-        ///  - Grant the reviewer review experience for the review.
+        /// Store in DB that the reviewer is a possible reviewer in this bug/change.
         /// </summary>
-        // Die erste wird dann nur aufgerufen, wenn Comparison gesetzt ist
         protected void ProcessReviewInfo(ReviewInfo info, bool noComparison)
         {
             // Store in DB that the reviewer is a possible reviewer in this bug/change.
