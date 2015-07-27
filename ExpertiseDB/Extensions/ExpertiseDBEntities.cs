@@ -161,14 +161,14 @@
             return Database.SqlQuery<DeveloperWithEditTime>(sql).ToList();
         }
 
-        public List<DeveloperForPath> GetDeveloperForPath(int repositoryId, string path)
+        public List<DeveloperForPath> GetDevelopersForPath(int repositoryId, string path)
         {
             string sql = string.Format(CultureInfo.InvariantCulture, "CALL GetDevelopersForPath({0},'{1}')", repositoryId, path.Replace("'", "''") + "%");
 
             return Database.SqlQuery<DeveloperForPath>(sql).ToList();
         }
 
-        public List<DeveloperForPath> GetDeveloperWithoutPath(int repositoryId)
+        public List<DeveloperForPath> GetDevelopersWithoutPath(int repositoryId)
         {
             string sql = string.Format(CultureInfo.InvariantCulture, "CALL GetDevelopersWOPath({0})", repositoryId);
 
