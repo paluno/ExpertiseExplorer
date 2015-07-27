@@ -161,11 +161,50 @@
             return Database.SqlQuery<DeveloperWithEditTime>(sql).ToList();
         }
 
-        public List<DeveloperForPath> GetDevelopersForPath(int repositoryId, string path)
+        public IEnumerable<DeveloperForPath> GetDevelopersForPath(int repositoryId, string path)
         {
-            string sql = string.Format(CultureInfo.InvariantCulture, "CALL GetDevelopersForPath({0},'{1}')", repositoryId, path.Replace("'", "''") + "%");
+            try
+            {
+                string sql = string.Format(CultureInfo.InvariantCulture, "CALL GetDevelopersForPath({0},'{1}')", repositoryId, path.Replace("'", "''") + "%");
+                return Database.SqlQuery<DeveloperForPath>(sql).ToList();
+            }
+            catch (MySql.Data.MySqlClient.MySqlException mse) when (mse.InnerException is TimeoutException)
+            {
+                // this query can take quite a while. In this handler, we compute the result in single steps. This is slower, but
+                // each partial query is less likely to produce a timeout
 
-            return Database.SqlQuery<DeveloperForPath>(sql).ToList();
+                List<int> similarArtifactIds = Artifacts
+                    .Where(artifact => artifact.RepositoryId == repositoryId && artifact.Name.StartsWith(path))
+                    .Select(artifact => artifact.ArtifactId)
+                    .ToList();
+
+                IDictionary<int,DeveloperForPath> allDevelopersByDeveloperId = new Dictionary<int,DeveloperForPath>();
+                foreach (int artifactId in similarArtifactIds)
+                {
+                    IEnumerable<DeveloperForPath> relevantDeveloperExpertises = DeveloperExpertises
+                        .Where(de => de.ArtifactId == artifactId)
+                        .Select(de => new DeveloperForPath() {
+                            DeveloperId = de.DeveloperId,
+                            IsFirstAuthorCount = de.IsFirstAuthor ? 1 : 0,
+                            DeliveriesCount = de.DeliveriesCount
+                        })
+                        .ToList(); // these are only partial results that have to be aggregated
+
+                    foreach(DeveloperForPath dfp in relevantDeveloperExpertises)
+                    {
+                        if (allDevelopersByDeveloperId.ContainsKey(dfp.DeveloperId))
+                        {
+                            DeveloperForPath existingEntry = allDevelopersByDeveloperId[dfp.DeveloperId];
+                            existingEntry.DeliveriesCount += dfp.DeliveriesCount;
+                            existingEntry.IsFirstAuthorCount += dfp.IsFirstAuthorCount;
+                        }
+                        else
+                            allDevelopersByDeveloperId[dfp.DeveloperId] = dfp;
+                    }
+                }
+
+                return allDevelopersByDeveloperId.Values;
+            }
         }
 
         public List<DeveloperForPath> GetDevelopersWithoutPath(int repositoryId)

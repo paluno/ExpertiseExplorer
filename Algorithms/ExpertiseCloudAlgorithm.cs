@@ -45,7 +45,7 @@
             if (path == null)
                 throw new NullReferenceException("path from file " + filename + " is null");
 
-            List<DeveloperForPath> developersForPath;
+            IEnumerable<DeveloperForPath> developersForPath;
             if (path == string.Empty)
             {
                 using (var repository = new ExpertiseDBEntities())
