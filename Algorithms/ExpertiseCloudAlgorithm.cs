@@ -30,7 +30,18 @@
 
             int artifactId = SourceRepositoryManager.FindOrCreateFileArtifactId(filename);
 
-            var path = Path.GetDirectoryName(filename);
+            string path;
+            try
+            {
+                path = Path.GetDirectoryName(filename);
+            }
+            catch(System.ArgumentException) when (Path.GetInvalidPathChars().Any(evilChar => filename.Contains(evilChar)))
+            {
+                string escapedFilename = filename;
+                foreach (char evilChar in Path.GetInvalidPathChars())
+                    escapedFilename = escapedFilename.Replace(evilChar, '%');
+                path = Path.GetDirectoryName(escapedFilename);
+            }
             if (path == null)
                 throw new NullReferenceException("path from file " + filename + " is null");
 
