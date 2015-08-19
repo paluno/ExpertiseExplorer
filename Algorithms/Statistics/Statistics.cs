@@ -285,14 +285,23 @@
             int count = workingSet.Count();
 
             StringBuilder batchSb = new StringBuilder();
+            StringBuilder batchDerivationSb = new StringBuilder();
+
             for (int i = 0; i < count; i += BATCHSIZE)
             {
                 ComputeBatchStatistic(batchSb, workingSet.Take(i).ToList());
+
+                int from = i;
+                if (from < 0) from = 0;
+                int take = BATCHSIZE;
+                if (from + take > count) take = count - from;
+                ComputeBatchDerivationStatistic(batchDerivationSb, workingSet.Skip(from).Take(take).ToList());
             }
 
             ComputeBatchStatistic(batchSb, workingSet.Take(count).ToList());
 
             File.WriteAllText($"{basepath}stats_{algorithmId}_analyzed{source.Postfix}-batch.csv", batchSb.ToString());
+            File.WriteAllText($"{basepath}stats_{algorithmId}_analyzed{source.Postfix}-deriv-batch.csv", batchDerivationSb.ToString());
 
             int foundNo = workingSet.Count(sr => sr.IsMatch);
             int[] expertPlacements = new int[StatisticsResult.NUMBER_OF_EXPERTS];
@@ -327,6 +336,20 @@
 
             batchSb.AppendLine(count + ";" + result);
         }
+
+        private void ComputeBatchDerivationStatistic(StringBuilder batchSb, List<StatisticsResult> workingSet)
+        {
+            int count = workingSet.Count();
+            int foundNo = workingSet.Count(sr => sr.IsMatch);
+            double result = 0;
+            if (count != 0) result = ((double)foundNo / (double)count);
+
+            int bugId = 0;
+            if (count != 0) bugId = workingSet[0].BugId;
+
+            batchSb.AppendLine(count + ";" + bugId + ";" + result);
+        }
+
 
         /// <summary>
         /// computes the size of the set of entries that have the actual reviewer within the top 5 computed reviewers and is shared between all algorithms
