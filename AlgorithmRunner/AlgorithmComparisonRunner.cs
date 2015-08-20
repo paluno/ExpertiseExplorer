@@ -174,7 +174,8 @@
                         ReviewInfo ri = info as ReviewInfo;
                         if (null != ri)
                         {
-                            ProcessReviewInfo(ri, noComparison || fRecalculateMode);    // in recalculate mode, additional reviewers do not need to be added, as they already exist
+                            if (!noComparison)
+                                ProcessReviewInfo(ri);
                             GrantReviewerExperience(ri);
                         }
                         PatchUpload pu = info as PatchUpload;
@@ -286,32 +287,30 @@
         /// <summary>
         /// Store in DB that the reviewer is a possible reviewer in this bug/change.
         /// </summary>
-        protected void ProcessReviewInfo(ReviewInfo info, bool noComparison)
+        protected void ProcessReviewInfo(ReviewInfo info)
         {
-            // Store in DB that the reviewer is a possible reviewer in this bug/change.
-            if (!noComparison)
-                using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+            using (ExpertiseDBEntities repository = new ExpertiseDBEntities())
+            {
+                Bug theBug = repository.Bugs.Single(bug => bug.ChangeId == info.ChangeId && bug.RepositoryId == RepositoryId);
+
+                bool fBugDirty = false;
+                foreach (string primaryName in NameConsolidator.DeanonymizeAuthor(info.Reviewer))   // this is usually just one
                 {
-                    Bug theBug = repository.Bugs.Single(bug => bug.ChangeId == info.ChangeId);
+                    if (theBug.ActualReviewers.Any(reviewer => string.Equals(reviewer.Reviewer,primaryName, StringComparison.InvariantCultureIgnoreCase)))
+                        continue;     //  the reviewer is already in the list
 
-                    bool fBugDirty = false;
-                    foreach (string primaryName in NameConsolidator.DeanonymizeAuthor(info.Reviewer))   // this is usually just one
+                    theBug.ActualReviewers.Add(new ActualReviewer()
                     {
-                        if (theBug.ActualReviewers.Any(reviewer => string.Equals(reviewer.Reviewer,primaryName, StringComparison.InvariantCultureIgnoreCase)))
-                            continue;     //  the reviewer is already in the list
-
-                        theBug.ActualReviewers.Add(new ActualReviewer()
-                        {
-                            ActivityId = info.ActivityId,
-                            Bug = theBug,
-                            Reviewer = primaryName
-                        });
-                        fBugDirty = true;
-                    }
-
-                    if (fBugDirty)
-                        repository.SaveChanges();
+                        ActivityId = info.ActivityId,
+                        Bug = theBug,
+                        Reviewer = primaryName
+                    });
+                    fBugDirty = true;
                 }
+
+                if (fBugDirty)
+                    repository.SaveChanges();
+            }
         }
 
         /// <summary>
