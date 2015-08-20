@@ -264,7 +264,8 @@
                 
                 if (fRecalculateMode)
                     currentBug = repository.Bugs.SingleOrDefault(bug => bug.ChangeId == info.ChangeId);
-                else
+                
+                if (!fRecalculateMode || null == currentBug)
                 {
                     currentBug = new Bug()
                     {
