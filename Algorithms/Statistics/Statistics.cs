@@ -13,6 +13,7 @@
 
     public class Statistics
     {
+        private static readonly int BATCHSIZE = 100;
         private static readonly ILog log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly string repositoryURL;
@@ -23,16 +24,18 @@
         private string Path4MissingReviewers { get { return basepath + "reviewers_missing.txt"; } }
 
         private int _RepositoryId = int.MinValue;
+        
+
         public int RepositoryId
         {
             get
             {
                 if (int.MinValue == _RepositoryId)
                 {
-                    using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
-                    {
+                  using (ExpertiseDBEntities entities = new ExpertiseDBEntities())
+                   {
                         _RepositoryId = entities.Repositorys.Single(repository => repository.SourceURL == repositoryURL).RepositoryId;
-                    }
+                 }
                 }
 
                 return _RepositoryId;
@@ -280,6 +283,26 @@
                 .Where(sr => source.findBugs().Contains(sr.BugId)).ToList();
 
             int count = workingSet.Count();
+
+            StringBuilder batchSb = new StringBuilder();
+            StringBuilder batchDerivationSb = new StringBuilder();
+
+            for (int i = 0; i < count; i += BATCHSIZE)
+            {
+                ComputeBatchStatistic(batchSb, workingSet.Take(i).ToList());
+
+                int from = i;
+                if (from < 0) from = 0;
+                int take = BATCHSIZE;
+                if (from + take > count) take = count - from;
+                ComputeBatchDerivationStatistic(batchDerivationSb, workingSet.Skip(from).Take(take).ToList());
+            }
+
+            ComputeBatchStatistic(batchSb, workingSet.Take(count).ToList());
+
+            File.WriteAllText($"{basepath}stats_{algorithmId}_analyzed{source.Postfix}-batch.csv", batchSb.ToString());
+            File.WriteAllText($"{basepath}stats_{algorithmId}_analyzed{source.Postfix}-deriv-batch.csv", batchDerivationSb.ToString());
+
             int foundNo = workingSet.Count(sr => sr.IsMatch);
             int[] expertPlacements = new int[StatisticsResult.NUMBER_OF_EXPERTS];
 
@@ -293,8 +316,40 @@
             for (int i = 0; i < StatisticsResult.NUMBER_OF_EXPERTS; i++)
                 sb.AppendLine($"Expert was No {i+1}:  {expertPlacements[i]} / {count} ({(double)expertPlacements[i] / (double)count:P})");
 
+            int top1 = expertPlacements[0];
+            int top3 = top1 + expertPlacements[1] + expertPlacements[2];
+            int top5 = top3 + expertPlacements[3] + expertPlacements[4];
+
+            sb.AppendLine().AppendLine($"Top-1:  {(double)top1 / (double)count:P}");
+            sb.AppendLine($"Top-3:  {(double)top3 / (double)count:P}");
+            sb.AppendLine($"Top-5:  {(double)top5 / (double)count:P}");
+
             File.WriteAllText($"{basepath}stats_{algorithmId}_analyzed{source.Postfix}.txt", sb.ToString());
         }
+
+        private void ComputeBatchStatistic(StringBuilder batchSb, List<StatisticsResult> workingSet)
+        {
+            int count = workingSet.Count();
+            int foundNo = workingSet.Count(sr => sr.IsMatch);
+            double result = 0;
+            if(count != 0) result = ((double)foundNo / (double)count);
+
+            batchSb.AppendLine(count + ";" + result);
+        }
+
+        private void ComputeBatchDerivationStatistic(StringBuilder batchSb, List<StatisticsResult> workingSet)
+        {
+            int count = workingSet.Count();
+            int foundNo = workingSet.Count(sr => sr.IsMatch);
+            double result = 0;
+            if (count != 0) result = ((double)foundNo / (double)count);
+
+            int bugId = 0;
+            if (count != 0) bugId = workingSet[0].BugId;
+
+            batchSb.AppendLine(count + ";" + bugId + ";" + result);
+        }
+
 
         /// <summary>
         /// computes the size of the set of entries that have the actual reviewer within the top 5 computed reviewers and is shared between all algorithms
