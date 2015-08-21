@@ -21,7 +21,7 @@ namespace ExpertiseExplorer.AlgorithmRunner.Gerrit
         protected override IEnumerable<IssueTrackerEvent> PrefilterRawInput(string pathToRawInputFile)
         {
             List<IssueTrackerEvent> result = new List<IssueTrackerEvent>();
-            string[] lines = File.ReadAllLines(InputFilePath);
+            string[] lines = File.ReadAllLines(pathToRawInputFile);
 
             foreach (string line in lines)
             {
