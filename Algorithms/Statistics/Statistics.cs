@@ -212,7 +212,7 @@
                             .Select(ar => context.Developers.FirstOrDefault(dev => dev.Name == ar.Reviewer && dev.RepositoryId == RepositoryId).DeveloperId)
                             .ToList();
 
-                    Debug.Assert(actualReviewerIds.Count > 0);  // All bugs must have reviewers
+//                    Debug.Assert(actualReviewerIds.Count > 0);  // All bugs must have reviewers
 
                     foreach (int algorithmId in algorithmIds)
                         output[algorithmId].Add(CalculateResultForOneAlgorithmAndBug(algorithmId, bugId, actualReviewerIds));

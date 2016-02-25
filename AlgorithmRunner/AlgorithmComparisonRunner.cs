@@ -174,7 +174,7 @@
                         ReviewInfo ri = info as ReviewInfo;
                         if (null != ri)
                         {
-                            if (!noComparison)
+                            if (!noComparison && !fRecalculateMode)
                                 ProcessReviewInfo(ri);
                             GrantReviewerExperience(ri);
                         }
