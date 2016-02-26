@@ -1,4 +1,7 @@
-﻿using System;
+﻿using ExpertiseExplorer.Algorithms;
+using ExpertiseExplorer.Algorithms.FPS;
+using ExpertiseExplorer.Algorithms.RepositoryManagement;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,6 +12,24 @@ namespace ReviewerRecommender.Controllers
 {
     public class ValuesController : ApiController
     {
+        public static WeightedReviewCountAlgorithm reviewAlgorithm;
+
+        static ValuesController()
+        {
+            RootDirectory fpsTree = new RootDirectory();
+            reviewAlgorithm = new WeightedReviewCountAlgorithm(fpsTree);
+            reviewAlgorithm.LoadReviewScoresFromDB();
+
+            reviewAlgorithm.Deduplicator = new AliasFinder();
+
+            SourceRepositoryConnector SourceManager = new SourceRepositoryConnector();
+            SourceManager.InitIdsFromDbForSourceUrl("test", false);
+
+            reviewAlgorithm.SourceRepositoryManager = SourceManager;
+            reviewAlgorithm.RepositoryId = SourceManager.RepositoryId;
+
+        }
+
         // GET api/values
         public IEnumerable<string> Get()
         {
@@ -24,6 +45,16 @@ namespace ReviewerRecommender.Controllers
         // POST api/values
         public void Post([FromBody]string value)
         {
+        }
+
+        public void review(string reviewer, string[] files, DateTime reviewTime)
+        {
+            reviewAlgorithm.AddReviewScore(reviewer, files, reviewTime);
+        }
+
+        public void getReviewTest(string reviewer, DateTime reviewTime)
+        {
+            reviewAlgorithm.AddReviewScore(reviewer, new string[] { "file/A", "file/B" }, reviewTime);
         }
 
         // PUT api/values/5

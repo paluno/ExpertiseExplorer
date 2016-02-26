@@ -2,8 +2,7 @@
 -- Data for table `expertisedb`.`ArtifactTypes`
 -- -----------------------------------------------------
 START TRANSACTION;
-USE `expertisedb`;
-INSERT INTO `expertisedb`.`ArtifactTypes` (`ArtifactTypeId`, `Name`) VALUES (1, 'File');
+INSERT INTO `ArtifactTypes` (`ArtifactTypeId`, `Name`) VALUES (1, 'File');
 
 COMMIT;
 
@@ -11,7 +10,6 @@ COMMIT;
 -- stored procedure GetDeveloperExpertiseSum(int)
 -- -----------------------------------------------------
 START TRANSACTION;
-USE `expertisedb`;
 
 CREATE PROCEDURE `GetDeveloperExpertiseSum`(IN repoId INT)
 SELECT DeveloperExpertises.DeveloperId, RepositoryId, sum(DeveloperExpertiseValues.Value) AS ExSum 
@@ -30,7 +28,6 @@ COMMIT;
 -- -----------------------------------------------------
 
 START TRANSACTION;
-USE `expertisedb`;
 
 CREATE PROCEDURE `GetDevelopersForPath`(IN repId INT, IN path VARCHAR(255))
 SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM DeveloperExpertises
@@ -47,7 +44,6 @@ COMMIT;
 -- -----------------------------------------------------
 
 START TRANSACTION;
-USE `expertisedb`;
 
 CREATE PROCEDURE `GetDevelopersWOPath`(IN repId INT)
 SELECT DeveloperId, sum(IsFirstAuthor) as IsFirstAuthorCount, sum(DeliveriesCount) as DeliveriesCount FROM DeveloperExpertises
@@ -64,7 +60,6 @@ COMMIT;
 -- -----------------------------------------------------
 
 START TRANSACTION;
-USE `expertisedb`;
 
 CREATE PROCEDURE `GetUserForLastRevisionOfBefore`(IN filenameid int, IN beforeDatetime DATETIME)
 SELECT User,time FROM FileRevisions
@@ -82,7 +77,6 @@ COMMIT;
 
 
 START TRANSACTION;
-USE `expertisedb`;
 
 CREATE PROCEDURE `GetUsersOfRevisionsOfBefore`(IN filenameid int, IN beforeDatetime DATETIME)
 SELECT User,time FROM FileRevisions
@@ -100,7 +94,6 @@ COMMIT;
 
 
 START TRANSACTION;
-USE `expertisedb`;
 
 CREATE PROCEDURE `GetActualReviewersGrouped`(IN RepID INT)
 SELECT ChangeId, count(DISTINCT ArtifactId) as Count
