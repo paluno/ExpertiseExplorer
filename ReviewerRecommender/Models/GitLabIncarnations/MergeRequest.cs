@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,16 +11,19 @@ namespace ReviewerRecommender.Models.GitLab
 {
     public partial class MergeRequest
     {
+        public enum MergeRequestAction { open, reopen, close, merge }
+
         [JsonProperty("action")]
-        public string Action { get; set; }
+        public MergeRequestAction Action { get; set; }
 
         public HttpClient GitLabAPI { get; set; }
 
         public MergeRequest()
         {
             GitLabAPI = new HttpClient();
-            GitLabAPI.BaseAddress = new Uri("http://192.168.56.101/api/v3/");
-            GitLabAPI.DefaultRequestHeaders.Add("PRIVATE-TOKEN", "9koXpg98eAheJpvBs5tK");
+            
+            GitLabAPI.BaseAddress = new Uri(ConfigurationManager.AppSettings["GitLabAPIURL"]);
+            GitLabAPI.DefaultRequestHeaders.Add("PRIVATE-TOKEN", ConfigurationManager.AppSettings["GitLabAPIKey"]);
         }
 
         public async Task<List<Commit>> FetchCommitsAsync()
@@ -32,5 +36,18 @@ namespace ReviewerRecommender.Models.GitLab
 
             return await response.Content.ReadAsAsync<List<Commit>>();
         }
+
+        public async Task<IEnumerable<string>> FetchFilesAffectedByMergeRequest()
+        {
+            List<Commit> commits = await FetchCommitsAsync();
+            return
+                commits
+                    .Select(commit => commit.Added
+                                        .Concat(commit.Modified)
+                                        .Concat(commit.Removed)
+                           )
+                    .Aggregate((c1, c2) => c1.Union(c2));
+        }
+
     }
 }

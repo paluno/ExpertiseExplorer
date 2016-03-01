@@ -66,6 +66,9 @@ namespace ReviewerRecommender.Models.GitLab
 
         [JsonProperty("merge_status")]
         public string MergeStatus { get; set; }
+
+        [JsonProperty("updated_at")]
+        public DateTime UpdatedAt { get; set; }
     }
 
 }

@@ -16,8 +16,6 @@ namespace ReviewerRecommender.Controllers
     [RoutePrefix("api/Projects/{project}")]
     public class ProjectsController : ApiController
     {
-
-
         [Route("merge")]
         [HttpPost]
         public void PostMerge(string project, MergeRequestEvent mr)
@@ -26,12 +24,14 @@ namespace ReviewerRecommender.Controllers
                 BadRequest("This URI is only for events of object_kind merge_request, but the posted object is different.");
             else
             {
-                if (mr.AffectedMergeRequest.Action == "close")  // TODO: or merge
+                if (mr.AffectedMergeRequest.Action == MergeRequest.MergeRequestAction.close
+                    || mr.AffectedMergeRequest.Action == MergeRequest.MergeRequestAction.merge)
+                    
                 {
                     // Update reviewer expertise
                     ProjectRecommender.FindProjectRecommender(project).orderExpertiseAward(mr.User, mr.AffectedMergeRequest);
                 }
-                else if (mr.AffectedMergeRequest.Action == "new")
+                else if (mr.AffectedMergeRequest.Action == MergeRequest.MergeRequestAction.open)
                 {
                     // recommend reviewers
                     ProjectRecommender.FindProjectRecommender(project).orderReviewerRecommendation(mr.AffectedMergeRequest);

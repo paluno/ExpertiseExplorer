@@ -64,6 +64,24 @@ namespace ExpertiseExplorer.Algorithms.RepositoryManagement
             }
         }
 
+        public void EnsureSourceRepositoryExistance(string sourceURL)
+        {
+            using (var entities = new ExpertiseDBEntities())
+            {
+                SourceRepository sourceRepository = entities.SourceRepositorys.SingleOrDefault(sr => sr.URL == sourceURL);
+                if (sourceRepository != null)
+                    return;
+
+                entities.SourceRepositorys.Add(new SourceRepository()
+                {
+                    Name = sourceURL,
+                    URL = sourceURL
+                });
+
+                entities.SaveChanges();
+            }
+        }
+
         public int GetFilenameIdFromFilenameApproximation(string filename)
         {
             Debug.Assert(SourceRepositoryId > -1, "Initialize SourceRepositoryId first");
