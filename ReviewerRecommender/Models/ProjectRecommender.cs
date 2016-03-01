@@ -42,6 +42,11 @@ namespace ReviewerRecommender.Models
             ThreadPool.QueueUserWorkItem(delegate(object dummy) { recommendReviewersAsync(mr).Wait(); });
         }
 
+        public void orderExpertiseAward(GitLabUser initiator, MergeRequest mr)
+        {
+            ThreadPool.QueueUserWorkItem(delegate (object dummy) { awardReviewerExpertise(initiator, mr).Wait(); });
+        }
+
         protected async Task recommendReviewersAsync(MergeRequest mr)
         {
             List<Commit> commits = await mr.FetchCommitsAsync();
@@ -52,6 +57,14 @@ namespace ReviewerRecommender.Models
 
             // Todo: Calculate good reviewers, post to MR
             //Algorithm.GetDevelopersForArtifactsAsync()
+        }
+
+        protected async Task awardReviewerExpertise(GitLabUser user, MergeRequest mr)
+        {
+            // TODO: implement
+            // 1. Check whether the user has already been awarded review expertise for this MergeRequest
+            // 2. Find the files affected by the MergeRequest
+            // 3. Award expertise for the affected files
         }
     }
 }

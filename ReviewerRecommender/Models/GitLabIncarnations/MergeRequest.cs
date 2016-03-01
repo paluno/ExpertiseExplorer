@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -9,6 +10,9 @@ namespace ReviewerRecommender.Models.GitLab
 {
     public partial class MergeRequest
     {
+        [JsonProperty("action")]
+        public string Action { get; set; }
+
         public HttpClient GitLabAPI { get; set; }
 
         public MergeRequest()
@@ -21,7 +25,7 @@ namespace ReviewerRecommender.Models.GitLab
         public async Task<List<Commit>> FetchCommitsAsync()
         {
              HttpResponseMessage response = await GitLabAPI.GetAsync(
-                string.Format("/projects/{0}/merge_requests/{1}/commits", ProjectId, Id)
+                string.Format("/projects/{0}/merge_requests/{1}/commits", TargetProjectId, Id)
                 );
 
             response.EnsureSuccessStatusCode();

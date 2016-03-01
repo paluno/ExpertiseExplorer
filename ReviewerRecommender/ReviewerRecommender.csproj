@@ -174,7 +174,6 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ProjectsController.cs" />
-    <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -182,6 +181,7 @@
     <Compile Include="Models\GitLab\GitLabUser.cs" />
     <Compile Include="Models\GitLab\Commit.cs" />
     <Compile Include="Models\GitLab\MergeRequest.cs" />
+    <Compile Include="Models\GitLab\MergeRequestEvent.cs" />
     <Compile Include="Models\GitLab\Milestone.cs" />
     <Compile Include="Models\GitLab\PushEvent.cs" />
     <Compile Include="Models\GitLab\Repository.cs" />
