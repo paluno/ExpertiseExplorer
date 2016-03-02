@@ -11,7 +11,6 @@ namespace ReviewerRecommender.Models.GitLab
 
     public class GitLabUser
     {
-
         [JsonProperty("id")]
         public int Id { get; set; }
 

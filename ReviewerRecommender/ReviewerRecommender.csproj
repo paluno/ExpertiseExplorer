@@ -178,6 +178,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\GitLabIncarnations\MergeRequest.cs" />
+    <Compile Include="Models\GitLab\Change.cs" />
     <Compile Include="Models\GitLab\GitLabUser.cs" />
     <Compile Include="Models\GitLab\Commit.cs" />
     <Compile Include="Models\GitLab\MergeRequest.cs" />

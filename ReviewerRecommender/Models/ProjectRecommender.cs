@@ -20,7 +20,9 @@ namespace ReviewerRecommender.Models
 
         public int RepositoryId { get; }
 
-        public WeightedReviewCountAlgorithm recommendationAlgorithm { get; set; }
+        protected WeightedReviewCountAlgorithm recommendationAlgorithm { get; }
+
+        protected SourceRepositoryConnector SourceManager { get; }
 
         private static ConcurrentDictionary<string, ProjectRecommender> dictRecommenders { get; } 
             = new ConcurrentDictionary<string, ProjectRecommender>();
@@ -35,7 +37,11 @@ namespace ReviewerRecommender.Models
                     if (dictRecommenders.ContainsKey(projectName))
                         return dictRecommenders[projectName];
                     else
-                        return dictRecommenders[projectName] = new ProjectRecommender(projectName);
+                    {
+                        ProjectRecommender pr = new ProjectRecommender(projectName);
+                        pr.initRecommendationAlgorithm();
+                        return dictRecommenders[projectName] = pr;
+                    }
         }
 
         private ProjectRecommender(string projectName)
@@ -45,13 +51,19 @@ namespace ReviewerRecommender.Models
             RootDirectory fpsTree = new RootDirectory();
             recommendationAlgorithm = new WeightedReviewCountAlgorithm(fpsTree);
 
-            SourceRepositoryConnector SourceManager = new SourceRepositoryConnector();
+            SourceManager = new SourceRepositoryConnector();
             SourceManager.Deduplicator = new AliasFinder();
-            SourceManager.EnsureSourceRepositoryExistance(projectName);
-            SourceManager.InitIdsFromDbForSourceUrl(projectName, false);
+            SourceManager.EnsureSourceRepositoryExistance(ProjectName);
+            SourceManager.InitIdsFromDbForSourceUrl(ProjectName, false);
+            recommendationAlgorithm.SourceRepositoryManager = SourceManager;
             recommendationAlgorithm.Deduplicator = SourceManager.Deduplicator;
             recommendationAlgorithm.RepositoryId = SourceManager.RepositoryId;
             this.RepositoryId = SourceManager.RepositoryId;
+        }
+
+        protected void initRecommendationAlgorithm()
+        {
+            recommendationAlgorithm.LoadReviewScoresFromDB();
         }
 
         public void orderReviewerRecommendation(MergeRequest mr)
@@ -68,8 +80,28 @@ namespace ReviewerRecommender.Models
         {
             IEnumerable<string> affectedFiles = await mr.FetchFilesAffectedByMergeRequest();
 
+            IEnumerable<int> artifactIds = affectedFiles
+                .Select(fileName => SourceManager.FindOrCreateFileArtifactId(fileName));
+            ComputedReviewer cr = await recommendationAlgorithm.GetDevelopersForArtifactsAsync(artifactIds);
+
+            string[] recommendedReviewers = new string[5];  // Magic number: we always recommend up to 5 reviewers.
+            using (var db = new ExpertiseDBEntities())
+            {
+                Task<Developer>[] taskFindDevelopers = new Task<Developer>[recommendedReviewers.Length];
+                if (null != cr.Expert1Id)
+                    taskFindDevelopers[0] = db.Developers.FindAsync(cr.Expert1Id);
+                if (null != cr.Expert2Id)
+                    taskFindDevelopers[1] = db.Developers.FindAsync(cr.Expert2Id);
+                if (null != cr.Expert3Id)
+                    taskFindDevelopers[2] = db.Developers.FindAsync(cr.Expert3Id);
+                if (null != cr.Expert4Id)
+                    taskFindDevelopers[3] = db.Developers.FindAsync(cr.Expert4Id);
+                if (null != cr.Expert5Id)
+                    taskFindDevelopers[4] = db.Developers.FindAsync(cr.Expert5Id);
+
+
+            }
             // Todo: Calculate good reviewers, post to MR
-            //Algorithm.GetDevelopersForArtifactsAsync()
         }
 
         protected object bugCreationLock = new object();
@@ -131,7 +163,7 @@ namespace ReviewerRecommender.Models
                 IEnumerable<string> affectedFiles = await mr.FetchFilesAffectedByMergeRequest();
 
                     // 3. Award expertise for the affected files
-                recommendationAlgorithm.AddReviewScore(user.Email, affectedFiles.ToList(), mr.UpdatedAt);
+                recommendationAlgorithm.AddReviewScore(user.Username, affectedFiles.ToList(), mr.UpdatedAt);
             }
         }
     }

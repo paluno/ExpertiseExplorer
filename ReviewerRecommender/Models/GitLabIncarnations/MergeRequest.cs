@@ -26,27 +26,39 @@ namespace ReviewerRecommender.Models.GitLab
             GitLabAPI.DefaultRequestHeaders.Add("PRIVATE-TOKEN", ConfigurationManager.AppSettings["GitLabAPIKey"]);
         }
 
-        public async Task<List<Commit>> FetchCommitsAsync()
+        //public async Task<List<Commit>> FetchCommitsAsync()
+        //{
+        //     HttpResponseMessage response = await GitLabAPI.GetAsync(
+        //        string.Format("projects/{0}/merge_requests/{1}/commits", TargetProjectId, Id)
+        //        );
+
+        //    response.EnsureSuccessStatusCode();
+
+        //    return await response.Content.ReadAsAsync<List<Commit>>();
+        //}
+
+        public async Task FetchChangesAsync()
         {
-             HttpResponseMessage response = await GitLabAPI.GetAsync(
-                string.Format("/projects/{0}/merge_requests/{1}/commits", TargetProjectId, Id)
-                );
+            if (this.Changes != null)
+                return;     // this MergeRequest already has the list of changes
+
+            HttpResponseMessage response = await GitLabAPI.GetAsync(
+               string.Format("projects/{0}/merge_requests/{1}/changes", TargetProjectId, Id)
+               );
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsAsync<List<Commit>>();
+            MergeRequest other = await response.Content.ReadAsAsync<MergeRequest>();
+            this.Changes = other.Changes;
+                // Update some other info that may be newer in the other merge request
+            if (this.UpdatedAt == DateTime.MinValue)
+                this.UpdatedAt = other.UpdatedAt;
         }
 
         public async Task<IEnumerable<string>> FetchFilesAffectedByMergeRequest()
         {
-            List<Commit> commits = await FetchCommitsAsync();
-            return
-                commits
-                    .Select(commit => commit.Added
-                                        .Concat(commit.Modified)
-                                        .Concat(commit.Removed)
-                           )
-                    .Aggregate((c1, c2) => c1.Union(c2));
+            await FetchChangesAsync();
+            return Changes.Select(c => c.NewPath);
         }
 
     }

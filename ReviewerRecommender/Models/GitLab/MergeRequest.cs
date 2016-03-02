@@ -69,6 +69,9 @@ namespace ReviewerRecommender.Models.GitLab
 
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt { get; set; }
+
+        [JsonProperty("changes")]
+        public Change[] Changes { get; set; }
     }
 
 }
