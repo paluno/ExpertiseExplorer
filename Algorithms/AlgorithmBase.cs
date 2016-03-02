@@ -207,7 +207,7 @@
             return GetDevelopersForArtifactsAsync(artifactIds, expertises => expertises.Sum());
         }
 
-        public async Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds, Func<IEnumerable<double>, double> aggregateResults)
+        protected async Task<ComputedReviewer> GetDevelopersForArtifactsAsync(IEnumerable<int> artifactIds, Func<IEnumerable<double>, double> aggregateResults)
         {
             using (var entities = new ExpertiseDBEntities())
             {

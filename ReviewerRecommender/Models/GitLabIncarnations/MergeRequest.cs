@@ -16,15 +16,6 @@ namespace ReviewerRecommender.Models.GitLab
         [JsonProperty("action")]
         public MergeRequestAction Action { get; set; }
 
-        public HttpClient GitLabAPI { get; set; }
-
-        public MergeRequest()
-        {
-            GitLabAPI = new HttpClient();
-            
-            GitLabAPI.BaseAddress = new Uri(ConfigurationManager.AppSettings["GitLabAPIURL"]);
-            GitLabAPI.DefaultRequestHeaders.Add("PRIVATE-TOKEN", ConfigurationManager.AppSettings["GitLabAPIKey"]);
-        }
 
         //public async Task<List<Commit>> FetchCommitsAsync()
         //{
@@ -42,17 +33,19 @@ namespace ReviewerRecommender.Models.GitLab
             if (this.Changes != null)
                 return;     // this MergeRequest already has the list of changes
 
-            HttpResponseMessage response = await GitLabAPI.GetAsync(
-               string.Format("projects/{0}/merge_requests/{1}/changes", TargetProjectId, Id)
-               );
+            using (HttpClient gitLabAPI = ProjectRecommender.CreateGitLabConnection())
+            using (HttpResponseMessage response = await gitLabAPI.GetAsync(
+                   string.Format("projects/{0}/merge_requests/{1}/changes", TargetProjectId, Id)
+                   ))
+            {
+                response.EnsureSuccessStatusCode();
 
-            response.EnsureSuccessStatusCode();
-
-            MergeRequest other = await response.Content.ReadAsAsync<MergeRequest>();
-            this.Changes = other.Changes;
+                MergeRequest other = await response.Content.ReadAsAsync<MergeRequest>();
+                this.Changes = other.Changes;
                 // Update some other info that may be newer in the other merge request
-            if (this.UpdatedAt == DateTime.MinValue)
-                this.UpdatedAt = other.UpdatedAt;
+                if (this.UpdatedAt == DateTime.MinValue)
+                    this.UpdatedAt = other.UpdatedAt;
+            }
         }
 
         public async Task<IEnumerable<string>> FetchFilesAffectedByMergeRequest()
@@ -61,5 +54,16 @@ namespace ReviewerRecommender.Models.GitLab
             return Changes.Select(c => c.NewPath);
         }
 
+        public async Task postMessage(string message)
+        {
+            using (HttpClient gitLabAPI = ProjectRecommender.CreateGitLabConnection())
+            using (HttpResponseMessage response = await gitLabAPI.PostAsJsonAsync(
+                   string.Format("projects/{0}/merge_requests/{1}/notes", TargetProjectId, Id),
+                   new Note(message)
+                   ))
+            {
+                response.EnsureSuccessStatusCode();
+            }
+        }
     }
 }

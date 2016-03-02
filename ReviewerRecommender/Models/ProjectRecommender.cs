@@ -11,6 +11,8 @@ using System.Web;
 using System.Data.Entity;
 using ExpertiseExplorer.Algorithms.FPS;
 using ExpertiseExplorer.Algorithms.RepositoryManagement;
+using System.Net.Http;
+using System.Configuration;
 
 namespace ReviewerRecommender.Models
 {
@@ -26,8 +28,7 @@ namespace ReviewerRecommender.Models
 
         private static ConcurrentDictionary<string, ProjectRecommender> dictRecommenders { get; } 
             = new ConcurrentDictionary<string, ProjectRecommender>();
-
-
+        
         public static ProjectRecommender FindProjectRecommender(string projectName)
         {
             if (dictRecommenders.ContainsKey(projectName))
@@ -42,6 +43,14 @@ namespace ReviewerRecommender.Models
                         pr.initRecommendationAlgorithm();
                         return dictRecommenders[projectName] = pr;
                     }
+        }
+
+        public static HttpClient CreateGitLabConnection()
+        {
+            HttpClient gitLabAPI = new HttpClient();
+            gitLabAPI.BaseAddress = new Uri(ConfigurationManager.AppSettings["GitLabAPIURL"]);
+            gitLabAPI.DefaultRequestHeaders.Add("PRIVATE-TOKEN", ConfigurationManager.AppSettings["GitLabAPIKey"]);
+            return gitLabAPI;
         }
 
         private ProjectRecommender(string projectName)
@@ -82,6 +91,8 @@ namespace ReviewerRecommender.Models
 
             IEnumerable<int> artifactIds = affectedFiles
                 .Select(fileName => SourceManager.FindOrCreateFileArtifactId(fileName));
+
+                // Calculate good reviewers
             ComputedReviewer cr = await recommendationAlgorithm.GetDevelopersForArtifactsAsync(artifactIds);
 
             string[] recommendedReviewers = new string[5];  // Magic number: we always recommend up to 5 reviewers.
@@ -89,7 +100,7 @@ namespace ReviewerRecommender.Models
             {
                 Task<Developer>[] taskFindDevelopers = new Task<Developer>[recommendedReviewers.Length];
                 if (null != cr.Expert1Id)
-                    taskFindDevelopers[0] = db.Developers.FindAsync(cr.Expert1Id);
+                    taskFindDevelopers[0] = db.Developers.FindAsync(cr.Expert1Id); 
                 if (null != cr.Expert2Id)
                     taskFindDevelopers[1] = db.Developers.FindAsync(cr.Expert2Id);
                 if (null != cr.Expert3Id)
@@ -99,9 +110,30 @@ namespace ReviewerRecommender.Models
                 if (null != cr.Expert5Id)
                     taskFindDevelopers[4] = db.Developers.FindAsync(cr.Expert5Id);
 
+                Func<Developer> dummyDeveloperFunc = delegate () { return null; };
+                for (int i = 0;i< taskFindDevelopers.Length; ++i)
+                   if (null == taskFindDevelopers[i]) 
+                        taskFindDevelopers[i] = Task.Run<Developer>(dummyDeveloperFunc);
 
+                Developer[] recommendedDevelopers = await Task.WhenAll<Developer>(taskFindDevelopers);
+                for (int i = 0; i < recommendedDevelopers.Length; ++i)
+                    if (null != recommendedDevelopers[i])
+                        recommendedReviewers[i] = recommendedDevelopers[i].Name;
             }
-            // Todo: Calculate good reviewers, post to MR
+
+            // post recommendation to MR
+            string recommendationMessage;
+            int countRecommendedReviewers = recommendedReviewers.Count(r => !string.IsNullOrEmpty(r));
+            if (0 == countRecommendedReviewers)
+                recommendationMessage = "I have no idea who could review this merge request.";
+            else if (1 == countRecommendedReviewers)
+                recommendationMessage = string.Format("I think that @{0} would be a good reviewer for this merge request.",
+                    recommendedReviewers.Single(r => !string.IsNullOrEmpty(r)));
+            else
+                recommendationMessage = string.Format("I think that {0} would be good reviewers for this merge request.",
+                    string.Join(", ", "@" + recommendedReviewers));
+
+            await mr.postMessage(recommendationMessage);
         }
 
         protected object bugCreationLock = new object();
